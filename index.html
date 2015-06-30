@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0"/>
+ 
+<title>Leaflet template</title>
+ 
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+<!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
+<![endif]-->
+<script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
+ 
+<script src="http://d3js.org/d3.v3.min.js"></script>
+ 
+<style type="text/css">
+html, body { height: 100% }
+#map { min-height: 100%; }
+body {
+    margin: 0;
+    font-family: Helvetica, Arial, sans-serif; font-size: 12px;
+    overflow: hidden;
+    background-color: #f00;
+}
+</style>
+ 
+</head><body>
+ 
+<div id="map"></div>
+ 
+<script type="text/javascript">
+var map = L.map('map');
+map.setView([37.7504, -122.4425], 13);
+var basemap = L.tileLayer('http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {
+        attribution: '<a href="http://content.stamen.com/dotspotting_toner_cartography_available_for_download">Stamen Toner</a>, <a href="http://www.openstreetmap.org/">OpenStreetMap</a>, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+        maxZoom: 17
+});
+basemap.addTo(map);
+</script>
+</body></html>
