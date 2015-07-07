@@ -52,13 +52,23 @@ gulp.task('images', function () {
         .pipe($.size());
 });
 
+// Data
+gulp.task('data', function() {
+    return gulp.src(['app/data/*'])
+        .pipe(gulp.dest('dist/data'))
+        .pipe($.size());
+});
+
 // Clean
 gulp.task('clean', function () {
-    return gulp.src(['dist/styles', 'dist/scripts', 'dist/images'], { read: false }).pipe($.clean());
+    return gulp.src(
+        ['dist/styles', 'dist/scripts', 'dist/images', 'dist/data'], 
+        { read: false }
+    ).pipe($.clean());
 });
 
 // Build
-gulp.task('build', ['html', 'images']);
+gulp.task('build', ['html', 'images', 'data']);
 
 // Default task
 gulp.task('default', ['clean'], function () {
