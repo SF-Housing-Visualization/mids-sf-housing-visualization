@@ -1,4 +1,5 @@
-// Adapted from http://bl.ocks.org/kiranml1/6872226
+// Adapted from http://nvd3.org/examples/multiBarHorizontal.html
+
 (function(window, d3, nv, data, container) {
   nv.addGraph(function() {
     console.log(data);
