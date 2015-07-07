@@ -1,8 +1,12 @@
 // Adapted from http://nvd3.org/examples/multiBarHorizontal.html
 
 (function(window, d3, nv, data, container) {
+  
+  var getDispatcher = function getDispatcher() { 
+    return window.dispatcher; 
+  }.bind(this);
+
   nv.addGraph(function() {
-    console.log(data);
     var chart = nv.models.multiBarHorizontalChart()
         .x(function(d) { return d.label })
         .y(function(d) { return d.value })
@@ -22,6 +26,12 @@
     nv.utils.windowResize(chart.update);
 
     return chart;
+  }, function() {
+    d3.selectAll(container + ' .nv-bar').on('click',
+      function(data) {
+        getDispatcher().dispatch(data);
+      }
+    );
   });
 
 })(window, d3, nv, window.data.sidebar, '.sidebar svg');
