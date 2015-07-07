@@ -29,7 +29,7 @@
   }, function() {
     d3.selectAll(container + ' .nv-bar').on('click',
       function(data) {
-        getDispatcher()(data);
+        getDispatcher().dispatch(data);
       }
     );
   });
