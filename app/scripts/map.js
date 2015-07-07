@@ -38,7 +38,7 @@
 			fillColor: "#E3E3E3",
 			weight: 1,
 			opacity: 0.4,
-			color: 'blue',
+			color: 'gray',
 			fillOpacity: 0.3
 		};
 	}

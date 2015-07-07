@@ -37,15 +37,17 @@
       <div class="sidebar">
         <svg></svg>
       </div>
+      <div class="time-series">
+        <svg></svg>
+      </div>
 
 
 	<!-- build:js scripts/vendor.js -->
 	<script src="lib/scripts/leaflet.js"></script>
+  <!-- bower:js -->
   <script src="bower_components/d3/d3.js"></script>
   <script src="bower_components/nvd3/build/nv.d3.js"></script>
-  <!-- bower:js -->
   <script src="bower_components/jquery/dist/jquery.js"></script>
-	
 	<script src="bower_components/topojson/topojson.js"></script>
 	<script>
 		// Copyright (c) 2013 Ryan Clark, https://gist.github.com/rclark/5779673 
@@ -65,12 +67,17 @@
 	<!-- endbower -->
   <!-- endbuild -->
 	
+  <!-- build:js data/data.js -->
+  <script src="data/map-data.js"></script>
+  <script src="data/sidebar-data.js"></script>
+  <script src="data/time-series-data.js"></script>
+  <!-- endbuild -->
+
 	<!-- build:js scripts/main.js -->
-  <script src="scripts/sidebar-data.js"></script>
   <script src="scripts/sidebar.js"></script>
+  <script src="scripts/time-series.js"></script>
   <script src="scripts/state.js"></script>
   <script src="scripts/dispatcher.js"></script>
-  <script src="scripts/map-data.js"></script>
 	<script src="scripts/map.js"></script>
 	<!-- endbuild -->
 
@@ -78,6 +85,7 @@
     http://oramind.com/country-border-highlighting-with-leaflet-js/
   -->
   
+
   <script src="data/map-country-border-data.js"></script>
 
 </body>
