@@ -9,9 +9,12 @@
     var state = getState();
     console.log('dispatching event', selection, state);
     for (handler in handlers) {
-      console.log('calling handler', handler, selection, state);
-      handler(selection, state);
+      var target = handlers[handler];
+      console.log('calling handler', target, selection, state);
+      target(selection, state);
     }
+    
+    return true;
   }.bind(this);
 
   dispatcher.register = function register(handler) {
