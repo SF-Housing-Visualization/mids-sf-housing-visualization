@@ -1,7 +1,4 @@
 import React from 'react';
-import MapVisualization from './map-visualization';
-import SidebarVisualization from './sidebar-visualization';
-import TimeSeriesVisualization from './time-series-visualization';
 
 export default class extends React.Component {
   constructor(props) {
@@ -19,18 +16,8 @@ export default class extends React.Component {
 
   render() {
     return (
-      <div>
-
-        <header className="group">
-          <div className="appName">mids-sf-housing-visualization</div>
-        </header>
-
-        <MapVisualization />
-
-        <SidebarVisualization />
-
-        <TimeSeriesVisualization />
-
+      <div className="time-series">
+        <svg></svg>
       </div>
     );
   }
