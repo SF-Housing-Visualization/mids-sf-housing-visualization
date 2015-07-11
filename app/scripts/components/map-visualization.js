@@ -18,18 +18,17 @@ export default class extends React.Component {
 
   render() {
     const position = [51.505, -0.09];
+    const center = [52.5377, 13.3958];
+    const zoom = 4;
+    const minZoom = 0;
+    const maxZoom = 18;
     return (
       <div className="map-application">
-        <Map center={position} zoom={13}>
+        <Map id='map' minZoom={minZoom} maxZoom={maxZoom} center={center} zoom={zoom}>
           <TileLayer
-            url='http://{s}.tile.osm.org/{z}/{x}/{y}.png'
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            url='http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png'
+            attribution='Map data &copy; <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
           />
-          <Marker position={position}>
-            <Popup>
-              <span>A pretty CSS3 popup.<br/>Easily customizable.</span>
-            </Popup>
-          </Marker>
         </Map>
       </div>
     );

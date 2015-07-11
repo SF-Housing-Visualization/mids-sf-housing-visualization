@@ -1,25 +1,28 @@
 import React from 'react';
+import d3 from 'd3';
+import SidebarData from '../data/sidebar-data';
+
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: [
-        'Browserify',
-        'Babel',
-        'Bootstrap',
-        'Modernizr',
-        'Jest'
-      ]
+      data : SidebarData
     };
+    console.log(this.state);
   }
 
   render() {
     return (
-      <div className="sidebar">
-        <svg></svg>
+      <div className='sidebar'>
+        <svg id='sidebar-svg'></svg>
       </div>
     );
+  }
+
+  componentDidMount() {
+    console.log(document.querySelector('.sidebar'));
+
   }
 
   oldRender() {
