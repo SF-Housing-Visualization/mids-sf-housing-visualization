@@ -1,39 +1,49 @@
 import React from 'react';
+import d3 from 'd3';
+import nvd3 from 'd3';
+import TimeSeriesData from '../data/time-series-data';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: [
-        'Browserify',
-        'Babel',
-        'Bootstrap',
-        'Modernizr',
-        'Jest'
-      ]
+      data : TimeSeriesData
     };
+    console.log(this.state);
   }
 
   render() {
     return (
       <div className="time-series">
-        <svg></svg>
+        <svg id="time-series-svg"></svg>
       </div>
     );
   }
 
-  oldRender() {
-    return (
-      <div className="hero-unit">
-        <h1>'Allo, 'Allo!</h1>
-        <p>This is a React component.<br/>
-           You now also have:</p>
-        <ul>{this.state.items.map(this.renderItem)}</ul>
-      </div>
-    );
-  }
+  componentDidMount() {
+    console.log(document.querySelector('.time-series'));
+    const container = '.time-series svg';
+    let data = this.state.data;
+    nv.addGraph(function() {
+      var chart = nv.models.lineWithFocusChart();
 
-  renderItem(item, index) {
-    return <li key={index}>{item}</li>;
+      chart.xAxis
+          .tickFormat(d3.format(',f'));
+
+      chart.yAxis
+          .tickFormat(d3.format(',.2f'));
+
+      chart.y2Axis
+          .tickFormat(d3.format(',.2f'));
+
+      d3.select(container)
+          .datum(data)
+          .transition().duration(500)
+          .call(chart);
+
+      nv.utils.windowResize(chart.update);
+
+      return chart;
+    });
   }
 }

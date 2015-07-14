@@ -19,7 +19,7 @@ export default class extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="root-container">
 
         <header className="group">
           <div className="appName">mids-sf-housing-visualization</div>

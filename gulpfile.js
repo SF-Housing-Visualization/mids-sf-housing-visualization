@@ -80,7 +80,10 @@ gulp.task('fonts', function() {
 });
 
 gulp.task('extras', function () {
-  return gulp.src(['app/*.txt', 'app/*.ico'])
+  return gulp.src([
+      'app/*.txt', 
+      'app/*.ico', 
+      'app/bower_components/nvd3/build/nv.d3.css'])
     .pipe(gulp.dest('dist/'))
     .pipe($.size());
 });

@@ -13,3 +13,5 @@ L.TopoJSON = L.GeoJSON.extend({
     }
   }
 });
+
+export default L.TopoJSON;
