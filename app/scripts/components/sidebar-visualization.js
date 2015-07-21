@@ -2,6 +2,8 @@ import React from 'react';
 import d3 from 'd3';
 import nvd3 from 'd3';
 import SidebarData from '../data/sidebar-data';
+import SelectionActions from './selection-actions';
+import SelectionStore from './selection-store';
 
 
 export default class extends React.Component {
@@ -22,9 +24,14 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
+    this.unsubscribeFromSelectionStore =
+      SelectionStore.listen(this.onSelectionChange);
+
     console.log(document.querySelector('.sidebar'));
     const container = '.sidebar svg';
     let data = this.state.data;
+    let onBarClick = this.onBarClick.bind(this);
+
     nv.addGraph(function() {
       var chart = nv.models.multiBarHorizontalChart()
           .x(function(d) { return d.label })
@@ -46,12 +53,28 @@ export default class extends React.Component {
 
       return chart;
     }, function() {
-      d3.selectAll(container + ' .nv-bar').on('click',
-        function(data) {
-          getDispatcher().dispatch(data);
-        }
-      );
+      d3
+        .selectAll(container + ' .nv-bar')
+        .on('click', onBarClick);
     });
+  }
+
+
+  componentWillUnmount() {
+    this.unsubscribeFromSelectionStore();
+  }
+
+  onBarClick(data) {
+    console.log('onBarClick data: ', data, 'this: ', this);
+    var geography = data.label;
+    SelectionActions.geographiesSelectionChange([ geography ]);
+  }
+
+  onSelectionChange(newSelection) {
+    console.log('onSelectionChange newSelection: ', newSelection, 
+      'this: ', this);
+    this.setState({ selection: newSelection });
+    console.log('Sidebar onSelectionChange this.state: ', this.state);
   }
   
 }
