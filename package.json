@@ -41,6 +41,7 @@
     ]
   },
   "browserify-shim": {
-    "d3": "global:d3"
+    "d3": "global:d3",
+    "reflux": "global:Reflux"
   }
 }

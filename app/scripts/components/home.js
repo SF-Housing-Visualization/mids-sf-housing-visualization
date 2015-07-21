@@ -2,6 +2,7 @@ import React from 'react';
 import MapVisualization from './map-visualization';
 import SidebarVisualization from './sidebar-visualization';
 import TimeSeriesVisualization from './time-series-visualization';
+import Actions from './actions';
 
 export default class extends React.Component {
   constructor(props) {
