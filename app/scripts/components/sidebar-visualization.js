@@ -13,6 +13,10 @@ export default class extends React.Component {
       data : SidebarData
     };
     console.log(this.state);
+
+    this.onBarClick = this.onBarClick.bind(this);
+    this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.setState = this.setState.bind(this);
   }
 
   render() {
@@ -27,10 +31,14 @@ export default class extends React.Component {
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
 
+    console.log('componentDidMount this: ', this);
     console.log(document.querySelector('.sidebar'));
     const container = '.sidebar svg';
     let data = this.state.data;
-    let onBarClick = this.onBarClick.bind(this);
+
+    let onBarClick = this.onBarClick;
+
+    console.log('this in com')
 
     nv.addGraph(function() {
       var chart = nv.models.multiBarHorizontalChart()
@@ -72,9 +80,9 @@ export default class extends React.Component {
 
   onSelectionChange(newSelection) {
     console.log('onSelectionChange newSelection: ', newSelection, 
-      'this: ', this);
-    this.setState({ selection: newSelection });
-    console.log('Sidebar onSelectionChange this.state: ', this.state);
+      'this: ', this, 'this.setState', this.setState);
+    
+    //console.log('Sidebar onSelectionChange this.state: ', this.state);
   }
   
 }

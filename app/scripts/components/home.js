@@ -20,6 +20,8 @@ export default class extends React.Component {
         'Jest'
       ]
     };
+
+    this.onSelectionChange = this.onSelectionChange.bind(this);
   }
 
   render() {
