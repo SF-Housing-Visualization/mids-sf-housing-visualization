@@ -2,6 +2,11 @@ import React from 'react';
 import MapVisualization from './map-visualization';
 import SidebarVisualization from './sidebar-visualization';
 import TimeSeriesVisualization from './time-series-visualization';
+import SelectionActions from './selection-actions';
+import SelectionStore from './selection-store';
+
+console.log('SelectionActions: ', SelectionActions);
+console.log('SelectionStore: ', SelectionStore);
 
 export default class extends React.Component {
   constructor(props) {
@@ -15,6 +20,8 @@ export default class extends React.Component {
         'Jest'
       ]
     };
+
+    this.onSelectionChange = this.onSelectionChange.bind(this);
   }
 
   render() {
@@ -33,6 +40,19 @@ export default class extends React.Component {
 
       </div>
     );
+  }
+
+  componentDidMount() {
+    this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  onSelectionChange(newSelection) {
+    this.setState({ selection: newSelection });
+    console.log('onSelectionChange this.state: ', this.state);
   }
 
   oldRender() {

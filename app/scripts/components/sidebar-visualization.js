@@ -2,6 +2,8 @@ import React from 'react';
 import d3 from 'd3';
 import nvd3 from 'd3';
 import SidebarData from '../data/sidebar-data';
+import SelectionActions from './selection-actions';
+import SelectionStore from './selection-store';
 
 
 export default class extends React.Component {
@@ -11,6 +13,10 @@ export default class extends React.Component {
       data : SidebarData
     };
     console.log(this.state);
+
+    this.onBarClick = this.onBarClick.bind(this);
+    this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.setState = this.setState.bind(this);
   }
 
   render() {
@@ -22,9 +28,18 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
+    this.unsubscribeFromSelectionStore =
+      SelectionStore.listen(this.onSelectionChange);
+
+    console.log('componentDidMount this: ', this);
     console.log(document.querySelector('.sidebar'));
     const container = '.sidebar svg';
     let data = this.state.data;
+
+    let onBarClick = this.onBarClick;
+
+    console.log('this in com')
+
     nv.addGraph(function() {
       var chart = nv.models.multiBarHorizontalChart()
           .x(function(d) { return d.label })
@@ -46,12 +61,33 @@ export default class extends React.Component {
 
       return chart;
     }, function() {
-      d3.selectAll(container + ' .nv-bar').on('click',
-        function(data) {
-          getDispatcher().dispatch(data);
-        }
-      );
+      d3
+        .selectAll(container + ' .nv-bar')
+        .on('click', onBarClick);
     });
+
+    d3.csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv',
+      function (data) {
+        console.log('got data_geos.csv', data);
+      });
+  }
+
+
+  componentWillUnmount() {
+    this.unsubscribeFromSelectionStore();
+  }
+
+  onBarClick(data) {
+    console.log('onBarClick data: ', data, 'this: ', this);
+    var geography = data.label;
+    SelectionActions.geographiesSelectionChange([ geography ]);
+  }
+
+  onSelectionChange(newSelection) {
+    console.log('onSelectionChange newSelection: ', newSelection, 
+      'this: ', this, 'this.setState', this.setState);
+    
+    //console.log('Sidebar onSelectionChange this.state: ', this.state);
   }
   
 }
