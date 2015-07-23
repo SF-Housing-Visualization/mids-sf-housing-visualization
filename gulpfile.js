@@ -94,7 +94,14 @@ gulp.task('serve', function() {
   gulp.src('dist')
     .pipe($.webserver({
       livereload: true,
-      port: 9000
+      port: 9000,
+      proxies: [
+        {
+          source: '/mids-sf-housing-sandbox',
+          target: 
+            'http://sf-housing-visualization.github.io/mids-sf-housing-sandbox'
+        }
+      ]
     }));
 });
 
