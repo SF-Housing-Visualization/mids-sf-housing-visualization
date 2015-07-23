@@ -4,6 +4,7 @@ import SidebarVisualization from './sidebar-visualization';
 import TimeSeriesVisualization from './time-series-visualization';
 import SelectionActions from './selection-actions';
 import SelectionStore from './selection-store';
+import GeographyLoadAction from './geography-load-action';
 
 console.log('SelectionActions: ', SelectionActions);
 console.log('SelectionStore: ', SelectionStore);
@@ -43,7 +44,11 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
+    const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
     this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+
+    // load large static data
+    GeographyLoadAction(url);
   }
 
   componentWillUnmount() {
