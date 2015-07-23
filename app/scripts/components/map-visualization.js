@@ -24,7 +24,9 @@ export default class extends React.Component {
     const maxZoom = 18;
     return (
       <div className="map-application">
-        <Map className="map" minZoom={minZoom} maxZoom={maxZoom} center={center} zoom={zoom}>
+        <Map className="map"
+          minZoom={minZoom} maxZoom={maxZoom}
+          center={center} zoom={zoom}>
           <TileLayer
             url='http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png'
             attribution='Map data &copy; <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'

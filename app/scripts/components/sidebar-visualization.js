@@ -65,6 +65,11 @@ export default class extends React.Component {
         .selectAll(container + ' .nv-bar')
         .on('click', onBarClick);
     });
+
+    d3.csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv',
+      function (data) {
+        console.log('got data_geos.csv', data);
+      });
   }
 
 
