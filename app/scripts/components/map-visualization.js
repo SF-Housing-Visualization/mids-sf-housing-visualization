@@ -4,6 +4,7 @@ import { Map, Marker, Popup, TileLayer } from 'react-leaflet';
 import SelectionActions from './selection-actions';
 import SelectionStore from './selection-store';
 import GeographyStore from './geography-store';
+import GeographyLoadAction from './geography-load-action';
 
 export default class extends React.Component {
   constructor(props) {
@@ -40,7 +41,12 @@ export default class extends React.Component {
       }
     };
 
+    this.onGeoMouseEnter = this.onGeoMouseEnter.bind(this);
+    this.onGeoMouseExit = this.onGeoMouseExit.bind(this);
     this.onGeoClick = this.onGeoClick.bind(this);
+
+    this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
+
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.setState = this.setState.bind(this);
   }
@@ -58,19 +64,67 @@ export default class extends React.Component {
 
     const url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
-    return (
-      <div className="map-application">
-        <Map className="map"
-          minZoom={minZoom} maxZoom={maxZoom}
-          center={center} zoom={zoom}>
-          <TileLayer
-            url={url}
-            attribution={attribution}
-          />
-        </Map>
-      </div>
+    const mapReactComponent = (
+      <Map ref='map' className="map"
+        minZoom={minZoom} maxZoom={maxZoom}
+        center={center} zoom={zoom}>
+        <TileLayer
+          url={url}
+          attribution={attribution}
+        />
+      </Map>
     );
+
+    //this.map = mapReactComponent;
+
+    console.log('render() map', mapReactComponent);
+    return mapReactComponent;
   }
+
+  componentDidMount() {
+    this.unsubscribeFromGeographyStore =
+      GeographyStore.listen(this.onGeographyStoreChange);
+
+    // load large static data
+    const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
+    GeographyLoadAction(url);
+  }
+
+  onGeographyStoreChange(geographies) {
+    console.log('onGeographyStoreChange geographies: ', geographies,
+      'this: ', this);
+
+    let areas = { };
+
+    let onGeoMouseEnter = this.onGeoMouseEnter;
+    let onGeoMouseExit = this.onGeoMouseExit;
+    let onGeoClick = this.onGeoClick;
+
+    function onEachGeoJsonFeature(feature, layer) {
+      layer.on({
+        click : onGeoClick,
+        mouseover : onGeoMouseEnter,
+        mouseout : onGeoMouseExit
+      });
+
+      let name = layer.feature.properties['NAME'];
+      areas[name] = layer;
+    }
+
+    let leafletElement = this.refs.map.leafletElement;
+    console.log('leafletElement ', leafletElement, 'style');
+
+    L.geoJson(geographies, {
+      style: this.geoStyles.baseline,
+      onEachFeature: onEachGeoJsonFeature,
+    }).addTo(leafletElement);
+
+    //L.geoJson(geoJson, {
+    //  style : styleGeoJsonBaseline,
+    //  onEachFeature : onEachGeoJsonFeature
+    //}).addTo(map);
+  }
+
 
   onGeoMouseEnter(event) {
     console.log('entering area', event);
@@ -93,6 +147,8 @@ export default class extends React.Component {
 
     SelectionActions.geographiesSelectionChange([ geography ]);
   }
+
+
 
   onSelectionChange(newSelection) {
     console.log('onSelectionChange newSelection: ', newSelection, 

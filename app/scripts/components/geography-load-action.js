@@ -1,5 +1,6 @@
 import Reflux from 'reflux';
 
 export default Reflux.createAction({
-  'asyncResult' : true
+  asyncResult: true//,
+  //children: [ 'initiated' ]
 });

@@ -33,7 +33,9 @@ export default class extends React.Component {
           <div className="appName">mids-sf-housing-visualization</div>
         </header>
 
-        <MapVisualization />
+        <div className="map-application">
+          <MapVisualization />
+        </div>
 
         <SidebarVisualization />
 

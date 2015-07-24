@@ -37,7 +37,8 @@ var _reflux = (typeof window !== "undefined" ? window.Reflux : typeof global !==
 var _reflux2 = _interopRequireDefault(_reflux);
 
 exports['default'] = _reflux2['default'].createAction({
-  'asyncResult': true
+  asyncResult: true //,
+  //children: [ 'initiated' ]
 });
 module.exports = exports['default'];
 
@@ -167,7 +168,11 @@ var _default = (function (_React$Component) {
             'mids-sf-housing-visualization'
           )
         ),
-        _react2['default'].createElement(_mapVisualization2['default'], null),
+        _react2['default'].createElement(
+          'div',
+          { className: 'map-application' },
+          _react2['default'].createElement(_mapVisualization2['default'], null)
+        ),
         _react2['default'].createElement(_sidebarVisualization2['default'], null),
         _react2['default'].createElement(_timeSeriesVisualization2['default'], null)
       );
@@ -275,6 +280,10 @@ var _geographyStore = require('./geography-store');
 
 var _geographyStore2 = _interopRequireDefault(_geographyStore);
 
+var _geographyLoadAction = require('./geography-load-action');
+
+var _geographyLoadAction2 = _interopRequireDefault(_geographyLoadAction);
+
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
     _classCallCheck(this, _class);
@@ -306,7 +315,12 @@ var _default = (function (_React$Component) {
       }
     };
 
+    this.onGeoMouseEnter = this.onGeoMouseEnter.bind(this);
+    this.onGeoMouseExit = this.onGeoMouseExit.bind(this);
     this.onGeoClick = this.onGeoClick.bind(this);
+
+    this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
+
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.setState = this.setState.bind(this);
   };
@@ -325,20 +339,65 @@ var _default = (function (_React$Component) {
 
       var url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
-      return _react2['default'].createElement(
-        'div',
-        { className: 'map-application' },
-        _react2['default'].createElement(
-          _reactLeaflet.Map,
-          { className: 'map',
-            minZoom: minZoom, maxZoom: maxZoom,
-            center: center, zoom: zoom },
-          _react2['default'].createElement(_reactLeaflet.TileLayer, {
-            url: url,
-            attribution: attribution
-          })
-        )
+      var mapReactComponent = _react2['default'].createElement(
+        _reactLeaflet.Map,
+        { ref: 'map', className: 'map',
+          minZoom: minZoom, maxZoom: maxZoom,
+          center: center, zoom: zoom },
+        _react2['default'].createElement(_reactLeaflet.TileLayer, {
+          url: url,
+          attribution: attribution
+        })
       );
+
+      //this.map = mapReactComponent;
+
+      console.log('render() map', mapReactComponent);
+      return mapReactComponent;
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.unsubscribeFromGeographyStore = _geographyStore2['default'].listen(this.onGeographyStoreChange);
+
+      // load large static data
+      var url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json';
+      (0, _geographyLoadAction2['default'])(url);
+    }
+  }, {
+    key: 'onGeographyStoreChange',
+    value: function onGeographyStoreChange(geographies) {
+      console.log('onGeographyStoreChange geographies: ', geographies, 'this: ', this);
+
+      var areas = {};
+
+      var onGeoMouseEnter = this.onGeoMouseEnter;
+      var onGeoMouseExit = this.onGeoMouseExit;
+      var onGeoClick = this.onGeoClick;
+
+      function onEachGeoJsonFeature(feature, layer) {
+        layer.on({
+          click: onGeoClick,
+          mouseover: onGeoMouseEnter,
+          mouseout: onGeoMouseExit
+        });
+
+        var name = layer.feature.properties['NAME'];
+        areas[name] = layer;
+      }
+
+      var leafletElement = this.refs.map.leafletElement;
+      console.log('leafletElement ', leafletElement, 'style');
+
+      _leaflet2['default'].geoJson(geographies, {
+        style: this.geoStyles.baseline,
+        onEachFeature: onEachGeoJsonFeature
+      }).addTo(leafletElement);
+
+      //L.geoJson(geoJson, {
+      //  style : styleGeoJsonBaseline,
+      //  onEachFeature : onEachGeoJsonFeature
+      //}).addTo(map);
     }
   }, {
     key: 'onGeoMouseEnter',
@@ -412,7 +471,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/map-visualization.js","/app/scripts/components")
-},{"./geography-store":3,"./selection-actions":6,"./selection-store":7,"_process":17,"buffer":13,"leaflet":18,"react":265,"react-leaflet":39}],6:[function(require,module,exports){
+},{"./geography-load-action":2,"./geography-store":3,"./selection-actions":6,"./selection-store":7,"_process":17,"buffer":13,"leaflet":18,"react":265,"react-leaflet":39}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
