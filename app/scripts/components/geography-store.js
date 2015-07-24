@@ -9,8 +9,8 @@ export default Reflux.createStore({
     this.onGeographyLoad = this.onGeographyLoad.bind(this);
     this.onGeographyLoaded = this.onGeographyLoaded.bind(this);
 
-    this.listenTo(GeographyLoadAction, 'onGeographyLoad');
-    this.listenTo(GeographyLoadAction.completed, 'onGeographyLoaded');
+    this.listenTo(GeographyLoadAction.start, this.onGeographyLoad);
+    this.listenTo(GeographyLoadAction.completed, this.onGeographyLoaded);
   },
 
   onGeographyLoad: function onGeographyLoad(url) {

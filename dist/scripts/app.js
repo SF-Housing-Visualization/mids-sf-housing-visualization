@@ -37,8 +37,8 @@ var _reflux = (typeof window !== "undefined" ? window.Reflux : typeof global !==
 var _reflux2 = _interopRequireDefault(_reflux);
 
 exports['default'] = _reflux2['default'].createAction({
-  asyncResult: true //,
-  //children: [ 'initiated' ]
+  asyncResult: true,
+  children: ['start']
 });
 module.exports = exports['default'];
 
@@ -72,8 +72,8 @@ exports['default'] = _reflux2['default'].createStore({
     this.onGeographyLoad = this.onGeographyLoad.bind(this);
     this.onGeographyLoaded = this.onGeographyLoaded.bind(this);
 
-    this.listenTo(_geographyLoadAction2['default'], 'onGeographyLoad');
-    this.listenTo(_geographyLoadAction2['default'].completed, 'onGeographyLoaded');
+    this.listenTo(_geographyLoadAction2['default'].start, this.onGeographyLoad);
+    this.listenTo(_geographyLoadAction2['default'].completed, this.onGeographyLoaded);
   },
 
   onGeographyLoad: function onGeographyLoad(url) {
@@ -362,7 +362,7 @@ var _default = (function (_React$Component) {
 
       // load large static data
       var url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json';
-      (0, _geographyLoadAction2['default'])(url);
+      _geographyLoadAction2['default'].start(url);
     }
   }, {
     key: 'onGeographyStoreChange',

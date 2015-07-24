@@ -87,7 +87,7 @@ export default class extends React.Component {
 
     // load large static data
     const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
-    GeographyLoadAction(url);
+    GeographyLoadAction.start(url);
   }
 
   onGeographyStoreChange(geographies) {
