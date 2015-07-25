@@ -30,8 +30,8 @@ export default class extends React.Component {
   componentDidMount() {
     console.log('SidebarVisualization componentDidMount(): SelectionStore',
       SelectionStore);
-    //this.unsubscribeFromSelectionStore =
-    //  SelectionStore.listen(this.onSelectionChange);
+    this.unsubscribeFromSelectionStore =
+      SelectionStore.listen(this.onSelectionChange);
 
     console.log('componentDidMount this: ', this);
     console.log(document.querySelector('.sidebar'));
@@ -55,14 +55,24 @@ export default class extends React.Component {
       chart.yAxis
           .tickFormat(d3.format(',.2f'));
 
+
       d3.select(container)
           .datum(data)
           .call(chart);
 
+      console.log('SidebarVisualization.componentDidMount() cil',
+        chart.interactiveLayer);
+
+      //chart.dispatch.on('elementMouseover', function (arg) {
+      //  console.log('elementMouseover', arg);
+      //});
+
       nv.utils.windowResize(chart.update);
 
       return chart;
-    }, function() {
+    }, function(chart) {
+      //console.log('SidebarVisualization.componentDidMount() cild',
+      //  chart);
       d3
         .selectAll(container + ' .nv-bar')
         .on('click', onBarClick);

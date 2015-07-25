@@ -268,6 +268,10 @@ var _leaflet2 = _interopRequireDefault(_leaflet);
 
 var _reactLeaflet = require('react-leaflet');
 
+var _underscore = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _selectionActions = require('./selection-actions');
 
 var _selectionActions2 = _interopRequireDefault(_selectionActions);
@@ -291,7 +295,8 @@ var _default = (function (_React$Component) {
     _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
     this.state = {
       selected: [],
-      layers: {}
+      layers: {},
+      hover: []
     };
 
     this.geoStyles = {
@@ -323,7 +328,9 @@ var _default = (function (_React$Component) {
     this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
 
     this.onSelectionChange = this.onSelectionChange.bind(this);
-    this.setState = this.setState.bind(this);
+    this.select = this.select.bind(this);
+    this.unselect = this.unselect.bind(this);
+    //this.setState = this.setState.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -411,71 +418,82 @@ var _default = (function (_React$Component) {
     value: function onGeoMouseEnter(event) {
       console.log('entering area', event);
       var layer = event.target;
-      layer.setStyle(this.geoStyles.hover);
+      var geography = layer.feature.properties['NAME'];
+
+      var hover = this.state.hover.push(geography);
+      this.setState({ hover: hover }); // ES6 implicit : hover
+
+      this.hover(geography);
     }
   }, {
     key: 'onGeoMouseExit',
     value: function onGeoMouseExit(event) {
       console.log('exiting area', event);
       var layer = event.target;
-      layer.setStyle(this.geoStyles.baseline);
+      var geography = layer.feature.properties['NAME'];
+
+      var hover = _underscore2['default'].without(this.state.hover, geography);
+      this.setState({ hover: hover }); // ES6 implicit : hover
+
+      this.unhover(geography);
     }
   }, {
     key: 'onGeoClick',
     value: function onGeoClick(event) {
       console.log('click in area', event);
       var layer = event.target;
-      var name = layer.feature.properties['NAME'];
+      var geography = layer.feature.properties['NAME'];
 
-      _selectionActions2['default'].geographiesSelectionChange([name]);
+      _selectionActions2['default'].geographiesSelectionChange([geography]);
     }
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
-      console.log('MapVisualization onSelectionChange newSelection: ', newSelection, 'this: ', this, 'this.setState', this.setState);
+      console.log('MapVisualization onSelectionChange newSelection: ', newSelection, 'this: ', this, 'this.setState', this.setState, '_.difference', _underscore2['default'].difference);
 
       var selectedGeographies = newSelection.selectedGeographies;
       if (selectedGeographies) {
-        selectedGeographies.forEach((function (selectedGeography) {
+        selectedGeographies.forEach(this.select);
+        var unselectedGeographies = _underscore2['default'].difference(this.state.selected, selectedGeographies);
+        console.log('unselectedGeographies', unselectedGeographies);
+        unselectedGeographies.forEach(this.unselect);
 
-          var layer = this.state.layers[selectedGeography];
-          console.log('MapVisualization onSelectionChange()', selectedGeography, selectedGeographies, layer, this.state);
-          layer.setStyle(this.geoStyles.selected);
-        }).bind(this));
+        this.setState({ selected: selectedGeographies });
       }
     }
   }, {
-    key: 'kloogeRender',
-    value: function kloogeRender() {
-      var position = [51.505, -0.09];
-      var center = [52.5377, 13.3958];
-      var zoom = 4;
-      var minZoom = 0;
-      var maxZoom = 18;
-      var mapClassName = 'map-application';
-      return _react2['default'].createElement(
-        'div',
-        { className: 'map-application' },
-        _react2['default'].createElement('div', { className: 'map', ref: 'leafletContainer' })
-      );
+    key: 'select',
+    value: function select(geography) {
+      var layer = this.state.layers[geography];
+      var style = this.contains(this.state.hover, geography) ? this.geoStyles.hover : this.geoStyles.selected;
+      layer.setStyle(style);
     }
   }, {
-    key: 'kloodgeComponentDidMount',
-    value: function kloodgeComponentDidMount() {
-      var leafletContainer = _react2['default'].findDOMNode(this.refs.leafletContainer);
-      console.log(leafletContainer);
-      /* create leaflet map */
-      var map = _leaflet2['default'].map(leafletContainer, {
-        center: [52.5377, 13.3958],
-        zoom: 4
-      });
-
-      /* add default stamen tile layer */
-      new _leaflet2['default'].tileLayer('http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {
-        minZoom: 0,
-        maxZoom: 18,
-        attribution: 'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
-      }).addTo(map);
+    key: 'unselect',
+    value: function unselect(geography) {
+      var layer = this.state.layers[geography];
+      var style = this.contains(this.state.hover, geography) ? this.geoStyles.hover : this.geoStyles.baseline;
+      layer.setStyle(style);
+    }
+  }, {
+    key: 'hover',
+    value: function hover(geography) {
+      var layer = this.state.layers[geography];
+      // when entering an area, the hover style always wins
+      var style = this.geoStyles.hover;
+      layer.setStyle(style);
+    }
+  }, {
+    key: 'unhover',
+    value: function unhover(geography) {
+      var layer = this.state.layers[geography];
+      var style = this.contains(this.state.selected, geography) ? this.geoStyles.selected : this.geoStyles.baseline;
+      layer.setStyle(style);
+    }
+  }, {
+    key: 'contains',
+    value: function contains(array, item) {
+      return _underscore2['default'].indexOf(array, item) > -1;
     }
   }]);
 
@@ -628,8 +646,7 @@ var _default = (function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       console.log('SidebarVisualization componentDidMount(): SelectionStore', _selectionStore2['default']);
-      //this.unsubscribeFromSelectionStore =
-      //  SelectionStore.listen(this.onSelectionChange);
+      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
 
       console.log('componentDidMount this: ', this);
       console.log(document.querySelector('.sidebar'));
@@ -654,10 +671,18 @@ var _default = (function (_React$Component) {
 
         _d32['default'].select(container).datum(data).call(chart);
 
+        console.log('SidebarVisualization.componentDidMount() cil', chart.interactiveLayer);
+
+        //chart.dispatch.on('elementMouseover', function (arg) {
+        //  console.log('elementMouseover', arg);
+        //});
+
         nv.utils.windowResize(chart.update);
 
         return chart;
-      }, function () {
+      }, function (chart) {
+        //console.log('SidebarVisualization.componentDidMount() cild',
+        //  chart);
         _d32['default'].selectAll(container + ' .nv-bar').on('click', onBarClick);
       });
 
