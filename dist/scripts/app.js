@@ -179,18 +179,10 @@ var _default = (function (_React$Component) {
     }
   }, {
     key: 'componentDidMount',
-    value: function componentDidMount() {
-      var url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json';
-      this.unsubscribe = _selectionStore2['default'].listen(this.onSelectionChange);
-
-      // load large static data
-      (0, _geographyLoadAction2['default'])(url);
-    }
+    value: function componentDidMount() {}
   }, {
     key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      this.unsubscribe();
-    }
+    value: function componentWillUnmount() {}
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
@@ -238,6 +230,14 @@ var _default = (function (_React$Component) {
 
 exports['default'] = _default;
 module.exports = exports['default'];
+
+//const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
+//this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+
+// load large static data
+//GeographyLoadAction(url);
+
+//this.unsubscribe();
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/home.js","/app/scripts/components")
 },{"./geography-load-action":2,"./map-visualization":5,"./selection-actions":6,"./selection-store":7,"./sidebar-visualization":8,"./time-series-visualization":9,"_process":17,"buffer":13,"react":265}],5:[function(require,module,exports){
@@ -290,7 +290,8 @@ var _default = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
     this.state = {
-      items: ['Browserify', 'Babel', 'Bootstrap', 'Modernizr', 'Jest']
+      selected: [],
+      layers: {}
     };
 
     this.geoStyles = {
@@ -358,6 +359,9 @@ var _default = (function (_React$Component) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
+      console.log('MapVisualization componentDidMount() SelectionStore', _selectionStore2['default'], 'GeographyStore', _geographyStore2['default']);
+      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
+
       this.unsubscribeFromGeographyStore = _geographyStore2['default'].listen(this.onGeographyStoreChange);
 
       // load large static data
@@ -365,11 +369,17 @@ var _default = (function (_React$Component) {
       _geographyLoadAction2['default'].start(url);
     }
   }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.unsubscribeFromSelectionStore();
+      this.unsubscribeFromGeographyStore();
+    }
+  }, {
     key: 'onGeographyStoreChange',
     value: function onGeographyStoreChange(geographies) {
       console.log('onGeographyStoreChange geographies: ', geographies, 'this: ', this);
 
-      var areas = {};
+      var layers = {};
 
       var onGeoMouseEnter = this.onGeoMouseEnter;
       var onGeoMouseExit = this.onGeoMouseExit;
@@ -383,7 +393,7 @@ var _default = (function (_React$Component) {
         });
 
         var name = layer.feature.properties['NAME'];
-        areas[name] = layer;
+        layers[name] = layer;
       }
 
       var leafletElement = this.refs.map.leafletElement;
@@ -394,10 +404,7 @@ var _default = (function (_React$Component) {
         onEachFeature: onEachGeoJsonFeature
       }).addTo(leafletElement);
 
-      //L.geoJson(geoJson, {
-      //  style : styleGeoJsonBaseline,
-      //  onEachFeature : onEachGeoJsonFeature
-      //}).addTo(map);
+      this.setState({ layers: layers }); // ES6 shorthand for : areas
     }
   }, {
     key: 'onGeoMouseEnter',
@@ -420,14 +427,22 @@ var _default = (function (_React$Component) {
       var layer = event.target;
       var name = layer.feature.properties['NAME'];
 
-      var geography = { label: name };
-
-      _selectionActions2['default'].geographiesSelectionChange([geography]);
+      _selectionActions2['default'].geographiesSelectionChange([name]);
     }
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
-      console.log('onSelectionChange newSelection: ', newSelection, 'this: ', this, 'this.setState', this.setState);
+      console.log('MapVisualization onSelectionChange newSelection: ', newSelection, 'this: ', this, 'this.setState', this.setState);
+
+      var selectedGeographies = newSelection.selectedGeographies;
+      if (selectedGeographies) {
+        selectedGeographies.forEach((function (selectedGeography) {
+
+          var layer = this.state.layers[selectedGeography];
+          console.log('MapVisualization onSelectionChange()', selectedGeography, selectedGeographies, layer, this.state);
+          layer.setStyle(this.geoStyles.selected);
+        }).bind(this));
+      }
     }
   }, {
     key: 'kloogeRender',
@@ -508,37 +523,35 @@ var _selectionActions = require('./selection-actions');
 
 var _selectionActions2 = _interopRequireDefault(_selectionActions);
 
-var selectedGeographies = [];
-var selectedMetrics = [];
-var selectedTimeInterval = [];
-
 exports['default'] = _reflux2['default'].createStore({
 
-  listenables: [_selectionActions2['default']],
-
-  init: function init() {},
-
-  getInitialState: function getInitialState() {
-    return {
-      selectedGeographies: selectedGeographies, // ES6 implicit :selectedGeographies
-      selectedMetrics: selectedMetrics, // ES6 implicit :selectedMetrics
-      selectedTimeInterval: selectedTimeInterval // ES6 implicit :selectedTimeInterval
+  init: function init() {
+    this.state = {
+      selectedGeographies: [],
+      selectedMetrics: [],
+      selectedTimeInterval: []
     };
+
+    this.listenTo(_selectionActions2['default'].geographiesSelectionChange, this.onGeographiesSelectionChange);
+
+    this.listenTo(_selectionActions2['default'].metricsSelectionChange, this.onMetricsSelectionChange);
+
+    this.listenTo(_selectionActions2['default'].timeIntervalSelectionChange, this.onTimeIntervalSelectionChange);
   },
 
-  onGeographiesSelectionChange: function onGeographiesSelectionChange(newValue) {
-    selectedGeographies = newValue;
-    this.trigger(selectedGeographies);
+  onGeographiesSelectionChange: function onGeographiesSelectionChange(selectedGeographies) {
+    this.state.selectedGeographies = selectedGeographies;
+    this.trigger({ selectedGeographies: selectedGeographies });
   },
 
-  onMetricsSelectionChange: function onMetricsSelectionChange(newValue) {
-    selectedMetrics = newValue;
-    this.trigger(selectedMetrics);
+  onMetricsSelectionChange: function onMetricsSelectionChange(selectedMetrics) {
+    this.state.selectedMetrics = selectedMetrics;
+    this.trigger({ selectedMetrics: selectedMetrics });
   },
 
-  onTimeIntervalSelectionChange: function onTimeIntervalSelectionChange(newValue) {
-    selectedTimeInterval = newValue;
-    this.trigger(selectedMetrics);
+  onTimeIntervalSelectionChange: function onTimeIntervalSelectionChange(selectedTimeInterval) {
+    this.state.selectedTimeInterval = selectedTimeInterval;
+    this.trigger({ selectedTimeInterval: selectedTimeInterval });
   }
 
 });
@@ -614,7 +627,9 @@ var _default = (function (_React$Component) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
+      console.log('SidebarVisualization componentDidMount(): SelectionStore', _selectionStore2['default']);
+      //this.unsubscribeFromSelectionStore =
+      //  SelectionStore.listen(this.onSelectionChange);
 
       console.log('componentDidMount this: ', this);
       console.log(document.querySelector('.sidebar'));

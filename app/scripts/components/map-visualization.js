@@ -10,13 +10,8 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: [
-        'Browserify',
-        'Babel',
-        'Bootstrap',
-        'Modernizr',
-        'Jest'
-      ]
+      selected: [ ],
+      layers: { }
     };
 
     this.geoStyles = {
@@ -82,19 +77,31 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
+    console.log('MapVisualization componentDidMount() SelectionStore', 
+      SelectionStore, 'GeographyStore', GeographyStore);
+    this.unsubscribeFromSelectionStore =
+      SelectionStore.listen(this.onSelectionChange);
+
+
+
     this.unsubscribeFromGeographyStore =
       GeographyStore.listen(this.onGeographyStoreChange);
 
     // load large static data
-    const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
+    const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json';
     GeographyLoadAction.start(url);
+  }
+
+  componentWillUnmount() {
+    this.unsubscribeFromSelectionStore();
+    this.unsubscribeFromGeographyStore();
   }
 
   onGeographyStoreChange(geographies) {
     console.log('onGeographyStoreChange geographies: ', geographies,
       'this: ', this);
 
-    let areas = { };
+    let layers = { };
 
     let onGeoMouseEnter = this.onGeoMouseEnter;
     let onGeoMouseExit = this.onGeoMouseExit;
@@ -108,7 +115,7 @@ export default class extends React.Component {
       });
 
       let name = layer.feature.properties['NAME'];
-      areas[name] = layer;
+      layers[name] = layer;
     }
 
     let leafletElement = this.refs.map.leafletElement;
@@ -119,10 +126,8 @@ export default class extends React.Component {
       onEachFeature: onEachGeoJsonFeature,
     }).addTo(leafletElement);
 
-    //L.geoJson(geoJson, {
-    //  style : styleGeoJsonBaseline,
-    //  onEachFeature : onEachGeoJsonFeature
-    //}).addTo(map);
+    this.setState({ layers }); // ES6 shorthand for : areas
+
   }
 
 
@@ -143,16 +148,25 @@ export default class extends React.Component {
     var layer = event.target;
     var name = layer.feature.properties['NAME'];
 
-    var geography = { label : name };
-
-    SelectionActions.geographiesSelectionChange([ geography ]);
+    SelectionActions.geographiesSelectionChange([ name ]);
   }
 
 
 
   onSelectionChange(newSelection) {
-    console.log('onSelectionChange newSelection: ', newSelection, 
-      'this: ', this, 'this.setState', this.setState);
+    console.log('MapVisualization onSelectionChange newSelection: ', 
+      newSelection, 'this: ', this, 'this.setState', this.setState);
+
+    let selectedGeographies = newSelection.selectedGeographies;
+    if (selectedGeographies) {
+      selectedGeographies.forEach(function(selectedGeography) {
+
+        let layer = this.state.layers[selectedGeography];
+        console.log('MapVisualization onSelectionChange()',
+          selectedGeography, selectedGeographies, layer, this.state);
+        layer.setStyle(this.geoStyles.selected);
+      }.bind(this));
+    }
   }
 
   kloogeRender() {

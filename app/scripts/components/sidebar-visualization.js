@@ -28,8 +28,10 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    this.unsubscribeFromSelectionStore =
-      SelectionStore.listen(this.onSelectionChange);
+    console.log('SidebarVisualization componentDidMount(): SelectionStore',
+      SelectionStore);
+    //this.unsubscribeFromSelectionStore =
+    //  SelectionStore.listen(this.onSelectionChange);
 
     console.log('componentDidMount this: ', this);
     console.log(document.querySelector('.sidebar'));

@@ -46,15 +46,15 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
-    this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+    //const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
+    //this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
 
     // load large static data
-    GeographyLoadAction(url);
+    //GeographyLoadAction(url);
   }
 
   componentWillUnmount() {
-    this.unsubscribe();
+    //this.unsubscribe();
   }
 
   onSelectionChange(newSelection) {

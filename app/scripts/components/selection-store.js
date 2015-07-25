@@ -1,40 +1,46 @@
 import Reflux from 'reflux';
 import SelectionActions from './selection-actions';
 
-var selectedGeographies = [ ];
-var selectedMetrics = [ ];
-var selectedTimeInterval = [ ];
-
 export default Reflux.createStore({
 
-  listenables: [ SelectionActions ],
-
-  init: function() { },
-
-  getInitialState: function() { 
-    return { 
-      selectedGeographies, // ES6 implicit :selectedGeographies
-      selectedMetrics, // ES6 implicit :selectedMetrics
-      selectedTimeInterval // ES6 implicit :selectedTimeInterval
+  init: function() {
+    this.state = {
+      selectedGeographies: [ ],
+      selectedMetrics: [ ],
+      selectedTimeInterval: [ ]
     };
+
+    this.listenTo(
+      SelectionActions.geographiesSelectionChange,
+      this.onGeographiesSelectionChange
+    );
+
+    this.listenTo(
+      SelectionActions.metricsSelectionChange,
+      this.onMetricsSelectionChange
+    );
+
+    this.listenTo(
+      SelectionActions.timeIntervalSelectionChange,
+      this.onTimeIntervalSelectionChange
+    );
+
   },
 
-  onGeographiesSelectionChange: 
-    function onGeographiesSelectionChange(newValue) {
-      selectedGeographies = newValue;
-      this.trigger(selectedGeographies);
-    },
 
-  onMetricsSelectionChange:
-    function onMetricsSelectionChange(newValue) {
-      selectedMetrics = newValue;
-      this.trigger(selectedMetrics);
-    },
+  onGeographiesSelectionChange: function (selectedGeographies) {
+    this.state.selectedGeographies = selectedGeographies;
+    this.trigger({ selectedGeographies });
+  },
 
-  onTimeIntervalSelectionChange:
-    function onTimeIntervalSelectionChange(newValue) {
-      selectedTimeInterval = newValue;
-      this.trigger(selectedMetrics);
-    }
+  onMetricsSelectionChange: function (selectedMetrics) {
+    this.state.selectedMetrics = selectedMetrics;
+    this.trigger({ selectedMetrics });
+  },
+
+  onTimeIntervalSelectionChange: function (selectedTimeInterval) { 
+    this.state.selectedTimeInterval = selectedTimeInterval;
+    this.trigger({ selectedTimeInterval });
+  }
 
 });
