@@ -42,6 +42,7 @@
   },
   "browserify-shim": {
     "d3": "global:d3",
-    "reflux": "global:Reflux"
+    "reflux": "global:Reflux",
+    "underscore": "global:_"
   }
 }

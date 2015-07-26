@@ -4,6 +4,7 @@ import SidebarVisualization from './sidebar-visualization';
 import TimeSeriesVisualization from './time-series-visualization';
 import SelectionActions from './selection-actions';
 import SelectionStore from './selection-store';
+import GeographyLoadAction from './geography-load-action';
 
 console.log('SelectionActions: ', SelectionActions);
 console.log('SelectionStore: ', SelectionStore);
@@ -32,7 +33,9 @@ export default class extends React.Component {
           <div className="appName">mids-sf-housing-visualization</div>
         </header>
 
-        <MapVisualization />
+        <div className="map-application">
+          <MapVisualization />
+        </div>
 
         <SidebarVisualization />
 
@@ -43,30 +46,19 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+    //const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
+    //this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+
+    // load large static data
+    //GeographyLoadAction(url);
   }
 
   componentWillUnmount() {
-    this.unsubscribe();
+    //this.unsubscribe();
   }
 
   onSelectionChange(newSelection) {
     this.setState({ selection: newSelection });
     console.log('onSelectionChange this.state: ', this.state);
-  }
-
-  oldRender() {
-    return (
-      <div className="hero-unit">
-        <h1>'Allo, 'Allo!</h1>
-        <p>This is a React component.<br/>
-           You now also have:</p>
-        <ul>{this.state.items.map(this.renderItem)}</ul>
-      </div>
-    );
-  }
-
-  renderItem(item, index) {
-    return <li key={index}>{item}</li>;
   }
 }
