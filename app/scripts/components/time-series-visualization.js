@@ -15,15 +15,16 @@ export default class extends React.Component {
   render() {
     return (
       <div className="time-series">
-        <svg id="time-series-svg"></svg>
+        <svg ref='svg'></svg>
       </div>
     );
   }
 
   componentDidMount() {
-    console.log(document.querySelector('.time-series'));
-    const container = '.time-series svg';
+    let svg = React.findDOMNode(this.refs.svg);
+
     let data = this.state.data;
+    
     nv.addGraph(function() {
       var chart = nv.models.lineWithFocusChart();
 
@@ -36,7 +37,7 @@ export default class extends React.Component {
       chart.y2Axis
           .tickFormat(d3.format(',.2f'));
 
-      d3.select(container)
+      d3.select(svg)
           .datum(data)
           .transition().duration(500)
           .call(chart);

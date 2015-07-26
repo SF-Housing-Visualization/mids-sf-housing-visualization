@@ -641,23 +641,21 @@ var _default = (function (_React$Component) {
       return _react2['default'].createElement(
         'div',
         { className: 'sidebar' },
-        _react2['default'].createElement('svg', { id: 'sidebar-svg' })
+        _react2['default'].createElement('svg', { ref: 'svg' })
       );
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      console.log('SidebarVisualization componentDidMount(): SelectionStore', _selectionStore2['default']);
-      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
+      var svg = _react2['default'].findDOMNode(this.refs.svg);
 
-      console.log('componentDidMount this: ', this);
-      console.log(document.querySelector('.sidebar'));
-      var container = '.sidebar svg';
       var data = this.state.data;
 
       var onBarHover = this.onBarHover;
       var onBarExit = this.onBarExit;
       var onBarClick = this.onBarClick;
+
+      var setState = this.setState.bind(this);
 
       nv.addGraph(function () {
         var chart = nv.models.multiBarHorizontalChart().x(function (d) {
@@ -672,7 +670,7 @@ var _default = (function (_React$Component) {
 
         chart.tooltip.enabled();
 
-        _d32['default'].select(container).datum(data).call(chart);
+        _d32['default'].select(svg).datum(data).call(chart);
 
         nv.utils.windowResize(chart.update);
 
@@ -680,25 +678,19 @@ var _default = (function (_React$Component) {
       }, function (chart) {
         var multibarDispatch = chart.multibar.dispatch;
 
-        //multibarDispatch.elementMouseover
-        //  .on('elementMouseover', this.onBarHover);
         multibarDispatch.on('elementMouseover', onBarHover);
         multibarDispatch.on('elementMouseout', onBarExit);
         multibarDispatch.on('elementClick', onBarClick);
-        console.log('chart.dispatch', multibarDispatch);
-        //dispatch.on('elementMounseover', function (event) {
-        //  console.log('caught tooltip', event);
-        //});
-        //console.log('SidebarVisualization.componentDidMount() cild',
-        //  chart);
-        //d3
-        //  .selectAll(container + ' .nv-bar')
-        //  .on('click', onBarClick);
+
+        // memoize the chart for later highlighting from external events
+        setState({ chart: chart }); // ES6 implicit :chart
       });
 
       _d32['default'].csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv', function (data) {
         console.log('got data_geos.csv', data);
       });
+
+      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
     }
   }, {
     key: 'componentWillUnmount',
@@ -727,6 +719,7 @@ var _default = (function (_React$Component) {
     value: function onSelectionChange(newSelection) {
       console.log('onSelectionChange newSelection: ', newSelection, 'this: ', this, 'this.setState', this.setState);
 
+      console.log('this.state.chart', this.state.chart);
       //console.log('Sidebar onSelectionChange this.state: ', this.state);
     }
   }]);
@@ -789,15 +782,16 @@ var _default = (function (_React$Component) {
       return _react2['default'].createElement(
         'div',
         { className: 'time-series' },
-        _react2['default'].createElement('svg', { id: 'time-series-svg' })
+        _react2['default'].createElement('svg', { ref: 'svg' })
       );
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      console.log(document.querySelector('.time-series'));
-      var container = '.time-series svg';
+      var svg = _react2['default'].findDOMNode(this.refs.svg);
+
       var data = this.state.data;
+
       nv.addGraph(function () {
         var chart = nv.models.lineWithFocusChart();
 
@@ -807,7 +801,7 @@ var _default = (function (_React$Component) {
 
         chart.y2Axis.tickFormat(_d32['default'].format(',.2f'));
 
-        _d32['default'].select(container).datum(data).transition().duration(500).call(chart);
+        _d32['default'].select(svg).datum(data).transition().duration(500).call(chart);
 
         nv.utils.windowResize(chart.update);
 

@@ -24,25 +24,21 @@ export default class extends React.Component {
   render() {
     return (
       <div className='sidebar'>
-        <svg id='sidebar-svg'></svg>
+        <svg ref='svg'></svg>
       </div>
     );
   }
 
   componentDidMount() {
-    console.log('SidebarVisualization componentDidMount(): SelectionStore',
-      SelectionStore);
-    this.unsubscribeFromSelectionStore =
-      SelectionStore.listen(this.onSelectionChange);
+    let svg = React.findDOMNode(this.refs.svg);
 
-    console.log('componentDidMount this: ', this);
-    console.log(document.querySelector('.sidebar'));
-    const container = '.sidebar svg';
     let data = this.state.data;
 
     let onBarHover = this.onBarHover;
     let onBarExit = this.onBarExit;
     let onBarClick = this.onBarClick;
+
+    let setState = this.setState.bind(this);
 
     nv.addGraph(function() {
       var chart = nv.models.multiBarHorizontalChart()
@@ -58,7 +54,7 @@ export default class extends React.Component {
 
       chart.tooltip.enabled();
 
-      d3.select(container)
+      d3.select(svg)
           .datum(data)
           .call(chart);
 
@@ -68,26 +64,21 @@ export default class extends React.Component {
     }, function(chart) {
       let multibarDispatch = chart.multibar.dispatch;
 
-      //multibarDispatch.elementMouseover
-      //  .on('elementMouseover', this.onBarHover);
       multibarDispatch.on('elementMouseover', onBarHover);
       multibarDispatch.on('elementMouseout', onBarExit);
       multibarDispatch.on('elementClick', onBarClick);
-      console.log('chart.dispatch', multibarDispatch);
-      //dispatch.on('elementMounseover', function (event) {
-      //  console.log('caught tooltip', event);
-      //});
-      //console.log('SidebarVisualization.componentDidMount() cild',
-      //  chart);
-      //d3
-      //  .selectAll(container + ' .nv-bar')
-      //  .on('click', onBarClick);
+
+      // memoize the chart for later highlighting from external events
+      setState({ chart }); // ES6 implicit :chart
     });
 
     d3.csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv',
       function (data) {
         console.log('got data_geos.csv', data);
       });
+
+    this.unsubscribeFromSelectionStore =
+      SelectionStore.listen(this.onSelectionChange);
   }
 
 
@@ -113,6 +104,7 @@ export default class extends React.Component {
     console.log('onSelectionChange newSelection: ', newSelection, 
       'this: ', this, 'this.setState', this.setState);
     
+    console.log('this.state.chart', this.state.chart);
     //console.log('Sidebar onSelectionChange this.state: ', this.state);
   }
   
