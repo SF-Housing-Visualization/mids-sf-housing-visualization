@@ -697,14 +697,6 @@ var _default = (function (_React$Component) {
       var chart = this.state.chart;
       var data = this.state.data;
 
-      for (var prop in chart) {
-        console.log('chart.', prop, chart[prop]);
-      }
-
-      console.log('chart', chart);
-      console.log('data', data);
-      console.log('selectedGeographies', selectedGeographies);
-
       data.forEach(function (series) {
         return _this.darkenSelected(series, selectedGeographies);
       });
@@ -770,9 +762,21 @@ var _d32 = _interopRequireDefault(_d3);
 
 var _d33 = _interopRequireDefault(_d3);
 
+var _underscore = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _dataTimeSeriesData = require('../data/time-series-data');
 
 var _dataTimeSeriesData2 = _interopRequireDefault(_dataTimeSeriesData);
+
+var _selectionActions = require('./selection-actions');
+
+var _selectionActions2 = _interopRequireDefault(_selectionActions);
+
+var _selectionStore = require('./selection-store');
+
+var _selectionStore2 = _interopRequireDefault(_selectionStore);
 
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
@@ -783,6 +787,12 @@ var _default = (function (_React$Component) {
       data: _dataTimeSeriesData2['default']
     };
     console.log(this.state);
+
+    this.onLineClick = this.onLineClick.bind(this);
+    this.onLineHover = this.onLineHover.bind(this);
+    this.onLineExit = this.onLineExit.bind(this);
+
+    this.onSelectionChange = this.onSelectionChange.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -803,6 +813,11 @@ var _default = (function (_React$Component) {
 
       var data = this.state.data;
 
+      var setState = this.setState.bind(this);
+      var onLineClick = this.onLineClick;
+      var onLineHover = this.onLineHover;
+      var onLineExit = this.onLineExit;
+
       nv.addGraph(function () {
         var chart = nv.models.lineWithFocusChart();
 
@@ -817,7 +832,83 @@ var _default = (function (_React$Component) {
         nv.utils.windowResize(chart.update);
 
         return chart;
+      }, function (chart) {
+        //for (var prop in chart) {console.log('TSV cDM(): ', prop, chart[prop]);}
+
+        var linesDispatch = chart.lines.dispatch;
+
+        linesDispatch.on('elementMouseover', onLineHover);
+        linesDispatch.on('elementMouseout', onLineExit);
+        linesDispatch.on('elementClick', onLineClick);
+
+        setState({ data: data, chart: chart }); // ES6 implicit :data, :chart
       });
+
+      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.unsubscribeFromSelectionStore();
+    }
+  }, {
+    key: 'onSelectionChange',
+    value: function onSelectionChange(newSelection) {
+      var _this = this;
+
+      var selectedGeographies = newSelection.selectedGeographies;
+
+      var chart = this.state.chart;
+      var data = this.state.data;
+
+      data.forEach(function (series) {
+        return _this.darkenSelected(series, selectedGeographies);
+      });
+
+      chart.color(function (d) {
+        console.log('color mapper', d); //d.color
+      });
+
+      chart.update();
+    }
+  }, {
+    key: 'onLineHover',
+    value: function onLineHover(data) {
+      console.log('onLineHover data: ', data);
+    }
+  }, {
+    key: 'onLineExit',
+    value: function onLineExit(data) {
+      console.log('onLineExit data: ', data);
+    }
+  }, {
+    key: 'onLineClick',
+    value: function onLineClick(event) {
+      console.log('onLineClick data: ', event);
+      var geography = event.series.key;
+      _selectionActions2['default'].geographiesSelectionChange([geography]);
+    }
+  }, {
+    key: 'darkenSelected',
+    value: function darkenSelected(series, selectedGeographies) {
+      var _this2 = this;
+
+      var key = series.key;
+
+      var baselineColor = '#AAAAAA';
+      var selectedColor = '#000000';
+
+      series.color = this.contains(selectedGeographies, key) ? selectedColor : baselineColor;
+
+      series.values.forEach(function (valueObject) {
+        var label = valueObject.label;
+        valueObject.color = _this2.contains(selectedGeographies, label) ? selectedColor : baselineColor;
+      });
+    }
+  }, {
+    key: 'contains',
+    value: function contains(array, item) {
+      return _underscore2['default'].indexOf(array, item) > -1;
     }
   }]);
 
@@ -828,7 +919,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/time-series-visualization.js","/app/scripts/components")
-},{"../data/time-series-data":11,"_process":17,"buffer":13,"react":265}],10:[function(require,module,exports){
+},{"../data/time-series-data":11,"./selection-actions":6,"./selection-store":7,"_process":17,"buffer":13,"react":265}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 

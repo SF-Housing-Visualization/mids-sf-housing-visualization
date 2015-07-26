@@ -107,14 +107,6 @@ export default class extends React.Component {
     let chart = this.state.chart;
     let data = this.state.data;
 
-    for (var prop in chart) {
-      console.log('chart.', prop, chart[prop]);
-    }
-
-    console.log('chart', chart);
-    console.log('data', data);
-    console.log('selectedGeographies', selectedGeographies);
-
     data.forEach((series) => this.darkenSelected(series, selectedGeographies));
 
     chart.barColor( (d) => d.color );
