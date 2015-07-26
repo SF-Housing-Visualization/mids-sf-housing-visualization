@@ -627,8 +627,10 @@ var _default = (function (_React$Component) {
     console.log(this.state);
 
     this.onBarClick = this.onBarClick.bind(this);
+    this.onBarHover = this.onBarHover.bind(this);
+    this.onBarExit = this.onBarExit.bind(this);
+
     this.onSelectionChange = this.onSelectionChange.bind(this);
-    this.setState = this.setState.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -653,9 +655,9 @@ var _default = (function (_React$Component) {
       var container = '.sidebar svg';
       var data = this.state.data;
 
+      var onBarHover = this.onBarHover;
+      var onBarExit = this.onBarExit;
       var onBarClick = this.onBarClick;
-
-      console.log('this in com');
 
       nv.addGraph(function () {
         var chart = nv.models.multiBarHorizontalChart().x(function (d) {
@@ -663,27 +665,35 @@ var _default = (function (_React$Component) {
         }).y(function (d) {
           return d.value;
         }).margin({ top: 30, right: 20, bottom: 50, left: 175 }).showValues(true) //Show bar value next to each bar.
-        .tooltips(true) //Show tooltips on hover.
         //.transitionDuration(350)
         .showControls(true); //Allow user to switch between "Grouped" and "Stacked" mode.
 
         chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
 
+        chart.tooltip.enabled();
+
         _d32['default'].select(container).datum(data).call(chart);
-
-        console.log('SidebarVisualization.componentDidMount() cil', chart.interactiveLayer);
-
-        //chart.dispatch.on('elementMouseover', function (arg) {
-        //  console.log('elementMouseover', arg);
-        //});
 
         nv.utils.windowResize(chart.update);
 
         return chart;
       }, function (chart) {
+        var multibarDispatch = chart.multibar.dispatch;
+
+        //multibarDispatch.elementMouseover
+        //  .on('elementMouseover', this.onBarHover);
+        multibarDispatch.on('elementMouseover', onBarHover);
+        multibarDispatch.on('elementMouseout', onBarExit);
+        multibarDispatch.on('elementClick', onBarClick);
+        console.log('chart.dispatch', multibarDispatch);
+        //dispatch.on('elementMounseover', function (event) {
+        //  console.log('caught tooltip', event);
+        //});
         //console.log('SidebarVisualization.componentDidMount() cild',
         //  chart);
-        _d32['default'].selectAll(container + ' .nv-bar').on('click', onBarClick);
+        //d3
+        //  .selectAll(container + ' .nv-bar')
+        //  .on('click', onBarClick);
       });
 
       _d32['default'].csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv', function (data) {
@@ -696,10 +706,20 @@ var _default = (function (_React$Component) {
       this.unsubscribeFromSelectionStore();
     }
   }, {
+    key: 'onBarHover',
+    value: function onBarHover(data) {
+      console.log('onBarHover data: ', data);
+    }
+  }, {
+    key: 'onBarExit',
+    value: function onBarExit(data) {
+      console.log('onBarExit data: ', data);
+    }
+  }, {
     key: 'onBarClick',
-    value: function onBarClick(data) {
-      console.log('onBarClick data: ', data, 'this: ', this);
-      var geography = data.label;
+    value: function onBarClick(event) {
+      console.log('onBarClick data: ', event);
+      var geography = event.data.label;
       _selectionActions2['default'].geographiesSelectionChange([geography]);
     }
   }, {
