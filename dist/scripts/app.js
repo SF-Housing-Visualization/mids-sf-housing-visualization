@@ -189,40 +189,6 @@ var _default = (function (_React$Component) {
       this.setState({ selection: newSelection });
       console.log('onSelectionChange this.state: ', this.state);
     }
-  }, {
-    key: 'oldRender',
-    value: function oldRender() {
-      return _react2['default'].createElement(
-        'div',
-        { className: 'hero-unit' },
-        _react2['default'].createElement(
-          'h1',
-          null,
-          '\'Allo, \'Allo!'
-        ),
-        _react2['default'].createElement(
-          'p',
-          null,
-          'This is a React component.',
-          _react2['default'].createElement('br', null),
-          'You now also have:'
-        ),
-        _react2['default'].createElement(
-          'ul',
-          null,
-          this.state.items.map(this.renderItem)
-        )
-      );
-    }
-  }, {
-    key: 'renderItem',
-    value: function renderItem(item, index) {
-      return _react2['default'].createElement(
-        'li',
-        { key: index },
-        item
-      );
-    }
   }]);
 
   return _class;
