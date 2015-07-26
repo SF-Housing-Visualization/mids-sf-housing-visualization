@@ -1,6 +1,7 @@
 import React from 'react';
 import d3 from 'd3';
 import nvd3 from 'd3';
+import _ from 'underscore';
 import SidebarData from '../data/sidebar-data';
 import SelectionActions from './selection-actions';
 import SelectionStore from './selection-store';
@@ -69,7 +70,7 @@ export default class extends React.Component {
       multibarDispatch.on('elementClick', onBarClick);
 
       // memoize the chart for later highlighting from external events
-      setState({ chart }); // ES6 implicit :chart
+      setState({ data, chart }); // ES6 implicit :data, :chart
     });
 
     d3.csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv',
@@ -101,11 +102,41 @@ export default class extends React.Component {
   }
 
   onSelectionChange(newSelection) {
-    console.log('onSelectionChange newSelection: ', newSelection, 
-      'this: ', this, 'this.setState', this.setState);
-    
-    console.log('this.state.chart', this.state.chart);
-    //console.log('Sidebar onSelectionChange this.state: ', this.state);
+    let selectedGeographies = newSelection.selectedGeographies;
+
+    let chart = this.state.chart;
+    let data = this.state.data;
+
+    for (var prop in chart) {
+      console.log('chart.', prop, chart[prop]);
+    }
+
+    console.log('chart', chart);
+    console.log('data', data);
+    console.log('selectedGeographies', selectedGeographies);
+
+    data.forEach((series) => this.darkenSelected(series, selectedGeographies));
+
+    chart.barColor( (d) => d.color );
+
+    chart.update();
+  }
+
+  darkenSelected(series, selectedGeographies) {
+    let baselineColor = series.color;
+    let selectedColor = '#000000';
+
+    series.values.forEach((valueObject) => {
+      let label = valueObject.label;
+      valueObject.color =
+        this.contains(selectedGeographies, label)
+        ? selectedColor
+        : baselineColor;
+    });
+  }
+
+  contains(array, item) {
+    return (_.indexOf(array, item) > -1);
   }
   
 }

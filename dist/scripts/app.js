@@ -328,8 +328,11 @@ var _default = (function (_React$Component) {
     this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
 
     this.onSelectionChange = this.onSelectionChange.bind(this);
+
     this.select = this.select.bind(this);
     this.unselect = this.unselect.bind(this);
+    this.hover = this.hover.bind(this);
+    this.unhover = this.unhover.bind(this);
     //this.setState = this.setState.bind(this);
   };
 
@@ -604,6 +607,10 @@ var _d32 = _interopRequireDefault(_d3);
 
 var _d33 = _interopRequireDefault(_d3);
 
+var _underscore = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _dataSidebarData = require('../data/sidebar-data');
 
 var _dataSidebarData2 = _interopRequireDefault(_dataSidebarData);
@@ -683,7 +690,7 @@ var _default = (function (_React$Component) {
         multibarDispatch.on('elementClick', onBarClick);
 
         // memoize the chart for later highlighting from external events
-        setState({ chart: chart }); // ES6 implicit :chart
+        setState({ data: data, chart: chart }); // ES6 implicit :data, :chart
       });
 
       _d32['default'].csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv', function (data) {
@@ -717,10 +724,48 @@ var _default = (function (_React$Component) {
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
-      console.log('onSelectionChange newSelection: ', newSelection, 'this: ', this, 'this.setState', this.setState);
+      var _this = this;
 
-      console.log('this.state.chart', this.state.chart);
-      //console.log('Sidebar onSelectionChange this.state: ', this.state);
+      var selectedGeographies = newSelection.selectedGeographies;
+
+      var chart = this.state.chart;
+      var data = this.state.data;
+
+      for (var prop in chart) {
+        console.log('chart.', prop, chart[prop]);
+      }
+
+      console.log('chart', chart);
+      console.log('data', data);
+      console.log('selectedGeographies', selectedGeographies);
+
+      data.forEach(function (series) {
+        return _this.darkenSelected(series, selectedGeographies);
+      });
+
+      chart.barColor(function (d) {
+        return d.color;
+      });
+
+      chart.update();
+    }
+  }, {
+    key: 'darkenSelected',
+    value: function darkenSelected(series, selectedGeographies) {
+      var _this2 = this;
+
+      var baselineColor = series.color;
+      var selectedColor = '#000000';
+
+      series.values.forEach(function (valueObject) {
+        var label = valueObject.label;
+        valueObject.color = _this2.contains(selectedGeographies, label) ? selectedColor : baselineColor;
+      });
+    }
+  }, {
+    key: 'contains',
+    value: function contains(array, item) {
+      return _underscore2['default'].indexOf(array, item) > -1;
     }
   }]);
 

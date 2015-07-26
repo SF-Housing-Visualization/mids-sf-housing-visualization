@@ -45,8 +45,11 @@ export default class extends React.Component {
     this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
 
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    
     this.select = this.select.bind(this);
     this.unselect = this.unselect.bind(this);
+    this.hover = this.hover.bind(this);
+    this.unhover = this.unhover.bind(this);
     //this.setState = this.setState.bind(this);
   }
 
