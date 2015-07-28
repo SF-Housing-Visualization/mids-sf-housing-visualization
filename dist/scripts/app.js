@@ -287,8 +287,49 @@ exports['default'] = _reflux2['default'].createStore({
   },
 
   onIndexLoaded: function onIndexLoaded(index) {
-    this.state = index;
-    this.trigger(index);
+    var shapedIndex = this.shape(index);
+    this.state = shapedIndex;
+    this.trigger(shapedIndex);
+  },
+
+  shape: function shape(index) {
+    var groups = {};
+    var groupOrder = [];
+
+    index.forEach(function (variable) {
+      var groupId = variable.GroupID;
+      var groupName = variable.GroupName;
+
+      var group = groups[groupId] || {
+        groupId: groupId, // ES6 implicit :groupId
+        groupName: groupName, // ES6 implicit :groupMame
+        variables: {},
+        variableOrder: []
+      };
+
+      if (!(groupId in groups)) {
+        groups[groupId] = group;
+        groupOrder.push(groupId);
+      }
+
+      var variableId = variable.VariableID;
+      var variableName = variable.VariableName;
+      var variableDescription = variable.variableDescription;
+
+      var variableObject = {
+        variableId: variableId, // ES6 implicit :variableId
+        variableName: variableName, // ES6 implicit :variableName
+        variableDescription: variableDescription // ES6 implicit :variableDescription
+      };
+
+      group.variables[variableId] = variableObject;
+      group.variableOrder.push(variableId);
+    });
+
+    return {
+      groups: groups, // ES6 implicit :groups
+      groupOrder: groupOrder //ES6 implicit :groupOrder
+    };
   }
 
 });

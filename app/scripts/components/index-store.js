@@ -22,8 +22,49 @@ export default Reflux.createStore({
   },
 
   onIndexLoaded: function onIndexLoaded(index) {
-    this.state = index;
-    this.trigger(index);
+    let shapedIndex = this.shape(index);
+    this.state = shapedIndex;
+    this.trigger(shapedIndex);
+  },
+
+  shape: function shape(index) {
+    let groups = { };
+    let groupOrder = [ ];
+
+    index.forEach( (variable) => {
+      let groupId = variable.GroupID;
+      let groupName = variable.GroupName;
+      
+      let group = groups[groupId] || { 
+        groupId, // ES6 implicit :groupId
+        groupName, // ES6 implicit :groupMame
+        variables : { },
+        variableOrder: [ ]
+      };
+      
+      if (!(groupId in groups)) {
+        groups[groupId] = group;
+        groupOrder.push(groupId);
+      }
+
+      let variableId = variable.VariableID;
+      let variableName = variable.VariableName;
+      let variableDescription = variable.variableDescription;
+
+      let variableObject = {
+        variableId, // ES6 implicit :variableId
+        variableName, // ES6 implicit :variableName
+        variableDescription // ES6 implicit :variableDescription
+      };
+
+      group.variables[variableId] = variableObject;
+      group.variableOrder.push(variableId);
+    });
+
+    return { 
+      groups, // ES6 implicit :groups
+      groupOrder //ES6 implicit :groupOrder
+    };
   }
 
 });
