@@ -308,8 +308,8 @@ var _default = (function (_React$Component) {
     key: 'render',
     value: function render() {
       var position = [51.505, -0.09];
-      var center = [52.5377, 13.3958];
-      var zoom = 4;
+      var center = [37.7833, -122.4167];
+      var zoom = 9;
       var minZoom = 0;
       var maxZoom = 18;
       var attribution = 'Map data &copy; ' + '<a href="http://www.openstreetmap.org">' + 'OpenStreetMap contributors</a>';
@@ -341,7 +341,7 @@ var _default = (function (_React$Component) {
       this.unsubscribeFromGeographyStore = _geographyStore2['default'].listen(this.onGeographyStoreChange);
 
       // load large static data
-      var url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json';
+      var url = '/mids-sf-housing-sandbox/data/prod/ca-counties.json';
       _geographyLoadAction2['default'].start(url);
     }
   }, {
@@ -360,6 +360,7 @@ var _default = (function (_React$Component) {
       var onGeoMouseEnter = this.onGeoMouseEnter;
       var onGeoMouseExit = this.onGeoMouseExit;
       var onGeoClick = this.onGeoClick;
+      var getGeographyName = this.getGeographyName;
 
       function onEachGeoJsonFeature(feature, layer) {
         layer.on({
@@ -368,7 +369,7 @@ var _default = (function (_React$Component) {
           mouseout: onGeoMouseExit
         });
 
-        var name = layer.feature.properties['NAME'];
+        var name = getGeographyName(layer);
         layers[name] = layer;
       }
 
@@ -387,7 +388,7 @@ var _default = (function (_React$Component) {
     value: function onGeoMouseEnter(event) {
       console.log('entering area', event);
       var layer = event.target;
-      var geography = layer.feature.properties['NAME'];
+      var geography = this.getGeographyName(layer);
 
       var hover = this.state.hover.push(geography);
       this.setState({ hover: hover }); // ES6 implicit : hover
@@ -399,7 +400,7 @@ var _default = (function (_React$Component) {
     value: function onGeoMouseExit(event) {
       console.log('exiting area', event);
       var layer = event.target;
-      var geography = layer.feature.properties['NAME'];
+      var geography = this.getGeographyName(layer);
 
       var hover = _underscore2['default'].without(this.state.hover, geography);
       this.setState({ hover: hover }); // ES6 implicit : hover
@@ -411,7 +412,7 @@ var _default = (function (_React$Component) {
     value: function onGeoClick(event) {
       console.log('click in area', event);
       var layer = event.target;
-      var geography = layer.feature.properties['NAME'];
+      var geography = this.getGeographyName(layer);
 
       _selectionActions2['default'].geographiesSelectionChange([geography]);
     }
@@ -463,6 +464,11 @@ var _default = (function (_React$Component) {
     key: 'contains',
     value: function contains(array, item) {
       return _underscore2['default'].indexOf(array, item) > -1;
+    }
+  }, {
+    key: 'getGeographyName',
+    value: function getGeographyName(layer) {
+      return layer.feature.properties['name'];
     }
   }]);
 
