@@ -6,23 +6,19 @@ import SelectionActions from './selection-actions';
 import SelectionStore from './selection-store';
 import GeographyLoadAction from './geography-load-action';
 
-console.log('SelectionActions: ', SelectionActions);
-console.log('SelectionStore: ', SelectionStore);
+import IndexLoadAction from './index-load-action';
+import IndexStore from './index-store';
+
+import MetricLoadAction from './metric-load-action';
+
+
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      items: [
-        'Browserify',
-        'Babel',
-        'Bootstrap',
-        'Modernizr',
-        'Jest'
-      ]
-    };
+    this.state = { };
 
-    this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onIndexLoaded = this.onIndexLoaded.bind(this);
   }
 
   render() {
@@ -33,11 +29,13 @@ export default class extends React.Component {
           <div className="appName">mids-sf-housing-visualization</div>
         </header>
 
+
+        <SidebarVisualization />
+        
         <div className="map-application">
           <MapVisualization />
         </div>
 
-        <SidebarVisualization />
 
         <TimeSeriesVisualization />
 
@@ -46,6 +44,13 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
+    this.unsubscribeFromIndexStore = IndexStore.listen(this.onIndexLoaded);
+
+    const indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
+
+    console.log('Home componentDidMount, indexUrl', indexUrl);
+
+    IndexLoadAction.start(indexUrl);
     //const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
     //this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
 
@@ -55,6 +60,11 @@ export default class extends React.Component {
 
   componentWillUnmount() {
     //this.unsubscribe();
+    this.unsubscribeFromIndexStore();
+  }
+
+  onIndexLoaded(index) {
+    console.log('Home onIndexLoaded ', index);
   }
 
   onSelectionChange(newSelection) {
