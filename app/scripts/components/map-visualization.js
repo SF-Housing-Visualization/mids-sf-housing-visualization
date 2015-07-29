@@ -67,14 +67,16 @@ export default class extends React.Component {
     const url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
     const mapReactComponent = (
-      <Map ref='map' className="map"
-        minZoom={minZoom} maxZoom={maxZoom}
-        center={center} zoom={zoom}>
-        <TileLayer
-          url={url}
-          attribution={attribution}
-        />
-      </Map>
+      <div className="map-application">
+        <Map ref='map' className="map"
+          minZoom={minZoom} maxZoom={maxZoom}
+          center={center} zoom={zoom}>
+          <TileLayer
+            url={url}
+            attribution={attribution}
+          />
+        </Map>
+      </div>
     );
 
     //this.map = mapReactComponent;

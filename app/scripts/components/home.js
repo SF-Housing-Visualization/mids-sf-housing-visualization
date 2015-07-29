@@ -36,9 +36,9 @@ export default class extends React.Component {
 
         <SidebarVisualization />
         
-        <div className="map-application">
-          <MapVisualization />
-        </div>
+        
+        <MapVisualization />
+        
 
 
         <TimeSeriesVisualization />

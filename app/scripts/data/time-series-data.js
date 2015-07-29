@@ -45,7 +45,7 @@ var countries = [
   'Estonia'
 ];
 
-export default stream_layers(countries.length,128,.1).map(function(data, i) {
+export default stream_layers(countries.length,15,.1).map(function(data, i) {
   return { 
     key: countries[i],
     values: data
