@@ -24,22 +24,21 @@ html {
 	
 	padding-top: 50px;
 
-	clear: none;
-	float: right;
+	float: left;
 	
 }
 
 .sidebar {
-	height: 60%;
+	height: 100%;
 	width: 60%;
 	padding-top: 50px;
-	float: left;
+	float: right;
 }
 
 .time-series {
 	height: 40%;
-	width: 100%;
-	clear: all;
+	width: 40%;
+	float: left;
 }
 
 .map {

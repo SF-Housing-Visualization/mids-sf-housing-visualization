@@ -179,11 +179,7 @@ var _default = (function (_React$Component) {
           )
         ),
         _react2['default'].createElement(_sidebarVisualization2['default'], null),
-        _react2['default'].createElement(
-          'div',
-          { className: 'map-application' },
-          _react2['default'].createElement(_mapVisualization2['default'], null)
-        ),
+        _react2['default'].createElement(_mapVisualization2['default'], null),
         _react2['default'].createElement(_timeSeriesVisualization2['default'], null)
       );
     }
@@ -458,14 +454,18 @@ var _default = (function (_React$Component) {
       var url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
       var mapReactComponent = _react2['default'].createElement(
-        _reactLeaflet.Map,
-        { ref: 'map', className: 'map',
-          minZoom: minZoom, maxZoom: maxZoom,
-          center: center, zoom: zoom },
-        _react2['default'].createElement(_reactLeaflet.TileLayer, {
-          url: url,
-          attribution: attribution
-        })
+        'div',
+        { className: 'map-application' },
+        _react2['default'].createElement(
+          _reactLeaflet.Map,
+          { ref: 'map', className: 'map',
+            minZoom: minZoom, maxZoom: maxZoom,
+            center: center, zoom: zoom },
+          _react2['default'].createElement(_reactLeaflet.TileLayer, {
+            url: url,
+            attribution: attribution
+          })
+        )
       );
 
       //this.map = mapReactComponent;
@@ -1205,7 +1205,7 @@ function stream_index(d, i) {
 
 var countries = ['Germany', 'France', 'Spain', 'Russia', 'Italy', 'Ukraine', 'Sweden', 'Norway', 'Estonia'];
 
-exports['default'] = stream_layers(countries.length, 128, .1).map(function (data, i) {
+exports['default'] = stream_layers(countries.length, 15, .1).map(function (data, i) {
   return {
     key: countries[i],
     values: data
