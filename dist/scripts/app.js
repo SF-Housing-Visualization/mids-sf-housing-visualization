@@ -153,7 +153,9 @@ var _default = (function (_React$Component) {
     _classCallCheck(this, _class);
 
     _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
-    this.state = {};
+    this.state = {
+      primaryMetric: '(none)'
+    };
 
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
   };
@@ -172,7 +174,8 @@ var _default = (function (_React$Component) {
           _react2['default'].createElement(
             'div',
             { className: 'appName' },
-            'mids-sf-housing-visualization'
+            'mids-sf-housing-visualization metric: ',
+            this.state.primaryMetric
           )
         ),
         _react2['default'].createElement(_sidebarVisualization2['default'], null),
@@ -210,6 +213,14 @@ var _default = (function (_React$Component) {
     key: 'onIndexLoaded',
     value: function onIndexLoaded(index) {
       console.log('Home onIndexLoaded ', index);
+      var primaryGroupId = index.groupOrder[0];
+      var primaryGroup = index.groups[primaryGroupId];
+
+      var primaryVariableId = primaryGroup.variableOrder[0];
+      var primaryVariable = primaryGroup.variables[primaryVariableId];
+
+      var primaryMetric = primaryVariable.variableName;
+      this.setState({ primaryMetric: primaryMetric }); // ES6 implicit :primaryMetric
     }
   }, {
     key: 'onSelectionChange',
@@ -611,7 +622,23 @@ module.exports = exports['default'];
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/map-visualization.js","/app/scripts/components")
 },{"./geography-load-action":2,"./geography-store":3,"./selection-actions":9,"./selection-store":10,"_process":20,"buffer":16,"leaflet":21,"react":268,"react-leaflet":42}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-"use strict";
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _reflux = (typeof window !== "undefined" ? window.Reflux : typeof global !== "undefined" ? global.Reflux : null);
+
+var _reflux2 = _interopRequireDefault(_reflux);
+
+exports['default'] = _reflux2['default'].createAction({
+  asyncResult: true,
+  children: ['start']
+});
+module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/metric-load-action.js","/app/scripts/components")
 },{"_process":20,"buffer":16}],9:[function(require,module,exports){
