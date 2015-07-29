@@ -16,7 +16,9 @@ import MetricLoadAction from './metric-load-action';
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { };
+    this.state = { 
+      primaryMetric: "(none)"
+    };
 
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
   }
@@ -26,7 +28,9 @@ export default class extends React.Component {
       <div className="root-container">
 
         <header className="group">
-          <div className="appName">mids-sf-housing-visualization</div>
+          <div className="appName">
+            mids-sf-housing-visualization 
+            metric: { this.state.primaryMetric }</div>
         </header>
 
 
@@ -65,6 +69,14 @@ export default class extends React.Component {
 
   onIndexLoaded(index) {
     console.log('Home onIndexLoaded ', index);
+    let primaryGroupId = index.groupOrder[0];
+    let primaryGroup = index.groups[primaryGroupId];
+
+    let primaryVariableId = primaryGroup.variableOrder[0];
+    let primaryVariable = primaryGroup.variables[primaryVariableId];
+
+    let primaryMetric = primaryVariable.variableName;
+    this.setState({ primaryMetric }); // ES6 implicit :primaryMetric
   }
 
   onSelectionChange(newSelection) {
