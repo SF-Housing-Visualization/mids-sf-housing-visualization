@@ -37,8 +37,7 @@ var _reflux = (typeof window !== "undefined" ? window.Reflux : typeof global !==
 var _reflux2 = _interopRequireDefault(_reflux);
 
 exports['default'] = _reflux2['default'].createAction({
-  asyncResult: true,
-  children: ['start']
+  asyncResult: true
 });
 module.exports = exports['default'];
 
@@ -72,7 +71,7 @@ exports['default'] = _reflux2['default'].createStore({
     this.onGeoMappingLoad = this.onGeoMappingLoad.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
 
-    this.listenTo(_geoMappingLoadAction2['default'].start, this.onGeoMappingLoad);
+    this.listenTo(_geoMappingLoadAction2['default'], this.onGeoMappingLoad);
     this.listenTo(_geoMappingLoadAction2['default'].completed, this.onGeoMappingLoaded);
   },
 
@@ -216,6 +215,10 @@ var _selectionStore = require('./selection-store');
 
 var _selectionStore2 = _interopRequireDefault(_selectionStore);
 
+var _geographyLoadAction = require('./geography-load-action');
+
+var _geographyLoadAction2 = _interopRequireDefault(_geographyLoadAction);
+
 var _indexLoadAction = require('./index-load-action');
 
 var _indexLoadAction2 = _interopRequireDefault(_indexLoadAction);
@@ -224,34 +227,18 @@ var _indexStore = require('./index-store');
 
 var _indexStore2 = _interopRequireDefault(_indexStore);
 
-var _geoMappingLoadAction = require('./geo-mapping-load-action');
-
-var _geoMappingLoadAction2 = _interopRequireDefault(_geoMappingLoadAction);
-
-var _geoMappingStore = require('./geo-mapping-store');
-
-var _geoMappingStore2 = _interopRequireDefault(_geoMappingStore);
-
 var _metricLoadAction = require('./metric-load-action');
 
 var _metricLoadAction2 = _interopRequireDefault(_metricLoadAction);
-
-var _metricStore = require('./metric-store');
-
-var _metricStore2 = _interopRequireDefault(_metricStore);
 
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
     _classCallCheck(this, _class);
 
     _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
-    this.state = {
-      selectedPrimaryMetric: null
-    };
+    this.state = {};
 
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
-    this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
-    this.onSelectionChange = this.onSelectionChange.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -268,74 +255,49 @@ var _default = (function (_React$Component) {
           _react2['default'].createElement(
             'div',
             { className: 'appName' },
-            'mids-sf-housing-visualization metric: ',
-            this.state.selectedPrimaryMetric ? this.state.selectedPrimaryMetric.group + ' > ' + this.state.selectedPrimaryMetric.metric : 'Loading...'
+            'mids-sf-housing-visualization'
           )
         ),
         _react2['default'].createElement(_sidebarVisualization2['default'], null),
-        _react2['default'].createElement(_mapVisualization2['default'], null),
+        _react2['default'].createElement(
+          'div',
+          { className: 'map-application' },
+          _react2['default'].createElement(_mapVisualization2['default'], null)
+        ),
         _react2['default'].createElement(_timeSeriesVisualization2['default'], null)
       );
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingLoaded);
       this.unsubscribeFromIndexStore = _indexStore2['default'].listen(this.onIndexLoaded);
-      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
 
       var indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
 
       console.log('Home componentDidMount, indexUrl', indexUrl);
-      _geoMappingLoadAction2['default'].start();
+
+      _indexLoadAction2['default'].start(indexUrl);
+      //const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
+      //this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+
+      // load large static data
+      //GeographyLoadAction(url);
     }
   }, {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
-      this.unsubscribeFromSelectionStore();
+      //this.unsubscribe();
       this.unsubscribeFromIndexStore();
-      this.unsubscribeFromGeoMappingStore();
-    }
-  }, {
-    key: 'onGeoMappingLoaded',
-    value: function onGeoMappingLoaded(geoMapping) {
-      console.log('Home onGeoMappingLoaded() ', geoMapping);
-
-      var indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
-      _indexLoadAction2['default'].start(indexUrl);
     }
   }, {
     key: 'onIndexLoaded',
     value: function onIndexLoaded(index) {
-      console.log('Home onIndexLoaded() ', index);
-
-      var primaryGroupId = index.groupOrder[0];
-      var primaryGroup = index.groups[primaryGroupId];
-
-      var primaryVariableId = primaryGroup.variableOrder[0];
-      var primaryVariable = primaryGroup.variables[primaryVariableId];
-
-      var primaryMetric = primaryVariable.variableName;
-
-      var metric = {
-        group: primaryGroupId,
-        metric: primaryVariableId,
-        display: {
-          group: primaryGroup,
-          metric: primaryMetric
-        }
-      };
-
-      _metricLoadAction2['default'].start(metric);
-      console.log('Home onIndexLoaded() called MetricLoadAction.start', metric);
-      _selectionActions2['default'].primaryMetricSelectionChange(metric);
-
-      //this.setState({ primaryMetric }); // ES6 implicit :primaryMetric
+      console.log('Home onIndexLoaded ', index);
     }
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
-      this.setState(newSelection);
+      this.setState({ selection: newSelection });
       console.log('onSelectionChange this.state: ', this.state);
     }
   }]);
@@ -347,7 +309,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/home.js","/app/scripts/components")
-},{"./geo-mapping-load-action":2,"./geo-mapping-store":3,"./index-load-action":7,"./index-store":8,"./map-visualization":9,"./metric-load-action":10,"./metric-store":11,"./selection-actions":12,"./selection-store":13,"./sidebar-visualization":14,"./time-series-visualization":15,"_process":23,"buffer":19,"react":271}],7:[function(require,module,exports){
+},{"./geography-load-action":4,"./index-load-action":7,"./index-store":8,"./map-visualization":9,"./metric-load-action":10,"./selection-actions":12,"./selection-store":13,"./sidebar-visualization":14,"./time-series-visualization":15,"_process":23,"buffer":19,"react":271}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -362,8 +324,7 @@ var _reflux = (typeof window !== "undefined" ? window.Reflux : typeof global !==
 var _reflux2 = _interopRequireDefault(_reflux);
 
 exports['default'] = _reflux2['default'].createAction({
-  asyncResult: true,
-  children: ['start']
+  asyncResult: true
 });
 module.exports = exports['default'];
 
@@ -568,18 +529,14 @@ var _default = (function (_React$Component) {
       var url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
       var mapReactComponent = _react2['default'].createElement(
-        'div',
-        { className: 'map-application' },
-        _react2['default'].createElement(
-          _reactLeaflet.Map,
-          { ref: 'map', className: 'map',
-            minZoom: minZoom, maxZoom: maxZoom,
-            center: center, zoom: zoom },
-          _react2['default'].createElement(_reactLeaflet.TileLayer, {
-            url: url,
-            attribution: attribution
-          })
-        )
+        _reactLeaflet.Map,
+        { ref: 'map', className: 'map',
+          minZoom: minZoom, maxZoom: maxZoom,
+          center: center, zoom: zoom },
+        _react2['default'].createElement(_reactLeaflet.TileLayer, {
+          url: url,
+          attribution: attribution
+        })
       );
 
       //this.map = mapReactComponent;
