@@ -18,8 +18,12 @@ import MetricStore from './metric-store';
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      selectedPrimaryMetric: null
+    this.state = { };
+
+    this.initial = {
+      geography: 'San Francisco',
+      date: 2013,
+      interval: [1999, 2015]
     };
 
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
@@ -79,8 +83,11 @@ export default class extends React.Component {
   onGeoMappingLoaded(geoMapping) {
     console.log('Home onGeoMappingLoaded() ', geoMapping);
 
-    const indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
-    IndexLoadAction.start(indexUrl);
+
+    SelectionActions.geographiesSelectionChange([ this.initial.geography ]);
+    SelectionActions.timePositionSelectionChange( this.initial.date );
+    SelectionActions.timeIntervalSelectionChange( this.initial.interval );
+    IndexLoadAction();
   }
 
   onIndexLoaded(index) {
@@ -104,7 +111,7 @@ export default class extends React.Component {
     };
 
 
-    MetricLoadAction.start(metric);
+    MetricLoadAction(metric);
     console.log('Home onIndexLoaded() called MetricLoadAction.start', metric);
     SelectionActions.primaryMetricSelectionChange(metric);
 

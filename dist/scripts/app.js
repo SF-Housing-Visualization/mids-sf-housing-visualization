@@ -238,6 +238,11 @@ var _default = (function (_React$Component) {
     _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
     this.state = {};
 
+    this.initial = {
+      geography: 'San Francisco',
+      date: 2013,
+      interval: [1999, 2015]
+
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
   };
 
@@ -288,6 +293,25 @@ var _default = (function (_React$Component) {
     value: function componentWillUnmount() {
       //this.unsubscribe();
       this.unsubscribeFromIndexStore();
+      this.unsubscribeFromGeoMappingStore();
+    }
+  }, {
+    key: 'onGeoMappingLoaded',
+    value: function onGeoMappingLoaded(geoMapping) {
+      console.log('Home onGeoMappingLoaded() ', geoMapping);
+
+      (0, _indexLoadAction2['default'])();
+      this.unsubscribeFromGeoMappingStore();
+    }
+  }, {
+    key: 'onGeoMappingLoaded',
+    value: function onGeoMappingLoaded(geoMapping) {
+      console.log('Home onGeoMappingLoaded() ', geoMapping);
+
+      _selectionActions2['default'].geographiesSelectionChange([this.initial.geography]);
+      _selectionActions2['default'].timePositionSelectionChange(this.initial.date);
+      _selectionActions2['default'].timeIntervalSelectionChange(this.initial.interval);
+      (0, _indexLoadAction2['default'])();
     }
   }, {
     key: 'onIndexLoaded',
@@ -358,12 +382,9 @@ exports['default'] = _reflux2['default'].createStore({
     this.onIndexLoad = this.onIndexLoad.bind(this);
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
 
-    this.listenTo(_indexLoadAction2['default'].start, this.onIndexLoad);
     this.listenTo(_indexLoadAction2['default'].completed, this.onIndexLoaded);
   },
 
-  onIndexLoad: function onIndexLoad(url) {
-    // url: /mids-sf-housing-sandbox/data/prod/fpo/geographies.json
     console.log('loading index with url ', url);
     _d32['default'].promise.csv(url).then(_indexLoadAction2['default'].completed)['catch'](_indexLoadAction2['default'].failed);
   },
@@ -730,6 +751,10 @@ var _d3 = (typeof window !== "undefined" ? window.d3 : typeof global !== "undefi
 
 var _d32 = _interopRequireDefault(_d3);
 
+var _underscore = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _metricLoadAction = require('./metric-load-action');
 
 var _metricLoadAction2 = _interopRequireDefault(_metricLoadAction);
@@ -764,10 +789,11 @@ exports['default'] = _reflux2['default'].createStore({
     var data = groupMetrics.data;
 
     var columns = this.transpose(data);
+    var rows = this.transform(data);
 
-    this.state[group] = columns;
+    this.state[group] = rows;
 
-    var result = { group: group, metric: metric, columns: columns };
+    var result = { group: group, metric: metric, columns: columns, rows: rows };
     this.trigger(result);
     console.log('MetricStore onMetricLoaded', result);
   },
@@ -787,6 +813,17 @@ exports['default'] = _reflux2['default'].createStore({
     });
 
     return columns;
+  },
+
+  transform: function transform(data) {
+    return data.map(function (row, index) {
+      var transformedRow = _underscore2['default'].mapObject(row, function (value, column) {
+        return column === 'Date' ? new Date(Date.parse(value)) : +value;
+      });
+
+      transformedRow.Year = transformedRow.Date.getUTCFullYear();
+      return transformedRow;
+    });
   }
 });
 module.exports = exports['default'];
@@ -963,6 +1000,11 @@ var _default = (function (_React$Component) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
+      var data = this.state.data;
+
+      this.drawChart(data);
+
+      this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingChange);
       var svg = _react2['default'].findDOMNode(this.refs.svg);
 
       var data = this.state.data;
@@ -1002,6 +1044,7 @@ var _default = (function (_React$Component) {
         setState({ data: data, chart: chart }); // ES6 implicit :data, :chart
       });
 
+      this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingChange);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
       this.unsubscribeFromMetricStore = _metricStore2['default'].listen(this.onMetricChange);
     }
@@ -1031,39 +1074,167 @@ var _default = (function (_React$Component) {
   }, {
     key: 'onMetricChange',
     value: function onMetricChange(metric) {
-      console.log('SidebarVisualization onMetricChange()', metric);
+      console.log('SidebarVisualization onMetricChange() metric', metric);
+
+      var data = this.reshapeMetric(metric);
+      console.log('SidebarVisualization onMetricChange() data', data);
+
+      this.setState({ data: data });
+      this.drawChart(data);
+    }
+  }, {
+    key: 'reshapeMetric',
+    value: function reshapeMetric(data) {
+      var year = this.state.selectedTimePosition;
+      var geography = this.state.selectedGeographies[0];
+      var geoMapping = this.state.geoMapping;
+      var forwardGeoMapping = geoMapping.forward;
+
+      var color = '#4f99b4';
+      var group = data.group;
+      var metric = data.metric;
+      var key = group + ' > ' + metric;
+
+      var geoId = geoMapping.reverse[geography];
+
+      var rows = data.rows;
+
+      var applicable = _underscore2['default'].filter(rows, function (row) {
+        return row.Year === year;
+      });
+
+      var valueByGeography = {};
+
+      // implicitly keep only the last value for any geography/year
+      applicable.forEach(function (row) {
+        var geography = forwardGeoMapping[row.GeoID].ShortName;
+        valueByGeography[geography] = row[metric];
+      });
+
+      var values = _underscore2['default'].map(_underscore2['default'].keys(valueByGeography), function (geography) {
+        var label = geography;
+        var series = 0;
+        var value = valueByGeography[geography];
+        return { color: color, key: key, label: label, series: series, value: value };
+      });
+
+      console.log('reshapeMetric', year, geography, geoMapping, color, key, applicable, valueByGeography, values);
+
+      return [{ color: color, key: key, values: values }];
     }
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
-      var _this = this;
-
-      var selectedGeographies = newSelection.selectedGeographies;
-
-      var chart = this.state.chart;
+      this.setState(newSelection);
       var data = this.state.data;
+      this.drawChart(data);
 
-      data.forEach(function (series) {
-        return _this.darkenSelected(series, selectedGeographies);
-      });
-
-      chart.barColor(function (d) {
-        return d.color;
-      });
-
-      chart.update();
+      console.log('SidebarVisualization onSelectionChange() new state:', this.state);
     }
   }, {
     key: 'darkenSelected',
     value: function darkenSelected(series, selectedGeographies) {
-      var _this2 = this;
+      var _this = this;
 
       var baselineColor = series.color;
       var selectedColor = '#000000';
 
       series.values.forEach(function (valueObject) {
         var label = valueObject.label;
-        valueObject.color = _this2.contains(selectedGeographies, label) ? selectedColor : baselineColor;
+        valueObject.color = _this.contains(selectedGeographies, label) ? selectedColor : baselineColor;
+      });
+    }
+  }, {
+    key: 'drawChart',
+    value: function drawChart(data) {
+      var svg = _react2['default'].findDOMNode(this.refs.svg);
+
+      console.log('SidebarVisualization drawChart() data', data);
+
+      var onBarHover = this.onBarHover;
+      var onBarExit = this.onBarExit;
+      var onBarClick = this.onBarClick;
+
+      var setState = this.setState.bind(this);
+
+      nv.addGraph(function () {
+        var chart = nv.models.multiBarHorizontalChart().x(function (d) {
+          return d.label;
+        }).y(function (d) {
+          return d.value;
+        }).margin({ top: 30, right: 20, bottom: 50, left: 175 }).showValues(true) //Show bar value next to each bar.
+        //.transitionDuration(350)
+        .showControls(true); //Allow user to switch between "Grouped" and "Stacked" mode.
+
+        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
+
+        chart.tooltip.enabled();
+
+        _d32['default'].select(svg).datum(data).call(chart);
+
+        nv.utils.windowResize(chart.update);
+
+        return chart;
+      }, function (chart) {
+        var multibarDispatch = chart.multibar.dispatch;
+
+        multibarDispatch.on('elementMouseover', onBarHover);
+        multibarDispatch.on('elementMouseout', onBarExit);
+        multibarDispatch.on('elementClick', onBarClick);
+
+        // memoize the chart for later highlighting from external events
+        setState({ chart: chart }); // ES6 implicit :data, :chart
+      });
+    }
+  }, {
+    key: 'drawChart',
+    value: function drawChart(data) {
+      var _this2 = this;
+
+      var svg = _react2['default'].findDOMNode(this.refs.svg);
+
+      console.log('SidebarVisualization drawChart() data', data);
+
+      var onBarHover = this.onBarHover;
+      var onBarExit = this.onBarExit;
+      var onBarClick = this.onBarClick;
+
+      var setState = this.setState.bind(this);
+
+      var selectedGeographies = this.state.selectedGeographies;
+      data.forEach(function (series) {
+        return _this2.darkenSelected(series, selectedGeographies);
+      });
+
+      nv.addGraph(function () {
+        var chart = nv.models.multiBarHorizontalChart().x(function (d) {
+          return d.label;
+        }).y(function (d) {
+          return d.value;
+        }).margin({ top: 30, right: 20, bottom: 50, left: 125 }).barColor(function (d) {
+          return d.color;
+        }).showValues(true) //Show bar value next to each bar.
+        //.transitionDuration(350)
+        .showControls(true); //Allow user to switch between "Grouped" and "Stacked" mode.
+
+        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
+
+        chart.tooltip.enabled();
+
+        _d32['default'].select(svg).datum(data).call(chart);
+
+        nv.utils.windowResize(chart.update);
+
+        return chart;
+      }, function (chart) {
+        var multibarDispatch = chart.multibar.dispatch;
+
+        multibarDispatch.on('elementMouseover', onBarHover);
+        multibarDispatch.on('elementMouseout', onBarExit);
+        multibarDispatch.on('elementClick', onBarClick);
+
+        // memoize the chart for later highlighting from external events
+        setState({ chart: chart }); // ES6 implicit :data, :chart
       });
     }
   }, {

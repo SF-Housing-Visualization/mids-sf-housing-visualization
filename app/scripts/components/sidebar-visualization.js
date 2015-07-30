@@ -24,7 +24,9 @@ export default class extends React.Component {
     this.onBarHover = this.onBarHover.bind(this);
     this.onBarExit = this.onBarExit.bind(this);
 
+    this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onMetricChange = this.onMetricChange.bind(this);
   }
 
   render() {
@@ -36,9 +38,118 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
+    this.unsubscribeFromGeoMappingStore =
+      GeoMappingStore.listen(this.onGeoMappingChange);
+    this.unsubscribeFromSelectionStore =
+      SelectionStore.listen(this.onSelectionChange);
+    this.unsubscribeFromMetricStore =
+      MetricStore.listen(this.onMetricChange);
+  }
+
+
+  componentWillUnmount() {
+    this.unsubscribeFromMetricStore();
+    this.unsubscribeFromSelectionStore();
+    this.unsubscribeFromGeoMappingStore();
+  }
+
+  onBarHover(data) {
+    console.log('onBarHover data: ', data);
+  }
+
+  onBarExit(data) {
+    console.log('onBarExit data: ', data);
+  }
+
+  onBarClick(event) {
+    console.log('onBarClick data: ', event);
+    var geography = event.data.label;
+    SelectionActions.geographiesSelectionChange([ geography ]);
+  }
+
+  onGeoMappingChange(geoMapping) {
+    console.log('SidebarVisualization onGeoMappingChange()', geoMapping);
+    this.setState({ geoMapping });
+  }
+
+  onMetricChange(metric) {
+    console.log('SidebarVisualization onMetricChange() metric', metric);
+
+    let data = this.reshapeMetric(metric);
+    console.log('SidebarVisualization onMetricChange() data', data);
+
+    this.setState({ data });
+    this.drawChart(data);
+  }
+
+  reshapeMetric(data) {
+    let year = this.state.selectedTimePosition;
+    let geography = this.state.selectedGeographies[0];
+    let geoMapping = this.state.geoMapping;
+    let forwardGeoMapping = geoMapping.forward;
+
+    let color = '#4f99b4';
+    let group = data.group;
+    let metric = data.metric;
+    let key = group + ' > ' + metric;
+
+    let geoId = geoMapping.reverse[geography];
+
+    let rows = data.rows;
+
+    let applicable = _.filter(rows, (row) => 
+      row.Year === year
+    );
+
+    let valueByGeography = { };
+
+    // implicitly keep only the last value for any geography/year
+    applicable.forEach((row) => {
+      let geography = forwardGeoMapping[row.GeoID].ShortName
+      valueByGeography[geography] = row[metric];
+    });
+
+    let values = _.map(_.keys(valueByGeography), (geography) => {
+      let label = geography;
+      let series = 0;
+      let value = valueByGeography[geography];
+      return { color, key, label, series, value};
+    });
+
+
+
+
+    console.log('reshapeMetric', year, geography, geoMapping, color, key, 
+       applicable, valueByGeography, values);
+
+    return [{ color, key, values }];
+  }
+
+  onSelectionChange(newSelection) {
+    this.setState(newSelection);
+    let data = this.state.data;
+    this.drawChart(data);
+
+    console.log('SidebarVisualization onSelectionChange() new state:', this.state);
+  }
+
+  darkenSelected(series, selectedGeographies) {
+    let baselineColor = series.color;
+    let selectedColor = '#000000';
+
+    series.values.forEach((valueObject) => {
+      let label = valueObject.label;
+      valueObject.color =
+        this.contains(selectedGeographies, label)
+        ? selectedColor
+        : baselineColor;
+    });
+  }
+
+  drawChart(data) {
     let svg = React.findDOMNode(this.refs.svg);
 
-    let data = this.state.data;
+    console.log('SidebarVisualization drawChart() data', data);
 
     let onBarHover = this.onBarHover;
     let onBarExit = this.onBarExit;
@@ -46,11 +157,15 @@ export default class extends React.Component {
 
     let setState = this.setState.bind(this);
 
+    let selectedGeographies = this.state.selectedGeographies;
+    data.forEach((series) => this.darkenSelected(series, selectedGeographies));
+
     nv.addGraph(function() {
       var chart = nv.models.multiBarHorizontalChart()
           .x(function(d) { return d.label })
           .y(function(d) { return d.value })
-          .margin({top: 30, right: 20, bottom: 50, left: 175})
+          .margin({top: 30, right: 20, bottom: 50, left: 125})
+          .barColor( (d) => d.color )
           .showValues(true)           //Show bar value next to each bar.
           //.transitionDuration(350)
           .showControls(true);        //Allow user to switch between "Grouped" and "Stacked" mode.
@@ -75,62 +190,7 @@ export default class extends React.Component {
       multibarDispatch.on('elementClick', onBarClick);
 
       // memoize the chart for later highlighting from external events
-      setState({ data, chart }); // ES6 implicit :data, :chart
-    });
-
-    this.unsubscribeFromSelectionStore =
-      SelectionStore.listen(this.onSelectionChange);
-    this.unsubscribeFromMetricStore =
-      MetricStore.listen(this.onMetricChange);
-  }
-
-
-  componentWillUnmount() {
-    this.unsubscribeFromMetricStore();
-    this.unsubscribeFromSelectionStore();
-  }
-
-  onBarHover(data) {
-    console.log('onBarHover data: ', data);
-  }
-
-  onBarExit(data) {
-    console.log('onBarExit data: ', data);
-  }
-
-  onBarClick(event) {
-    console.log('onBarClick data: ', event);
-    var geography = event.data.label;
-    SelectionActions.geographiesSelectionChange([ geography ]);
-  }
-
-  onMetricChange(metric) {
-    console.log('SidebarVisualization onMetricChange()', metric);
-  }
-
-  onSelectionChange(newSelection) {
-    let selectedGeographies = newSelection.selectedGeographies;
-
-    let chart = this.state.chart;
-    let data = this.state.data;
-
-    data.forEach((series) => this.darkenSelected(series, selectedGeographies));
-
-    chart.barColor( (d) => d.color );
-
-    chart.update();
-  }
-
-  darkenSelected(series, selectedGeographies) {
-    let baselineColor = series.color;
-    let selectedColor = '#000000';
-
-    series.values.forEach((valueObject) => {
-      let label = valueObject.label;
-      valueObject.color =
-        this.contains(selectedGeographies, label)
-        ? selectedColor
-        : baselineColor;
+      setState({ chart }); // ES6 implicit :data, :chart
     });
   }
 

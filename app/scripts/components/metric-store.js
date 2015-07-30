@@ -1,5 +1,6 @@
 import Reflux from 'reflux';
 import d3 from 'd3';
+import _ from 'underscore';
 import MetricLoadAction from './metric-load-action';
 
 export default Reflux.createStore({
@@ -32,10 +33,11 @@ export default Reflux.createStore({
     let data = groupMetrics.data;
 
     let columns = this.transpose(data);
+    let rows = this.transform(data)
 
-    this.state[group] = columns;
+    this.state[group] = rows;
 
-    let result = { group, metric, columns };
+    let result = { group, metric, columns, rows };
     this.trigger(result);
     console.log('MetricStore onMetricLoaded', result)
   },
@@ -58,5 +60,18 @@ export default Reflux.createStore({
     });
 
     return columns;
+  },
+
+  transform: function transform(data) {
+    return data.map( (row, index) => {
+      let transformedRow = _.mapObject(row, (value, column) => {
+        return (column === 'Date')
+            ? new Date(Date.parse(value))
+            : +( value )
+      });
+
+      transformedRow.Year = transformedRow.Date.getUTCFullYear();
+      return transformedRow;
+    });
   }
 });
