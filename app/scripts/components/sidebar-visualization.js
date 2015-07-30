@@ -151,6 +151,21 @@ export default class extends React.Component {
 
     console.log('SidebarVisualization drawChart() data', data);
 
+    // WORKAROUND: https://github.com/novus/nvd3/issues/998
+    // Issue: NVD3 does not clean up its tooltips when re-drawing
+    // Solution: delete tooltip element manually from the DOM before redraw
+    let previousChart = this.state.chart;
+    if (previousChart) {
+      let tooltipElement = previousChart.tooltip.tooltipElem();
+      
+      previousChart.tooltip.enabled(false);
+      previousChart.update();
+      
+      if (tooltipElement && tooltipElement.parentNode) {
+        tooltipElement.parentNode.removeChild(tooltipElement);
+      }
+    }
+
     let onBarHover = this.onBarHover;
     let onBarExit = this.onBarExit;
     let onBarClick = this.onBarClick;
