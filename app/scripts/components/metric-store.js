@@ -13,17 +13,50 @@ export default Reflux.createStore({
     this.listenTo(MetricLoadAction.completed, this.onMetricLoaded);
   },
 
-  onMetricLoad: function onMetricLoad(url) {
+  onMetricLoad: function onMetricLoad(metricSpecification) {
+    let group = metricSpecification.group;
+    let metric = metricSpecification.metric;
+    let url = '/mids-sf-housing-sandbox/data/prod/values/' + group + '.csv';
     // url: /mids-sf-housing-sandbox/data/prod/fpo/geographies.json
-    console.log('loading index with url ', url);
+    console.log('MetricStore onMetricLoad() loading metrics ', url);
     d3.promise.csv(url)
-      .then(MetricLoadAction.completed)
+      .then((data) => MetricLoadAction.completed({
+        group, metric, data
+      }))
       .catch(MetricLoadAction.failed);
   },
 
-  onMetricLoaded: function onMetricLoaded(index) {
-    let shapedIndex = index;
-    this.state = shapedIndex;
-    this.trigger(shapedIndex);
+  onMetricLoaded: function onMetricLoaded(groupMetrics) {
+    let group = groupMetrics.group;
+    let metric = groupMetrics.metric;
+    let data = groupMetrics.data;
+
+    let columns = this.transpose(data);
+
+    this.state[group] = columns;
+
+    let result = { group, metric, columns };
+    this.trigger(result);
+    console.log('MetricStore onMetricLoaded', result)
+  },
+
+  transpose: function transpose(data) {
+    let columns = { };
+    data.forEach( (row, index) => {
+      for (var column in row) {
+        if (! (column in columns) ) {
+          columns[column] = [ ];
+        }
+
+        let value =
+          (column === 'Date')
+          ? new Date(Date.parse(row[column])).getUTCFullYear()
+          : +( row[column] );
+          
+        columns[column][index] = value;
+      }
+    });
+
+    return columns;
   }
-}
+});

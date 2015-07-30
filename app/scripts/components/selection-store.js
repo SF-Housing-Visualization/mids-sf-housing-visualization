@@ -6,7 +6,9 @@ export default Reflux.createStore({
   init: function() {
     this.state = {
       selectedGeographies: [ ],
-      selectedMetrics: [ ],
+      selectedPrimaryMetric: null,
+      selectedSecondaryMetrics: [ ],
+      selectedTimePosition: null,
       selectedTimeInterval: [ ]
     };
 
@@ -16,8 +18,18 @@ export default Reflux.createStore({
     );
 
     this.listenTo(
-      SelectionActions.metricsSelectionChange,
-      this.onMetricsSelectionChange
+      SelectionActions.primaryMetricSelectionChange,
+      this.onPrimaryMetricSelectionChange
+    );
+
+    this.listenTo(
+      SelectionActions.secondaryMetricsSelectionChange,
+      this.onSecondaryMetricsSelectionChange
+    );
+
+    this.listenTo(
+      SelectionActions.timePositionSelectionChange,
+      this.onTimePositionSelectionChange
     );
 
     this.listenTo(
@@ -33,9 +45,19 @@ export default Reflux.createStore({
     this.trigger({ selectedGeographies });
   },
 
-  onMetricsSelectionChange: function (selectedMetrics) {
-    this.state.selectedMetrics = selectedMetrics;
-    this.trigger({ selectedMetrics });
+  onPrimaryMetricSelectionChange: function (selectedPrimaryMetric) {
+    this.state.selectedPrimaryMetric = selectedPrimaryMetric;
+    this.trigger({ selectedPrimaryMetric }); // implicit :selectedPrimaryMetric
+  },
+
+  onSecondaryMetricsSelectionChange: function (selectedSecondaryMetrics) {
+    this.state.selectedSecondaryMetrics = selectedSecondaryMetrics;
+    this.trigger({ selectedSecondaryMetrics });
+  },
+
+  onTimePositionSelectionChange: function (selectedTimePosition) { 
+    this.state.selectedTimePosition = selectedTimePosition;
+    this.trigger({ selectedTimePosition });
   },
 
   onTimeIntervalSelectionChange: function (selectedTimeInterval) { 
