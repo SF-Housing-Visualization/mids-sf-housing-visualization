@@ -9,12 +9,12 @@ export default Reflux.createStore({
     this.onIndexLoad = this.onIndexLoad.bind(this);
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
 
-    this.listenTo(IndexLoadAction.start, this.onIndexLoad);
+    this.listenTo(IndexLoadAction, this.onIndexLoad);
     this.listenTo(IndexLoadAction.completed, this.onIndexLoaded);
   },
 
-  onIndexLoad: function onIndexLoad(url) {
-    // url: /mids-sf-housing-sandbox/data/prod/fpo/geographies.json
+  onIndexLoad: function onIndexLoad() {
+    const url = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
     console.log('loading index with url ', url);
     d3.promise.csv(url)
       .then(IndexLoadAction.completed)

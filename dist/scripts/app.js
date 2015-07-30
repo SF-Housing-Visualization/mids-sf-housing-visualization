@@ -215,10 +215,6 @@ var _selectionStore = require('./selection-store');
 
 var _selectionStore2 = _interopRequireDefault(_selectionStore);
 
-var _geographyLoadAction = require('./geography-load-action');
-
-var _geographyLoadAction2 = _interopRequireDefault(_geographyLoadAction);
-
 var _indexLoadAction = require('./index-load-action');
 
 var _indexLoadAction2 = _interopRequireDefault(_indexLoadAction);
@@ -227,9 +223,21 @@ var _indexStore = require('./index-store');
 
 var _indexStore2 = _interopRequireDefault(_indexStore);
 
+var _geoMappingLoadAction = require('./geo-mapping-load-action');
+
+var _geoMappingLoadAction2 = _interopRequireDefault(_geoMappingLoadAction);
+
+var _geoMappingStore = require('./geo-mapping-store');
+
+var _geoMappingStore2 = _interopRequireDefault(_geoMappingStore);
+
 var _metricLoadAction = require('./metric-load-action');
 
 var _metricLoadAction2 = _interopRequireDefault(_metricLoadAction);
+
+var _metricStore = require('./metric-store');
+
+var _metricStore2 = _interopRequireDefault(_metricStore);
 
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
@@ -242,8 +250,11 @@ var _default = (function (_React$Component) {
       geography: 'San Francisco',
       date: 2013,
       interval: [1999, 2015]
+    };
 
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
+    this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
+    this.onSelectionChange = this.onSelectionChange.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -260,47 +271,32 @@ var _default = (function (_React$Component) {
           _react2['default'].createElement(
             'div',
             { className: 'appName' },
-            'mids-sf-housing-visualization'
+            'mids-sf-housing-visualization metric: ',
+            this.state.selectedPrimaryMetric ? this.state.selectedPrimaryMetric.group + ' > ' + this.state.selectedPrimaryMetric.metric : 'Loading...'
           )
         ),
         _react2['default'].createElement(_sidebarVisualization2['default'], null),
-        _react2['default'].createElement(
-          'div',
-          { className: 'map-application' },
-          _react2['default'].createElement(_mapVisualization2['default'], null)
-        ),
+        _react2['default'].createElement(_mapVisualization2['default'], null),
         _react2['default'].createElement(_timeSeriesVisualization2['default'], null)
       );
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
+      this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingLoaded);
       this.unsubscribeFromIndexStore = _indexStore2['default'].listen(this.onIndexLoaded);
+      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
 
       var indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
 
       console.log('Home componentDidMount, indexUrl', indexUrl);
-
-      _indexLoadAction2['default'].start(indexUrl);
-      //const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
-      //this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
-
-      // load large static data
-      //GeographyLoadAction(url);
+      (0, _geoMappingLoadAction2['default'])();
     }
   }, {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
-      //this.unsubscribe();
+      this.unsubscribeFromSelectionStore();
       this.unsubscribeFromIndexStore();
-      this.unsubscribeFromGeoMappingStore();
-    }
-  }, {
-    key: 'onGeoMappingLoaded',
-    value: function onGeoMappingLoaded(geoMapping) {
-      console.log('Home onGeoMappingLoaded() ', geoMapping);
-
-      (0, _indexLoadAction2['default'])();
       this.unsubscribeFromGeoMappingStore();
     }
   }, {
@@ -316,12 +312,35 @@ var _default = (function (_React$Component) {
   }, {
     key: 'onIndexLoaded',
     value: function onIndexLoaded(index) {
-      console.log('Home onIndexLoaded ', index);
+      console.log('Home onIndexLoaded() ', index);
+
+      var primaryGroupId = index.groupOrder[0];
+      var primaryGroup = index.groups[primaryGroupId];
+
+      var primaryVariableId = primaryGroup.variableOrder[0];
+      var primaryVariable = primaryGroup.variables[primaryVariableId];
+
+      var primaryMetric = primaryVariable.variableName;
+
+      var metric = {
+        group: primaryGroupId,
+        metric: primaryVariableId,
+        display: {
+          group: primaryGroup,
+          metric: primaryMetric
+        }
+      };
+
+      (0, _metricLoadAction2['default'])(metric);
+      console.log('Home onIndexLoaded() called MetricLoadAction.start', metric);
+      _selectionActions2['default'].primaryMetricSelectionChange(metric);
+
+      //this.setState({ primaryMetric }); // ES6 implicit :primaryMetric
     }
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
-      this.setState({ selection: newSelection });
+      this.setState(newSelection);
       console.log('onSelectionChange this.state: ', this.state);
     }
   }]);
@@ -333,7 +352,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/home.js","/app/scripts/components")
-},{"./geography-load-action":4,"./index-load-action":7,"./index-store":8,"./map-visualization":9,"./metric-load-action":10,"./selection-actions":12,"./selection-store":13,"./sidebar-visualization":14,"./time-series-visualization":15,"_process":23,"buffer":19,"react":271}],7:[function(require,module,exports){
+},{"./geo-mapping-load-action":2,"./geo-mapping-store":3,"./index-load-action":7,"./index-store":8,"./map-visualization":9,"./metric-load-action":10,"./metric-store":11,"./selection-actions":12,"./selection-store":13,"./sidebar-visualization":14,"./time-series-visualization":15,"_process":23,"buffer":19,"react":271}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -382,9 +401,12 @@ exports['default'] = _reflux2['default'].createStore({
     this.onIndexLoad = this.onIndexLoad.bind(this);
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
 
+    this.listenTo(_indexLoadAction2['default'], this.onIndexLoad);
     this.listenTo(_indexLoadAction2['default'].completed, this.onIndexLoaded);
   },
 
+  onIndexLoad: function onIndexLoad() {
+    var url = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
     console.log('loading index with url ', url);
     _d32['default'].promise.csv(url).then(_indexLoadAction2['default'].completed)['catch'](_indexLoadAction2['default'].failed);
   },
@@ -550,14 +572,18 @@ var _default = (function (_React$Component) {
       var url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
       var mapReactComponent = _react2['default'].createElement(
-        _reactLeaflet.Map,
-        { ref: 'map', className: 'map',
-          minZoom: minZoom, maxZoom: maxZoom,
-          center: center, zoom: zoom },
-        _react2['default'].createElement(_reactLeaflet.TileLayer, {
-          url: url,
-          attribution: attribution
-        })
+        'div',
+        { className: 'map-application' },
+        _react2['default'].createElement(
+          _reactLeaflet.Map,
+          { ref: 'map', className: 'map',
+            minZoom: minZoom, maxZoom: maxZoom,
+            center: center, zoom: zoom },
+          _react2['default'].createElement(_reactLeaflet.TileLayer, {
+            url: url,
+            attribution: attribution
+          })
+        )
       );
 
       //this.map = mapReactComponent;
@@ -727,8 +753,7 @@ var _reflux = (typeof window !== "undefined" ? window.Reflux : typeof global !==
 var _reflux2 = _interopRequireDefault(_reflux);
 
 exports['default'] = _reflux2['default'].createAction({
-  asyncResult: true,
-  children: ['start']
+  asyncResult: true
 });
 module.exports = exports['default'];
 
@@ -766,7 +791,7 @@ exports['default'] = _reflux2['default'].createStore({
     this.onMetricLoad = this.onMetricLoad.bind(this);
     this.onMetricLoaded = this.onMetricLoaded.bind(this);
 
-    this.listenTo(_metricLoadAction2['default'].start, this.onMetricLoad);
+    this.listenTo(_metricLoadAction2['default'], this.onMetricLoad);
     this.listenTo(_metricLoadAction2['default'].completed, this.onMetricLoaded);
   },
 
@@ -983,7 +1008,9 @@ var _default = (function (_React$Component) {
     this.onBarHover = this.onBarHover.bind(this);
     this.onBarExit = this.onBarExit.bind(this);
 
+    this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onMetricChange = this.onMetricChange.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -1000,50 +1027,6 @@ var _default = (function (_React$Component) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var data = this.state.data;
-
-      this.drawChart(data);
-
-      this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingChange);
-      var svg = _react2['default'].findDOMNode(this.refs.svg);
-
-      var data = this.state.data;
-
-      var onBarHover = this.onBarHover;
-      var onBarExit = this.onBarExit;
-      var onBarClick = this.onBarClick;
-
-      var setState = this.setState.bind(this);
-
-      nv.addGraph(function () {
-        var chart = nv.models.multiBarHorizontalChart().x(function (d) {
-          return d.label;
-        }).y(function (d) {
-          return d.value;
-        }).margin({ top: 30, right: 20, bottom: 50, left: 175 }).showValues(true) //Show bar value next to each bar.
-        //.transitionDuration(350)
-        .showControls(true); //Allow user to switch between "Grouped" and "Stacked" mode.
-
-        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
-
-        chart.tooltip.enabled();
-
-        _d32['default'].select(svg).datum(data).call(chart);
-
-        nv.utils.windowResize(chart.update);
-
-        return chart;
-      }, function (chart) {
-        var multibarDispatch = chart.multibar.dispatch;
-
-        multibarDispatch.on('elementMouseover', onBarHover);
-        multibarDispatch.on('elementMouseout', onBarExit);
-        multibarDispatch.on('elementClick', onBarClick);
-
-        // memoize the chart for later highlighting from external events
-        setState({ data: data, chart: chart }); // ES6 implicit :data, :chart
-      });
-
       this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingChange);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
       this.unsubscribeFromMetricStore = _metricStore2['default'].listen(this.onMetricChange);
@@ -1053,6 +1036,7 @@ var _default = (function (_React$Component) {
     value: function componentWillUnmount() {
       this.unsubscribeFromMetricStore();
       this.unsubscribeFromSelectionStore();
+      this.unsubscribeFromGeoMappingStore();
     }
   }, {
     key: 'onBarHover',
@@ -1070,6 +1054,12 @@ var _default = (function (_React$Component) {
       console.log('onBarClick data: ', event);
       var geography = event.data.label;
       _selectionActions2['default'].geographiesSelectionChange([geography]);
+    }
+  }, {
+    key: 'onGeoMappingChange',
+    value: function onGeoMappingChange(geoMapping) {
+      console.log('SidebarVisualization onGeoMappingChange()', geoMapping);
+      this.setState({ geoMapping: geoMapping });
     }
   }, {
     key: 'onMetricChange',
@@ -1142,48 +1132,6 @@ var _default = (function (_React$Component) {
       series.values.forEach(function (valueObject) {
         var label = valueObject.label;
         valueObject.color = _this.contains(selectedGeographies, label) ? selectedColor : baselineColor;
-      });
-    }
-  }, {
-    key: 'drawChart',
-    value: function drawChart(data) {
-      var svg = _react2['default'].findDOMNode(this.refs.svg);
-
-      console.log('SidebarVisualization drawChart() data', data);
-
-      var onBarHover = this.onBarHover;
-      var onBarExit = this.onBarExit;
-      var onBarClick = this.onBarClick;
-
-      var setState = this.setState.bind(this);
-
-      nv.addGraph(function () {
-        var chart = nv.models.multiBarHorizontalChart().x(function (d) {
-          return d.label;
-        }).y(function (d) {
-          return d.value;
-        }).margin({ top: 30, right: 20, bottom: 50, left: 175 }).showValues(true) //Show bar value next to each bar.
-        //.transitionDuration(350)
-        .showControls(true); //Allow user to switch between "Grouped" and "Stacked" mode.
-
-        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
-
-        chart.tooltip.enabled();
-
-        _d32['default'].select(svg).datum(data).call(chart);
-
-        nv.utils.windowResize(chart.update);
-
-        return chart;
-      }, function (chart) {
-        var multibarDispatch = chart.multibar.dispatch;
-
-        multibarDispatch.on('elementMouseover', onBarHover);
-        multibarDispatch.on('elementMouseout', onBarExit);
-        multibarDispatch.on('elementClick', onBarClick);
-
-        // memoize the chart for later highlighting from external events
-        setState({ chart: chart }); // ES6 implicit :data, :chart
       });
     }
   }, {

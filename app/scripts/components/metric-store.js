@@ -10,7 +10,7 @@ export default Reflux.createStore({
     this.onMetricLoad = this.onMetricLoad.bind(this);
     this.onMetricLoaded = this.onMetricLoaded.bind(this);
 
-    this.listenTo(MetricLoadAction.start, this.onMetricLoad);
+    this.listenTo(MetricLoadAction, this.onMetricLoad);
     this.listenTo(MetricLoadAction.completed, this.onMetricLoaded);
   },
 

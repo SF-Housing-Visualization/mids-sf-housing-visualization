@@ -9,7 +9,7 @@ export default Reflux.createStore({
     this.onGeoMappingLoad = this.onGeoMappingLoad.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
 
-    this.listenTo(GeoMappingLoadAction.start, this.onGeoMappingLoad);
+    this.listenTo(GeoMappingLoadAction, this.onGeoMappingLoad);
     this.listenTo(GeoMappingLoadAction.completed, this.onGeoMappingLoaded);
   },
 

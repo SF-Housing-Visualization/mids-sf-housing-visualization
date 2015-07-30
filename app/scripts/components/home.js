@@ -69,7 +69,7 @@ export default class extends React.Component {
     const indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
 
     console.log('Home componentDidMount, indexUrl', indexUrl);
-    GeoMappingLoadAction.start();
+    GeoMappingLoadAction();
     
 
   }
