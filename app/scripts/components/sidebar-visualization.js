@@ -3,8 +3,13 @@ import d3 from 'd3';
 import nvd3 from 'd3';
 import _ from 'underscore';
 import SidebarData from '../data/sidebar-data';
+
 import SelectionActions from './selection-actions';
 import SelectionStore from './selection-store';
+
+import MetricStore from './metric-store';
+
+import GeoMappingStore from './geo-mapping-store';
 
 
 export default class extends React.Component {
@@ -73,17 +78,15 @@ export default class extends React.Component {
       setState({ data, chart }); // ES6 implicit :data, :chart
     });
 
-    d3.csv('/mids-sf-housing-sandbox/data/prod/data_geos.csv',
-      function (data) {
-        console.log('got data_geos.csv', data);
-      });
-
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
+    this.unsubscribeFromMetricStore =
+      MetricStore.listen(this.onMetricChange);
   }
 
 
   componentWillUnmount() {
+    this.unsubscribeFromMetricStore();
     this.unsubscribeFromSelectionStore();
   }
 
@@ -99,6 +102,10 @@ export default class extends React.Component {
     console.log('onBarClick data: ', event);
     var geography = event.data.label;
     SelectionActions.geographiesSelectionChange([ geography ]);
+  }
+
+  onMetricChange(metric) {
+    console.log('SidebarVisualization onMetricChange()', metric);
   }
 
   onSelectionChange(newSelection) {
