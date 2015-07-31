@@ -1258,6 +1258,14 @@ var _selectionStore = require('./selection-store');
 
 var _selectionStore2 = _interopRequireDefault(_selectionStore);
 
+var _metricStore = require('./metric-store');
+
+var _metricStore2 = _interopRequireDefault(_metricStore);
+
+var _geoMappingStore = require('./geo-mapping-store');
+
+var _geoMappingStore2 = _interopRequireDefault(_geoMappingStore);
+
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
     _classCallCheck(this, _class);
@@ -1272,7 +1280,9 @@ var _default = (function (_React$Component) {
     this.onLineHover = this.onLineHover.bind(this);
     this.onLineExit = this.onLineExit.bind(this);
 
+    this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onMetricChange = this.onMetricChange.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -1289,9 +1299,24 @@ var _default = (function (_React$Component) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var svg = _react2['default'].findDOMNode(this.refs.svg);
+      this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingChange);
+      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
+      this.unsubscribeFromMetricStore = _metricStore2['default'].listen(this.onMetricChange);
 
       var data = this.state.data;
+      this.drawChart(data);
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.unsubscribeFromSelectionStore();
+    }
+  }, {
+    key: 'drawChart',
+    value: function drawChart(data) {
+      var svg = _react2['default'].findDOMNode(this.refs.svg);
+
+      console.log('TimeSeriesVisualization drawChart(data)', data);
 
       var setState = this.setState.bind(this);
       var onLineClick = this.onLineClick;
@@ -1301,11 +1326,13 @@ var _default = (function (_React$Component) {
       nv.addGraph(function () {
         var chart = nv.models.lineWithFocusChart();
 
-        chart.xAxis.tickFormat(_d32['default'].format(',f'));
+        chart.xAxis.tickFormat(_d32['default'].format('f'));
 
         chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
 
         chart.y2Axis.tickFormat(_d32['default'].format(',.2f'));
+
+        chart.showLegend(false);
 
         _d32['default'].select(svg).datum(data).transition().duration(500).call(chart);
 
@@ -1323,33 +1350,26 @@ var _default = (function (_React$Component) {
 
         setState({ data: data, chart: chart }); // ES6 implicit :data, :chart
       });
-
-      this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      this.unsubscribeFromSelectionStore();
     }
   }, {
     key: 'onSelectionChange',
     value: function onSelectionChange(newSelection) {
-      var _this = this;
+      this.setState(newSelection);
 
-      var selectedGeographies = newSelection.selectedGeographies;
+      var metric = this.state.metric;
 
-      var chart = this.state.chart;
-      var data = this.state.data;
+      if (metric && metric.rows) {
+        var data = this.reshapeMetric(this.state.metric);
+        this.setState({ data: data });
+        console.log('TimeSeriesVisualization onSelectionChange()', metric, data, this.state.selectedGeographies);
+        this.drawChart(data);
+      }
 
-      data.forEach(function (series) {
-        return _this.darkenSelected(series, selectedGeographies);
-      });
-
-      chart.color(function (d) {
-        console.log('color mapper', d); //d.color
-      });
-
-      chart.update();
+      /*let selectedGeographies = newSelection.selectedGeographies;
+       let chart = this.state.chart;
+      let data = this.state.data;
+       data.forEach((series) => this.darkenSelected(series, selectedGeographies));
+       chart.update();*/
     }
   }, {
     key: 'onLineHover',
@@ -1371,7 +1391,7 @@ var _default = (function (_React$Component) {
   }, {
     key: 'darkenSelected',
     value: function darkenSelected(series, selectedGeographies) {
-      var _this2 = this;
+      var _this = this;
 
       var key = series.key;
 
@@ -1382,8 +1402,79 @@ var _default = (function (_React$Component) {
 
       series.values.forEach(function (valueObject) {
         var label = valueObject.label;
-        valueObject.color = _this2.contains(selectedGeographies, label) ? selectedColor : baselineColor;
+        valueObject.color = _this.contains(selectedGeographies, label) ? selectedColor : baselineColor;
       });
+    }
+  }, {
+    key: 'onGeoMappingChange',
+    value: function onGeoMappingChange(geoMapping) {
+      console.log('TimeSeriesVisualization onGeoMappingChange()', geoMapping);
+      this.setState({ geoMapping: geoMapping });
+    }
+  }, {
+    key: 'onMetricChange',
+    value: function onMetricChange(metric) {
+      console.log('TimeSeriesVisualization onMetricChange() metric', metric);
+      var data = this.reshapeMetric(metric);
+      console.log('TimeSeriesVisualization onMetricChange() data', data);
+
+      this.setState({ metric: metric, data: data });
+      this.drawChart(data);
+    }
+  }, {
+    key: 'reshapeMetric',
+    value: function reshapeMetric(data) {
+      var _this2 = this;
+
+      var selectedYear = this.state.selectedTimePosition;
+      var selectedGeographies = this.state.selectedGeographies;
+      var geoMapping = this.state.geoMapping;
+      var reverseGeoMapping = geoMapping.reverse;
+      var forwardGeoMapping = geoMapping.forward;
+
+      var baselineColor = '#4f99b4';
+      var selectedColor = '#000000';
+      var group = data.group;
+      var metric = data.metric;
+      var key = group + ' > ' + metric;
+
+      var rows = data.rows;
+
+      var valuesByGeography = _underscore2['default'].mapObject(reverseGeoMapping, function () {
+        return {};
+      });
+
+      // implicitly keep only the last value for any geography/year
+      rows.forEach(function (row) {
+        var geography = forwardGeoMapping[row.GeoID].ShortName;
+        var year = row.Year;
+        valuesByGeography[geography][year] = row[metric];
+      });
+
+      var geographies = _underscore2['default'].sortBy(_underscore2['default'].keys(valuesByGeography), function (geography) {
+        return _this2.contains(selectedGeographies, geography) ? 1 : 0;
+      });
+
+      var lines = _underscore2['default'].map(geographies, function (geography, series) {
+        console.log('debug reshapeMetric', geography, selectedGeographies);
+        var color = _this2.contains(selectedGeographies, geography) ? selectedColor : baselineColor;
+
+        console.log('debug reshapeMetric', geography, selectedGeographies, color);
+        var key = geography;
+        var years = valuesByGeography[geography];
+        var values = _underscore2['default'].map(_underscore2['default'].sortBy(_underscore2['default'].keys(years)), function (year) {
+          var x = year;
+          var y = years[year];
+          return { color: color, series: series, x: x, y: y };
+        });
+        //let values = [ { color, series: index, x: year, y} ]
+
+        return { color: color, key: key, values: values };
+      });
+
+      console.log('reshapeMetric', selectedGeographies, geoMapping, key, valuesByGeography, lines);
+
+      return lines;
     }
   }, {
     key: 'contains',
@@ -1399,7 +1490,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/time-series-visualization.js","/app/scripts/components")
-},{"../data/time-series-data":17,"./selection-actions":12,"./selection-store":13,"_process":23,"buffer":19,"react":271}],16:[function(require,module,exports){
+},{"../data/time-series-data":17,"./geo-mapping-store":3,"./metric-store":11,"./selection-actions":12,"./selection-store":13,"_process":23,"buffer":19,"react":271}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 "use strict";
 
