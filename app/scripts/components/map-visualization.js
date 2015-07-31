@@ -55,8 +55,8 @@ export default class extends React.Component {
 
   render() {
     const position = [51.505, -0.09];
-    const center = [52.5377, 13.3958];
-    const zoom = 4;
+    const center = [37.7833, -122.4167];
+    const zoom = 9;
     const minZoom = 0;
     const maxZoom = 18;
     const attribution = 
@@ -67,14 +67,16 @@ export default class extends React.Component {
     const url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
     const mapReactComponent = (
-      <Map ref='map' className="map"
-        minZoom={minZoom} maxZoom={maxZoom}
-        center={center} zoom={zoom}>
-        <TileLayer
-          url={url}
-          attribution={attribution}
-        />
-      </Map>
+      <div className="map-application">
+        <Map ref='map' className="map"
+          minZoom={minZoom} maxZoom={maxZoom}
+          center={center} zoom={zoom}>
+          <TileLayer
+            url={url}
+            attribution={attribution}
+          />
+        </Map>
+      </div>
     );
 
     //this.map = mapReactComponent;
@@ -95,7 +97,7 @@ export default class extends React.Component {
       GeographyStore.listen(this.onGeographyStoreChange);
 
     // load large static data
-    const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json';
+    const url = '/mids-sf-housing-sandbox/data/prod/ca-counties.json';
     GeographyLoadAction.start(url);
   }
 
@@ -113,6 +115,7 @@ export default class extends React.Component {
     let onGeoMouseEnter = this.onGeoMouseEnter;
     let onGeoMouseExit = this.onGeoMouseExit;
     let onGeoClick = this.onGeoClick;
+    let getGeographyName = this.getGeographyName;
 
     function onEachGeoJsonFeature(feature, layer) {
       layer.on({
@@ -121,7 +124,7 @@ export default class extends React.Component {
         mouseout : onGeoMouseExit
       });
 
-      let name = layer.feature.properties['NAME'];
+      let name = getGeographyName(layer);
       layers[name] = layer;
     }
 
@@ -141,7 +144,7 @@ export default class extends React.Component {
   onGeoMouseEnter(event) {
     console.log('entering area', event);
     let layer = event.target;
-    let geography = layer.feature.properties['NAME'];
+    let geography = this.getGeographyName(layer);
 
     let hover = this.state.hover.push(geography);
     this.setState({ hover }); // ES6 implicit : hover
@@ -152,7 +155,7 @@ export default class extends React.Component {
   onGeoMouseExit(event) {
     console.log('exiting area', event);
     let layer = event.target;
-    let geography = layer.feature.properties['NAME'];
+    let geography = this.getGeographyName(layer);
 
     let hover = _.without(this.state.hover, geography);
     this.setState({ hover }); // ES6 implicit : hover
@@ -163,7 +166,7 @@ export default class extends React.Component {
   onGeoClick(event) {
     console.log('click in area', event);
     var layer = event.target;
-    var geography = layer.feature.properties['NAME'];
+    var geography = this.getGeographyName(layer);
 
     SelectionActions.geographiesSelectionChange([ geography ]);
   }
@@ -219,6 +222,10 @@ export default class extends React.Component {
 
   contains(array, item) {
     return (_.indexOf(array, item) > -1);
+  }
+
+  getGeographyName(layer) {
+    return layer.feature.properties['name'];
   }
 
 }

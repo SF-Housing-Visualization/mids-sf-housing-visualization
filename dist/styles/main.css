@@ -7293,23 +7293,22 @@ html {
 
 .map-application {
   height: 60%;
-  width: 60%;
+  width: 40%;
   padding-top: 50px;
-  clear: none;
   float: left;
 }
 
 .sidebar {
-  height: 60%;
-  width: 40%;
+  height: 100%;
+  width: 60%;
   padding-top: 50px;
   float: right;
 }
 
 .time-series {
   height: 40%;
-  width: 100%;
-  clear: all;
+  width: 40%;
+  float: left;
 }
 
 .map {

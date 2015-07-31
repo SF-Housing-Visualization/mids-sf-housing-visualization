@@ -2,26 +2,32 @@ import React from 'react';
 import MapVisualization from './map-visualization';
 import SidebarVisualization from './sidebar-visualization';
 import TimeSeriesVisualization from './time-series-visualization';
+
 import SelectionActions from './selection-actions';
 import SelectionStore from './selection-store';
-import GeographyLoadAction from './geography-load-action';
 
-console.log('SelectionActions: ', SelectionActions);
-console.log('SelectionStore: ', SelectionStore);
+import IndexLoadAction from './index-load-action';
+import IndexStore from './index-store';
+
+import GeoMappingLoadAction from './geo-mapping-load-action';
+import GeoMappingStore from './geo-mapping-store';
+
+import MetricLoadAction from './metric-load-action';
+import MetricStore from './metric-store';
 
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      items: [
-        'Browserify',
-        'Babel',
-        'Bootstrap',
-        'Modernizr',
-        'Jest'
-      ]
+    this.state = { };
+
+    this.initial = {
+      geography: 'San Francisco',
+      date: 2013,
+      interval: [1999, 2015]
     };
 
+    this.onIndexLoaded = this.onIndexLoaded.bind(this);
+    this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
   }
 
@@ -30,14 +36,21 @@ export default class extends React.Component {
       <div className="root-container">
 
         <header className="group">
-          <div className="appName">mids-sf-housing-visualization</div>
+          <div className="appName">
+            mids-sf-housing-visualization 
+            metric: { 
+              this.state.selectedPrimaryMetric
+              ? this.state.selectedPrimaryMetric.group
+                + ' > '
+                + this.state.selectedPrimaryMetric.metric
+              : 'Loading...' 
+            }
+          </div>
         </header>
 
-        <div className="map-application">
-          <MapVisualization />
-        </div>
-
         <SidebarVisualization />
+                
+        <MapVisualization />
 
         <TimeSeriesVisualization />
 
@@ -46,19 +59,67 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    //const url = '/mids-sf-housing-sandbox/data/prod/fpo/geographies.json'
-    //this.unsubscribe = SelectionStore.listen(this.onSelectionChange);
+    this.unsubscribeFromGeoMappingStore =
+      GeoMappingStore.listen(this.onGeoMappingLoaded);
+    this.unsubscribeFromIndexStore =
+      IndexStore.listen(this.onIndexLoaded);
+    this.unsubscribeFromSelectionStore =
+      SelectionStore.listen(this.onSelectionChange);
 
-    // load large static data
-    //GeographyLoadAction(url);
+    const indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
+
+    console.log('Home componentDidMount, indexUrl', indexUrl);
+    GeoMappingLoadAction();
+    
+
   }
 
   componentWillUnmount() {
-    //this.unsubscribe();
+    this.unsubscribeFromSelectionStore();
+    this.unsubscribeFromIndexStore();
+    this.unsubscribeFromGeoMappingStore();
+  }
+
+  onGeoMappingLoaded(geoMapping) {
+    console.log('Home onGeoMappingLoaded() ', geoMapping);
+
+
+    SelectionActions.geographiesSelectionChange([ this.initial.geography ]);
+    SelectionActions.timePositionSelectionChange( this.initial.date );
+    SelectionActions.timeIntervalSelectionChange( this.initial.interval );
+    IndexLoadAction();
+  }
+
+  onIndexLoaded(index) {
+    console.log('Home onIndexLoaded() ', index);
+
+    let primaryGroupId = index.groupOrder[0];
+    let primaryGroup = index.groups[primaryGroupId];
+
+    let primaryVariableId = primaryGroup.variableOrder[0];
+    let primaryVariable = primaryGroup.variables[primaryVariableId];
+
+    let primaryMetric = primaryVariable.variableName;
+
+    let metric = {
+      group: primaryGroupId,
+      metric: primaryVariableId,
+      display: {
+        group: primaryGroup,
+        metric: primaryMetric
+      }
+    };
+
+
+    MetricLoadAction(metric);
+    console.log('Home onIndexLoaded() called MetricLoadAction.start', metric);
+    SelectionActions.primaryMetricSelectionChange(metric);
+
+    //this.setState({ primaryMetric }); // ES6 implicit :primaryMetric
   }
 
   onSelectionChange(newSelection) {
-    this.setState({ selection: newSelection });
+    this.setState(newSelection);
     console.log('onSelectionChange this.state: ', this.state);
   }
 }
