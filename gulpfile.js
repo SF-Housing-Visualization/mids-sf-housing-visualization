@@ -35,6 +35,22 @@ var bundler = {
   }
 };
 
+gulp.task('markdown', function() {
+  return gulp.src('IntroductoryPage.md')
+    .pipe($.remarkable({
+      preset: 'full',
+      disable: ['replacements'],
+      remarkableOptions: {
+        typographer: true,
+        linkify: true,
+        breaks: true
+      }
+    }))
+    .pipe($.rename('IntroductoryPage.html'))
+    .pipe(gulp.dest('dist'))
+    .pipe($.size());
+});
+
 gulp.task('styles', function() {
   return $.rubySass('app/styles/main.scss', {
       style: 'expanded',
@@ -74,7 +90,10 @@ gulp.task('images', function() {
 });
 
 gulp.task('fonts', function() {
-  return gulp.src(['app/fonts/**/*', 'app/bower_components/bootstrap-sass-official/assets/fonts/**/*'])
+  return gulp.src([
+      'app/fonts/**/*', 
+      'app/bower_components/bootstrap-sass-official/assets/fonts/**/*'
+    ])
     .pipe(gulp.dest('dist/fonts'))
     .pipe($.size());
 });
