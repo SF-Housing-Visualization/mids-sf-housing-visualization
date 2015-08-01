@@ -1,5 +1,6 @@
 import React from 'react';
-import IntroductoryPage from './content/introductory-page';
+
+import Introduction from './introduction';
 
 import MapVisualization from './map-visualization';
 import SidebarVisualization from './sidebar-visualization';
@@ -16,8 +17,6 @@ import GeoMappingStore from './geo-mapping-store';
 
 import MetricLoadAction from './metric-load-action';
 import MetricStore from './metric-store';
-
-console.log('IntroductoryPage', IntroductoryPage);
 
 export default class extends React.Component {
   constructor(props) {
@@ -53,7 +52,7 @@ export default class extends React.Component {
 
         </header>
 
-        <IntroductoryPage />
+        <Introduction />
         
 
         <SidebarVisualization />

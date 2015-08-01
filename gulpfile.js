@@ -35,18 +35,17 @@ var bundler = {
   }
 };
 
-var jsxES6Template = "import React from ''react'';
-
-export default class extends React.Component {
-  constructor(props) { super(props); }
-  render() {
-    return (
-      <div>
-        <%= contents %>
-      </div>
-    );
-  }
-}";
+var jsxES6Template = "import React from 'react';"
+ + 'export default class extends React.Component {'
+ + '  constructor(props) { super(props); }'
+ + '  render() {'
+ + '    return ('
+ + '      <div>'
+ + '      <%= contents %>'
+ + '      </div>'
+ + '    );'
+ + '  }'
+ + '}';
 
 gulp.task('markdown', function() {
   return gulp.src('app/content/*.md')
@@ -169,7 +168,15 @@ gulp.task('minify', ['minify:js', 'minify:css']);
 
 gulp.task('clean', del.bind(null, 'dist'));
 
-gulp.task('bundle', ['html', 'styles', 'scripts', 'images', 'fonts', 'extras']);
+gulp.task('bundle', [
+  'markdown', 
+  'html', 
+  'styles', 
+  'scripts', 
+  'images', 
+  'fonts', 
+  'extras'
+]);
 
 gulp.task('clean-bundle', sync(['clean', 'bundle']));
 
