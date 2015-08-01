@@ -7271,6 +7271,28 @@ button.close {
     display: none !important;
   }
 }
+.introduction {
+  padding-top: 50px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 25px;
+  font-size: 1em;
+  display: inline-block;
+  max-width: 1024px;
+}
+.introduction h1 {
+  font-size: 3em;
+}
+.introduction h2 {
+  font-size: 2.5em;
+}
+.introduction h3 {
+  font-size: 2em;
+}
+.introduction h1, .introduction h2, .introduction h3, .introduction h4, .introduction h5, .introduction h6, .introduction p {
+  line-height: 1.45;
+}
+
 *,
 *:before,
 *:after {
@@ -7289,10 +7311,6 @@ body,
 html {
   font-family: Arial, sans-serif;
   height: 100%;
-}
-
-.introduction {
-  padding-top: 50px;
 }
 
 .map-application {
