@@ -1,6 +1,6 @@
 
 .introduction {
-  padding-top: 50px;
+  padding-top: 25px;
   padding-left: 50px;
   padding-right: 50px;
   padding-bottom: 25px;
@@ -20,5 +20,13 @@
    line-height: 1.45;
   }
 
+  .collapsed {
+    max-height: 0px;
+    overflow: hidden;
+  }
+
+  .gradual {
+    transition: all 500ms;
+  }
 
 }

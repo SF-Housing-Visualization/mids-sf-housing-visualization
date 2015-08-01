@@ -7272,7 +7272,7 @@ button.close {
   }
 }
 .introduction {
-  padding-top: 50px;
+  padding-top: 25px;
   padding-left: 50px;
   padding-right: 50px;
   padding-bottom: 25px;
@@ -7291,6 +7291,14 @@ button.close {
 }
 .introduction h1, .introduction h2, .introduction h3, .introduction h4, .introduction h5, .introduction h6, .introduction p {
   line-height: 1.45;
+}
+.introduction .collapsed {
+  max-height: 0px;
+  overflow: hidden;
+}
+.introduction .gradual {
+  -webkit-transition: all 500ms;
+          transition: all 500ms;
 }
 
 *,
@@ -7316,14 +7324,12 @@ html {
 .map-application {
   height: 60%;
   width: 40%;
-  padding-top: 50px;
   float: left;
 }
 
 .sidebar {
   height: 100%;
   width: 60%;
-  padding-top: 50px;
   float: right;
 }
 
@@ -7344,12 +7350,10 @@ html {
 }
 
 header {
-  position: absolute;
-  top: 0;
-  left: 0;
   height: 50px;
   padding: 15px;
   z-index: 9;
+  border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
   width: 100%;
 }
