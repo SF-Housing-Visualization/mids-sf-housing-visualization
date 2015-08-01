@@ -1,4 +1,10 @@
 import React from 'react';
+import $ from 'jquery';
+
+import Introduction from './introduction';
+import IntroductionActions from './introduction-actions';
+import IntroductionStore from './introduction-store';
+
 import MapVisualization from './map-visualization';
 import SidebarVisualization from './sidebar-visualization';
 import TimeSeriesVisualization from './time-series-visualization';
@@ -29,13 +35,18 @@ export default class extends React.Component {
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onIntroductionStore = this.onIntroductionStore.bind(this);
   }
 
   render() {
     return (
       <div className="root-container">
 
-        <header className="group">
+
+
+        <Introduction />
+        
+        <header ref='visualization' className="group">
           <div className="appName">
             mids-sf-housing-visualization 
             metric: { 
@@ -46,6 +57,7 @@ export default class extends React.Component {
               : 'Loading...' 
             }
           </div>
+
         </header>
 
         <SidebarVisualization />
@@ -65,6 +77,10 @@ export default class extends React.Component {
       IndexStore.listen(this.onIndexLoaded);
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
+    this.unsubscribeFromIntroductionStore =
+      IntroductionStore.listen(this.onIntroductionStore);
+
+    //this.listenTo
 
     const indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
 
@@ -75,6 +91,7 @@ export default class extends React.Component {
   }
 
   componentWillUnmount() {
+    this.unsubscribeFromIntroductionStore();
     this.unsubscribeFromSelectionStore();
     this.unsubscribeFromIndexStore();
     this.unsubscribeFromGeoMappingStore();
@@ -121,5 +138,16 @@ export default class extends React.Component {
   onSelectionChange(newSelection) {
     this.setState(newSelection);
     console.log('onSelectionChange this.state: ', this.state);
+  }
+
+  onIntroductionStore(event) {
+    console.log('onIntroductionStore', event);
+    if (event.visualize) {
+      let body = document.body; // React.findDOMNode('body');
+      let visualization = React.findDOMNode(this.refs.visualization);
+      $(body).animate({
+        scrollTop: $(visualization).offset().top
+      }, 500);
+    }
   }
 }

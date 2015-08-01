@@ -7271,6 +7271,36 @@ button.close {
     display: none !important;
   }
 }
+.introduction {
+  padding-top: 25px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 25px;
+  font-size: 1em;
+  display: inline-block;
+  max-width: 1024px;
+}
+.introduction h1 {
+  font-size: 3em;
+}
+.introduction h2 {
+  font-size: 2.5em;
+}
+.introduction h3 {
+  font-size: 2em;
+}
+.introduction h1, .introduction h2, .introduction h3, .introduction h4, .introduction h5, .introduction h6, .introduction p {
+  line-height: 1.45;
+}
+.introduction .collapsed {
+  max-height: 0px;
+  overflow: hidden;
+}
+.introduction .gradual {
+  -webkit-transition: all 500ms;
+          transition: all 500ms;
+}
+
 *,
 *:before,
 *:after {
@@ -7294,14 +7324,12 @@ html {
 .map-application {
   height: 60%;
   width: 40%;
-  padding-top: 50px;
   float: left;
 }
 
 .sidebar {
   height: 100%;
   width: 60%;
-  padding-top: 50px;
   float: right;
 }
 
@@ -7322,12 +7350,10 @@ html {
 }
 
 header {
-  position: absolute;
-  top: 0;
-  left: 0;
   height: 50px;
   padding: 15px;
   z-index: 9;
+  border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
   width: 100%;
 }
