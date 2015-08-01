@@ -35,6 +35,35 @@ var bundler = {
   }
 };
 
+var jsxES6Template = "import React from 'react';"
+ + 'export default class extends React.Component {'
+ + '  constructor(props) { super(props); }'
+ + '  render() {'
+ + '    return ('
+ + '      <div>'
+ + '      <%= contents %>'
+ + '      </div>'
+ + '    );'
+ + '  }'
+ + '}';
+
+gulp.task('markdown', function() {
+  return gulp.src('app/content/*.md')
+    .pipe($.remarkable({
+      preset: 'full',
+      disable: ['replacements'],
+      remarkableOptions: {
+        typographer: true,
+        linkify: true,
+        breaks: true
+      }
+    }))
+    .pipe($.wrap(jsxES6Template))
+    .pipe($.rename(function (path) { return path.extname = '.js'; }))
+    .pipe(gulp.dest('app/scripts/content'))
+    .pipe($.size());
+});
+
 gulp.task('styles', function() {
   return $.rubySass('app/styles/main.scss', {
       style: 'expanded',
@@ -74,7 +103,10 @@ gulp.task('images', function() {
 });
 
 gulp.task('fonts', function() {
-  return gulp.src(['app/fonts/**/*', 'app/bower_components/bootstrap-sass-official/assets/fonts/**/*'])
+  return gulp.src([
+      'app/fonts/**/*', 
+      'app/bower_components/bootstrap-sass-official/assets/fonts/**/*'
+    ])
     .pipe(gulp.dest('dist/fonts'))
     .pipe($.size());
 });
@@ -136,7 +168,15 @@ gulp.task('minify', ['minify:js', 'minify:css']);
 
 gulp.task('clean', del.bind(null, 'dist'));
 
-gulp.task('bundle', ['html', 'styles', 'scripts', 'images', 'fonts', 'extras']);
+gulp.task('bundle', [
+  'markdown', 
+  'html', 
+  'styles', 
+  'scripts', 
+  'images', 
+  'fonts', 
+  'extras'
+]);
 
 gulp.task('clean-bundle', sync(['clean', 'bundle']));
 
@@ -152,6 +192,7 @@ gulp.task('default', ['build']);
 
 gulp.task('watch', sync(['clean-bundle', 'serve']), function() {
   bundler.watch();
+  gulp.watch('app/content/*.md', ['markdown']);
   gulp.watch('app/*.html', ['html']);
   gulp.watch('app/styles/**/*.scss', ['styles']);
   gulp.watch('app/images/**/*', ['images']);

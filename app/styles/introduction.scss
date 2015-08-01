@@ -1,0 +1,32 @@
+
+.introduction {
+  padding-top: 25px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 25px;
+
+  font-size: 1em;
+
+  display: inline-block;
+  max-width: 1024px;
+  
+  h1 { font-size: 3em; }
+  h2 { font-size: 2.5em; }
+  h3 { font-size: 2em; }
+
+
+
+  h1,h2,h3,h4,h5,h6,p {
+   line-height: 1.45;
+  }
+
+  .collapsed {
+    max-height: 0px;
+    overflow: hidden;
+  }
+
+  .gradual {
+    transition: all 500ms;
+  }
+
+}

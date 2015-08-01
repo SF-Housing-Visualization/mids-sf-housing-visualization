@@ -1,5 +1,6 @@
 $icon-font-path: "/fonts/bootstrap/";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap";
+@import "introduction";
 @import "visualization";
 @import '../nv.d3.css';
 @import '../leaflet.css';
