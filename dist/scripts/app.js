@@ -1698,36 +1698,6 @@ var _default = (function (_React$Component) {
         var label = valueObject.label;
         valueObject.color = _this.contains(selectedGeographies, label) ? selectedColor : baselineColor;
       });
-
-      // implicitly keep only the last value for any geography/year
-      rows.forEach(function (row) {
-        var geography = forwardGeoMapping[row.GeoID].ShortName;
-        var year = row.Year;
-        valuesByGeography[geography][year] = row[metric];
-      });
-
-      var geographies = _underscore2['default'].sortBy(_underscore2['default'].keys(valuesByGeography), function (geography) {
-        return _this2.contains(selectedGeographies, geography) ? 1 : 0;
-      });
-
-      var lines = _underscore2['default'].map(geographies, function (geography, series) {
-        var color = _this2.contains(selectedGeographies, geography) ? selectedColor : baselineColor;
-
-        var key = geography;
-        var years = valuesByGeography[geography];
-        var values = _underscore2['default'].map(_underscore2['default'].sortBy(_underscore2['default'].keys(years)), function (year) {
-          var x = year;
-          var y = years[year];
-          return { color: color, series: series, x: x, y: y };
-        });
-        //let values = [ { color, series: index, x: year, y} ]
-
-        return { color: color, key: key, values: values };
-      });
-
-      console.log('reshapeMetric', selectedGeographies, geoMapping, key, valuesByGeography, lines);
-
-      return lines;
     }
   }, {
     key: 'onGeoMappingChange',
