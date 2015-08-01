@@ -35,8 +35,21 @@ var bundler = {
   }
 };
 
+var jsxES6Template = "import React from ''react'';
+
+export default class extends React.Component {
+  constructor(props) { super(props); }
+  render() {
+    return (
+      <div>
+        <%= contents %>
+      </div>
+    );
+  }
+}";
+
 gulp.task('markdown', function() {
-  return gulp.src('IntroductoryPage.md')
+  return gulp.src('app/content/*.md')
     .pipe($.remarkable({
       preset: 'full',
       disable: ['replacements'],
@@ -46,8 +59,9 @@ gulp.task('markdown', function() {
         breaks: true
       }
     }))
-    .pipe($.rename('IntroductoryPage.html'))
-    .pipe(gulp.dest('dist'))
+    .pipe($.wrap(jsxES6Template))
+    .pipe($.rename(function (path) { return path.extname = '.js'; }))
+    .pipe(gulp.dest('app/scripts/content'))
     .pipe($.size());
 });
 
