@@ -1471,10 +1471,8 @@ var _default = (function (_React$Component) {
       });
 
       var lines = _underscore2['default'].map(geographies, function (geography, series) {
-        console.log('debug reshapeMetric', geography, selectedGeographies);
         var color = _this2.contains(selectedGeographies, geography) ? selectedColor : baselineColor;
 
-        console.log('debug reshapeMetric', geography, selectedGeographies, color);
         var key = geography;
         var years = valuesByGeography[geography];
         var values = _underscore2['default'].map(_underscore2['default'].sortBy(_underscore2['default'].keys(years)), function (year) {

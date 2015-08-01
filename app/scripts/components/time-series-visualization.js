@@ -221,13 +221,11 @@ export default class extends React.Component {
     });
 
     let lines = _.map(geographies, (geography, series) => {
-      console.log('debug reshapeMetric', geography, selectedGeographies)
       let color = 
         this.contains(selectedGeographies, geography)
         ? selectedColor
         : baselineColor;
 
-      console.log('debug reshapeMetric', geography, selectedGeographies, color);
       let key = geography;
       let years = valuesByGeography[geography];
       let values = _.map(_.sortBy(_.keys(years)), (year) => {
