@@ -108,6 +108,8 @@ gulp.task('fonts', function() {
       'app/bower_components/bootstrap-sass-official/assets/fonts/**/*'
     ])
     .pipe(gulp.dest('dist/fonts'))
+    // HACK to get both local and deployed fonts to work correctly
+    .pipe(gulp.dest('dist/dist/fonts'))
     .pipe($.size());
 });
 
