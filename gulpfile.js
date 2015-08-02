@@ -109,7 +109,7 @@ gulp.task('fonts', function() {
     ])
     .pipe(gulp.dest('dist/fonts'))
     // HACK to get both local and deployed fonts to work correctly
-    .pipe(gulp.dest('dist/dist/fonts'))
+    .pipe(gulp.dest('dist/mids-sf-housing-visualization/dist/fonts'))
     .pipe($.size());
 });
 
