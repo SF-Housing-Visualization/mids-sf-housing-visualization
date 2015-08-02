@@ -1897,89 +1897,71 @@ var _default = (function (_React$Component) {
                         _react2["default"].createElement(
                               "p",
                               null,
-                              "For example, quotes like this suggest the housing crisis is new?"
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
-                              "“I’ve spent my entire life on the Peninsula,” said Poncia, a 38-year-old teacher at a school in San Mateo. “I’m at a point where I have to make a major change in my career or move out due to high rents. I feel like I’m barely staying afloat as a teacher.”"
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
+                              "For example, a quote from ",
                               _react2["default"].createElement(
                                     "a",
                                     { href: "http://www.mercurynews.com/business/ci_25095612/high-prices-sending-bay-area-renters-and-homebuyers" },
-                                    "http://www.mercurynews.com/business/ci_25095612/high-prices-sending-bay-area-renters-and-homebuyers"
+                                    "this article"
+                              ),
+                              " suggests the housing crisis is new?"
+                        ),
+                        _react2["default"].createElement(
+                              "blockquote",
+                              null,
+                              _react2["default"].createElement(
+                                    "p",
+                                    null,
+                                    "“I’ve spent my entire life on the Peninsula,” said Poncia, a 38-year-old teacher at a school in San Mateo. “I’m at a point where I have to make a major change in my career or move out due to high rents. I feel like I’m barely staying afloat as a teacher.”"
                               )
                         ),
                         _react2["default"].createElement(
                               "p",
                               null,
-                              "But others suggest this problem has been around for decades."
+                              "But another from the same article suggests this problem has been around for decades."
+                        ),
+                        _react2["default"].createElement(
+                              "blockquote",
+                              null,
+                              _react2["default"].createElement(
+                                    "p",
+                                    null,
+                                    "“I came here in the late 1990s and even then it was very clear that there had been a failure to keep up with demand going back at least 10 years before that.”"
+                              )
                         ),
                         _react2["default"].createElement(
                               "p",
                               null,
-                              "“I came here in the late 1990s and even then it was very clear that there had been a failure to keep up with demand going back at least 10 years before that.”"
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
-                              "This article also suggests that people are flowing to the periphery of the bay area. How much more affordable is it? Is the bay area turning into a region of elites?"
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
-                              "(",
                               _react2["default"].createElement(
                                     "a",
                                     { href: "http://www.bizjournals.com/sanfrancisco/print-edition/2015/01/02/the-housing-crisis-2015-forecast.html" },
-                                    "http://www.bizjournals.com/sanfrancisco/print-edition/2015/01/02/the-housing-crisis-2015-forecast.html"
+                                    "Another article"
                               ),
-                              ")"
+                              " suggests that people are flowing to the periphery of the bay area. How much more affordable is it? Is the bay area turning into a region of elites?"
                         ),
                         _react2["default"].createElement(
                               "p",
                               null,
-                              "(",
                               _react2["default"].createElement(
                                     "a",
                                     { href: "http://kalw.org/post/bay-area-housing-bubble-or-housing-crisis" },
-                                    "http://kalw.org/post/bay-area-housing-bubble-or-housing-crisis"
+                                    "Yet another article"
                               ),
-                              ")"
+                              " asks whether this is a housing bubble (valuations are too high) or housing crisis (not enough housing supply)? How does the current housing problem compare to history, particularly the dot-com bubble and mid 2000’s housing bubble?"
                         ),
                         _react2["default"].createElement(
                               "p",
                               null,
-                              "Is this a housing bubble (valuations are too high) or housing crisis (not enough housing supply)? How does the current housing problem compare to history, particularly the dot-com bubble and mid 2000’s housing bubble?"
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
-                              "Are people fleeing the bay area because housing is so unaffordable?"
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
-                              "(",
                               _react2["default"].createElement(
                                     "a",
                                     { href: "https://www.redfin.com/blog/2015/05/the-digital-diaspora.html#.VX9fVhNVikr" },
-                                    "https://www.redfin.com/blog/2015/05/the-digital-diaspora.html#.VX9fVhNVikr"
+                                    "One final article"
                               ),
-                              ")"
+                              " asks if people are leaving Northern California altogether because housing is so unaffordable."
                         ),
                         _react2["default"].createElement(
                               "p",
                               null,
-                              "We have our own practical questions:"
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
-                              "Where can I actually afford to live & what income levels does it take to be able to afford to live in the bay area?"
+                              "Indeed, we have our own practical questions. Where can I actually afford to live & what income levels does it take to be able to afford to live in the bay area?"
                         ),
                         _react2["default"].createElement(
                               "p",
@@ -1994,7 +1976,7 @@ var _default = (function (_React$Component) {
                         _react2["default"].createElement(
                               "p",
                               null,
-                              "[This would be basically the same as the screen-shots we showed in midterm presentation interactive display]"
+                              "[This would be basically the same as the screen-shots we showed in midterm presentation interactive display or could alternatively be some of Angela’s interesting observations - still I think the difference in affordability of outlying counties vs “core” counties today vs 2005 is quite notable]."
                         ),
                         _react2["default"].createElement(
                               "p",
