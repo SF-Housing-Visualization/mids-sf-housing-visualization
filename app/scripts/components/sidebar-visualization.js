@@ -11,6 +11,8 @@ import MetricStore from './metric-store';
 
 import GeoMappingStore from './geo-mapping-store';
 
+import DimensionStore from './dimension-store';
+
 
 export default class extends React.Component {
   constructor(props) {
@@ -27,17 +29,23 @@ export default class extends React.Component {
     this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
+    this.onDimensionChange = this.onDimensionChange.bind(this);
   }
 
   render() {
+    let componentHeight = this.state.componentHeight;
+    let style = componentHeight ? { height: componentHeight } : { };
+    
     return (
-      <div className='sidebar'>
+      <div className='sidebar' style={ style }>
         <svg ref='svg'></svg>
       </div>
     );
   }
 
   componentDidMount() {
+    this.unsubscribeFromDimensionStore =
+      DimensionStore.listen(this.onDimensionChange);
     this.unsubscribeFromGeoMappingStore =
       GeoMappingStore.listen(this.onGeoMappingChange);
     this.unsubscribeFromSelectionStore =
@@ -51,6 +59,7 @@ export default class extends React.Component {
     this.unsubscribeFromMetricStore();
     this.unsubscribeFromSelectionStore();
     this.unsubscribeFromGeoMappingStore();
+    this.unsubscribeFromDimensionStore();
   }
 
   onBarHover(data) {
@@ -131,6 +140,18 @@ export default class extends React.Component {
     this.drawChart(data);
 
     console.log('SidebarVisualization onSelectionChange() new state:', this.state);
+  }
+
+  onDimensionChange(newDimension) {
+    console.log('SidebarVisualization onDimensionChange()', newDimension);
+    let windowHeight = newDimension.windowHeight;
+    let visualizationHeaderHeight = newDimension.visualizationHeaderHeight;
+
+    if (windowHeight && visualizationHeaderHeight) {
+      let componentHeight = windowHeight - visualizationHeaderHeight;
+      this.setState({ componentHeight });
+    }
+    
   }
 
   darkenSelected(series, selectedGeographies) {

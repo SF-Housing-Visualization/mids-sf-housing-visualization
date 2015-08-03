@@ -10,6 +10,8 @@ import MetricStore from './metric-store';
 
 import GeoMappingStore from './geo-mapping-store';
 
+import DimensionStore from './dimension-store';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -25,17 +27,23 @@ export default class extends React.Component {
     this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
+    this.onDimensionChange = this.onDimensionChange.bind(this);
   }
 
   render() {
+    let componentHeight = this.state.componentHeight;
+    let style = componentHeight ? { height: componentHeight } : { };
+
     return (
-      <div className="time-series">
+      <div className='time-series' style={ style }>
         <svg ref='svg'></svg>
       </div>
     );
   }
 
   componentDidMount() {
+    this.unsubscribeFromDimensionStore =
+      DimensionStore.listen(this.onDimensionChange);
     this.unsubscribeFromGeoMappingStore =
       GeoMappingStore.listen(this.onGeoMappingChange);
     this.unsubscribeFromSelectionStore =
@@ -49,6 +57,7 @@ export default class extends React.Component {
 
   componentWillUnmount() {
     this.unsubscribeFromSelectionStore();
+    this.unsubscribeFromDimensionStore();
   }
 
   drawChart(data) {
@@ -113,7 +122,17 @@ export default class extends React.Component {
 
   }
 
+  onDimensionChange(newDimension) {
+    console.log('TimeSeriesVisualization onDimensionChange()', newDimension);
+    let windowHeight = newDimension.windowHeight;
+    let visualizationHeaderHeight = newDimension.visualizationHeaderHeight;
 
+    if (windowHeight && visualizationHeaderHeight) {
+      let componentHeight = 0.60 * (windowHeight - visualizationHeaderHeight);
+      this.setState({ componentHeight });
+    }
+    
+  }
 
   onSelectionChange(newSelection) {
     this.setState(newSelection);

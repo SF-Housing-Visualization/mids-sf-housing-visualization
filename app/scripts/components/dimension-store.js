@@ -25,12 +25,16 @@ export default Reflux.createStore({
   onResizeVisualizationHeader: function onResizeVisualizationHeader(newSize) {
     this.updateState(newSize);
 
+    console.log('DimensionStore onResizeVisualizationHeader state', 
+      this.state, newSize);
     this.trigger(this.state);
+
+
   },
 
   updateState: function updateState(updates) {
     for (var key in updates) {
-      this.state[key] = updates.key;
+      this.state[key] = updates[key];
     }
   }
 });

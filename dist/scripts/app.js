@@ -79,12 +79,13 @@ exports['default'] = _reflux2['default'].createStore({
   onResizeVisualizationHeader: function onResizeVisualizationHeader(newSize) {
     this.updateState(newSize);
 
+    console.log('DimensionStore onResizeVisualizationHeader state', this.state, newSize);
     this.trigger(this.state);
   },
 
   updateState: function updateState(updates) {
     for (var key in updates) {
-      this.state[key] = updates.key;
+      this.state[key] = updates[key];
     }
   }
 });
@@ -904,6 +905,10 @@ var _geographyLoadAction = require('./geography-load-action');
 
 var _geographyLoadAction2 = _interopRequireDefault(_geographyLoadAction);
 
+var _dimensionStore = require('./dimension-store');
+
+var _dimensionStore2 = _interopRequireDefault(_dimensionStore);
+
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
     _classCallCheck(this, _class);
@@ -944,6 +949,7 @@ var _default = (function (_React$Component) {
     this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
 
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onDimensionChange = this.onDimensionChange.bind(this);
 
     this.select = this.select.bind(this);
     this.unselect = this.unselect.bind(this);
@@ -957,6 +963,9 @@ var _default = (function (_React$Component) {
   _createClass(_class, [{
     key: 'render',
     value: function render() {
+      var componentHeight = this.state.componentHeight;
+      var style = componentHeight ? { height: componentHeight } : {};
+
       var position = [51.505, -0.09];
       var center = [37.7833, -122.4167];
       var zoom = 9;
@@ -968,7 +977,7 @@ var _default = (function (_React$Component) {
 
       var mapReactComponent = _react2['default'].createElement(
         'div',
-        { className: 'map-application' },
+        { className: 'map-application', style: style },
         _react2['default'].createElement(
           _reactLeaflet.Map,
           { ref: 'map', className: 'map',
@@ -980,16 +989,12 @@ var _default = (function (_React$Component) {
           })
         )
       );
-
-      //this.map = mapReactComponent;
-
-      console.log('render() map', mapReactComponent);
       return mapReactComponent;
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      console.log('MapVisualization componentDidMount() SelectionStore', _selectionStore2['default'], 'GeographyStore', _geographyStore2['default']);
+      this.unsubscribeFromDimensionStore = _dimensionStore2['default'].listen(this.onDimensionChange);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
 
       this.unsubscribeFromGeographyStore = _geographyStore2['default'].listen(this.onGeographyStoreChange);
@@ -1003,6 +1008,19 @@ var _default = (function (_React$Component) {
     value: function componentWillUnmount() {
       this.unsubscribeFromSelectionStore();
       this.unsubscribeFromGeographyStore();
+      this.unsubscribeFromDimensionStore();
+    }
+  }, {
+    key: 'onDimensionChange',
+    value: function onDimensionChange(newDimension) {
+      console.log('MapVisualization onDimensionChange()', newDimension);
+      var windowHeight = newDimension.windowHeight;
+      var visualizationHeaderHeight = newDimension.visualizationHeaderHeight;
+
+      if (windowHeight && visualizationHeaderHeight) {
+        var componentHeight = 0.40 * (windowHeight - visualizationHeaderHeight);
+        this.setState({ componentHeight: componentHeight });
+      }
     }
   }, {
     key: 'onGeographyStoreChange',
@@ -1133,7 +1151,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/map-visualization.js","/app/scripts/components")
-},{"./geography-load-action":6,"./geography-store":7,"./selection-actions":18,"./selection-store":19,"_process":31,"buffer":27,"leaflet":32,"react":279,"react-leaflet":53}],15:[function(require,module,exports){
+},{"./dimension-store":3,"./geography-load-action":6,"./geography-store":7,"./selection-actions":18,"./selection-store":19,"_process":31,"buffer":27,"leaflet":32,"react":279,"react-leaflet":53}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -1212,10 +1230,10 @@ var _default = (function (_React$Component) {
     value: function componentDidMount() {
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
 
-      this.updateVisualizationHeaderHeight();
+      var visualizationHeaderHeight = this.updateVisualizationHeaderHeight();
 
       _dimensionActions2['default'].resizeVisualizationHeader({
-        visualizationHeaderHeight: this.state.visualizationHeaderHeight
+        visualizationHeaderHeight: visualizationHeaderHeight
       });
     }
   }, {
@@ -1243,16 +1261,20 @@ var _default = (function (_React$Component) {
         'div',
         null,
         _react2['default'].createElement(
-          'header',
-          { ref: 'visualization', className: 'group' },
-          metric
+          'div',
+          { ref: 'header' },
+          _react2['default'].createElement(
+            'header',
+            { ref: 'visualization', className: 'group' },
+            metric
+          )
         )
       );
     }
   }, {
     key: 'onDimensionStore',
     value: function onDimensionStore(event) {
-      console.log('MetricSelector onDimesionStore()', event);
+      console.log('MetricSelector onDimensionStore()', event);
     }
   }, {
     key: 'onSelectMetric',
@@ -1266,10 +1288,14 @@ var _default = (function (_React$Component) {
   }, {
     key: 'updateVisualizationHeaderHeight',
     value: function updateVisualizationHeaderHeight() {
-      var header = _react2['default'].findDOMNode(this.refs.visualization);
+      var header = _react2['default'].findDOMNode(this.refs.header);
       var height = $(header).height();
 
+      console.log('MetricSelector updateVisualizationHeaderHeight()', header, height);
+
       this.setState({ visualizationHeaderHeight: height });
+
+      return height;
     }
   }]);
 
@@ -1516,6 +1542,10 @@ var _geoMappingStore = require('./geo-mapping-store');
 
 var _geoMappingStore2 = _interopRequireDefault(_geoMappingStore);
 
+var _dimensionStore = require('./dimension-store');
+
+var _dimensionStore2 = _interopRequireDefault(_dimensionStore);
+
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
     _classCallCheck(this, _class);
@@ -1533,6 +1563,7 @@ var _default = (function (_React$Component) {
     this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
+    this.onDimensionChange = this.onDimensionChange.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -1540,15 +1571,19 @@ var _default = (function (_React$Component) {
   _createClass(_class, [{
     key: 'render',
     value: function render() {
+      var componentHeight = this.state.componentHeight;
+      var style = componentHeight ? { height: componentHeight } : {};
+
       return _react2['default'].createElement(
         'div',
-        { className: 'sidebar' },
+        { className: 'sidebar', style: style },
         _react2['default'].createElement('svg', { ref: 'svg' })
       );
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
+      this.unsubscribeFromDimensionStore = _dimensionStore2['default'].listen(this.onDimensionChange);
       this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingChange);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
       this.unsubscribeFromMetricStore = _metricStore2['default'].listen(this.onMetricChange);
@@ -1559,6 +1594,7 @@ var _default = (function (_React$Component) {
       this.unsubscribeFromMetricStore();
       this.unsubscribeFromSelectionStore();
       this.unsubscribeFromGeoMappingStore();
+      this.unsubscribeFromDimensionStore();
     }
   }, {
     key: 'onBarHover',
@@ -1642,6 +1678,18 @@ var _default = (function (_React$Component) {
       this.drawChart(data);
 
       console.log('SidebarVisualization onSelectionChange() new state:', this.state);
+    }
+  }, {
+    key: 'onDimensionChange',
+    value: function onDimensionChange(newDimension) {
+      console.log('SidebarVisualization onDimensionChange()', newDimension);
+      var windowHeight = newDimension.windowHeight;
+      var visualizationHeaderHeight = newDimension.visualizationHeaderHeight;
+
+      if (windowHeight && visualizationHeaderHeight) {
+        var componentHeight = windowHeight - visualizationHeaderHeight;
+        this.setState({ componentHeight: componentHeight });
+      }
     }
   }, {
     key: 'darkenSelected',
@@ -1736,7 +1784,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/sidebar-visualization.js","/app/scripts/components")
-},{"../data/sidebar-data":24,"./geo-mapping-store":5,"./metric-store":17,"./selection-actions":18,"./selection-store":19,"_process":31,"buffer":27,"react":279}],21:[function(require,module,exports){
+},{"../data/sidebar-data":24,"./dimension-store":3,"./geo-mapping-store":5,"./metric-store":17,"./selection-actions":18,"./selection-store":19,"_process":31,"buffer":27,"react":279}],21:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -1788,6 +1836,10 @@ var _geoMappingStore = require('./geo-mapping-store');
 
 var _geoMappingStore2 = _interopRequireDefault(_geoMappingStore);
 
+var _dimensionStore = require('./dimension-store');
+
+var _dimensionStore2 = _interopRequireDefault(_dimensionStore);
+
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
     _classCallCheck(this, _class);
@@ -1805,6 +1857,7 @@ var _default = (function (_React$Component) {
     this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
+    this.onDimensionChange = this.onDimensionChange.bind(this);
   };
 
   _inherits(_class, _React$Component);
@@ -1812,15 +1865,19 @@ var _default = (function (_React$Component) {
   _createClass(_class, [{
     key: 'render',
     value: function render() {
+      var componentHeight = this.state.componentHeight;
+      var style = componentHeight ? { height: componentHeight } : {};
+
       return _react2['default'].createElement(
         'div',
-        { className: 'time-series' },
+        { className: 'time-series', style: style },
         _react2['default'].createElement('svg', { ref: 'svg' })
       );
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
+      this.unsubscribeFromDimensionStore = _dimensionStore2['default'].listen(this.onDimensionChange);
       this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingChange);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
       this.unsubscribeFromMetricStore = _metricStore2['default'].listen(this.onMetricChange);
@@ -1832,6 +1889,7 @@ var _default = (function (_React$Component) {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
       this.unsubscribeFromSelectionStore();
+      this.unsubscribeFromDimensionStore();
     }
   }, {
     key: 'drawChart',
@@ -1887,6 +1945,18 @@ var _default = (function (_React$Component) {
 
         setState({ data: data, chart: chart }); // ES6 implicit :data, :chart
       });
+    }
+  }, {
+    key: 'onDimensionChange',
+    value: function onDimensionChange(newDimension) {
+      console.log('TimeSeriesVisualization onDimensionChange()', newDimension);
+      var windowHeight = newDimension.windowHeight;
+      var visualizationHeaderHeight = newDimension.visualizationHeaderHeight;
+
+      if (windowHeight && visualizationHeaderHeight) {
+        var componentHeight = 0.60 * (windowHeight - visualizationHeaderHeight);
+        this.setState({ componentHeight: componentHeight });
+      }
     }
   }, {
     key: 'onSelectionChange',
@@ -2025,7 +2095,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/time-series-visualization.js","/app/scripts/components")
-},{"../data/time-series-data":25,"./geo-mapping-store":5,"./metric-store":17,"./selection-actions":18,"./selection-store":19,"_process":31,"buffer":27,"react":279}],22:[function(require,module,exports){
+},{"../data/time-series-data":25,"./dimension-store":3,"./geo-mapping-store":5,"./metric-store":17,"./selection-actions":18,"./selection-store":19,"_process":31,"buffer":27,"react":279}],22:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 

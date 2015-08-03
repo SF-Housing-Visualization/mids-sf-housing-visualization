@@ -29,10 +29,10 @@ export default class extends React.Component {
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
 
-    this.updateVisualizationHeaderHeight();
+    let visualizationHeaderHeight = this.updateVisualizationHeaderHeight();
 
     DimensionActions.resizeVisualizationHeader({
-      visualizationHeaderHeight: this.state.visualizationHeaderHeight
+      visualizationHeaderHeight
     });
   }
 
@@ -57,15 +57,17 @@ export default class extends React.Component {
 
     return (
       <div>
-        <header ref='visualization' className='group'>
-          { metric }
-        </header>
+        <div ref='header'>
+          <header ref='visualization' className='group'>
+            { metric }
+          </header>
+        </div>
       </div>
     );
   }
 
   onDimensionStore(event) {
-    console.log('MetricSelector onDimesionStore()', event);
+    console.log('MetricSelector onDimensionStore()', event);
   }
 
   onSelectMetric(event) {
@@ -78,9 +80,14 @@ export default class extends React.Component {
   }
 
   updateVisualizationHeaderHeight() {
-    let header = React.findDOMNode(this.refs.visualization);
+    let header = React.findDOMNode(this.refs.header);
     let height = $(header).height();
 
+    console.log('MetricSelector updateVisualizationHeaderHeight()',
+      header, height);
+
     this.setState({ visualizationHeaderHeight : height });
+
+    return height;
   }
 }
