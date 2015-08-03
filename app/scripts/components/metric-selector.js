@@ -7,6 +7,8 @@ import DimensionActions from './dimension-actions';
 import MetricSelectorStore from './metric-selector-store';
 import MetricSelectorActions from './metric-selector-actions';
 
+import MetricsGrid from './metrics-grid';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -85,13 +87,13 @@ export default class extends React.Component {
       (selectorMaxHeight && this.state.expanded)
       ? { 
         maxHeight : selectorMaxHeight,
-        transitionDuration : '0.5s',
+        transitionDuration : '0.2s',
         transitionProperty : 'max-height',
         transitionTimingFunction : 'ease-in-out'
       } : { 
         maxHeight : 0, 
         overflowY : 'hidden',
-        transitionDuration : '0.5s',
+        transitionDuration : '0.2s',
         transitionProperty : 'max-height',
         transitionTimingFunction : 'ease-in-out'
       };
@@ -110,7 +112,7 @@ export default class extends React.Component {
           <div 
             className='metric-selector'
             ref='selector'>
-            { fakeClose }
+            <MetricsGrid />
           </div>
         </div>
       </div>
@@ -158,7 +160,7 @@ export default class extends React.Component {
   updateSelectorMaxHeight() {
     let selector =
       React.findDOMNode(this.refs.selector);
-    let height = $(selector).height();
+    let height = $(selector).outerHeight();
     console.log('MetricSelector updateSelectorMaxHeight()',
       selector, height);
     this.setState({ selectorMaxHeight : height });

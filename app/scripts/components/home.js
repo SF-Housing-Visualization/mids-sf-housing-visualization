@@ -106,7 +106,7 @@ export default class extends React.Component {
   onIndexLoaded(index) {
     console.log('Home onIndexLoaded() ', index);
 
-    let primaryGroupId = index.groupOrder[0];
+    let primaryGroupId = 'CARS';
     let primaryGroup = index.groups[primaryGroupId];
 
     let primaryVariableId = primaryGroup.variableOrder[0];
