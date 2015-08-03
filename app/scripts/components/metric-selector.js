@@ -4,12 +4,18 @@ import SelectionStore from './selection-store';
 
 import DimensionActions from './dimension-actions';
 
+import MetricSelectorStore from './metric-selector-store';
+import MetricSelectorActions from './metric-selector-actions';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { };
+    this.state = { expanded: false };
 
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onSelectMetric = this.onSelectMetric.bind(this);
+    this.onMetricSelected = this.onMetricSelected.bind(this);
+    this.onMetricSelectorStore = this.onMetricSelectorStore.bind(this);
 
     /*this.initial = {
       geography: 'San Francisco',
@@ -28,15 +34,20 @@ export default class extends React.Component {
   componentDidMount() {
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
+    this.unsubscribeFromMetricSelectorStore =
+      MetricSelectorStore.listen(this.onMetricSelectorStore);
 
     let visualizationHeaderHeight = this.updateVisualizationHeaderHeight();
 
     DimensionActions.resizeVisualizationHeader({
       visualizationHeaderHeight
     });
+
+    this.updateSelectorMaxHeight();
   }
 
   componentWillUnmount() {
+    this.unsubscribeFromMetricSelectorStore();
     this.unsubscribeFromSelectionStore();
   }
 
@@ -48,12 +59,42 @@ export default class extends React.Component {
       : 'Loading ...';
 
     let metric = (
-      <button className='btn btn-default btn-lg' onClick={this.onSelectMetric}
+      <button className='btn btn-default btn-lg' 
+        onClick={this.onSelectMetric}
         aria-label={ primaryMetricDisplayName }>
         <span className='glyphicon glyphicon-check' 
           aria-hidden='true'></span> { primaryMetricDisplayName }
       </button>
     );
+
+    let fakeClose = (
+      <button className='btn btn-default btn-lg' 
+        onClick={this.onMetricSelected}
+        aria-label={ primaryMetricDisplayName }>
+        <span className='glyphicon glyphicon-check' 
+          aria-hidden='true'></span> { primaryMetricDisplayName }
+      </button>
+    );
+
+    let selectorMaxHeight = this.state.selectorMaxHeight;
+    console.log('MetricSelector render()',
+      'selectorMaxHeight', selectorMaxHeight, 
+      'state.expanded', this.state.expanded);
+
+    let selectorContainerStyle =
+      (selectorMaxHeight && this.state.expanded)
+      ? { 
+        maxHeight : selectorMaxHeight,
+        transitionDuration : '0.5s',
+        transitionProperty : 'max-height',
+        transitionTimingFunction : 'ease-in-out'
+      } : { 
+        maxHeight : 0, 
+        overflowY : 'hidden',
+        transitionDuration : '0.5s',
+        transitionProperty : 'max-height',
+        transitionTimingFunction : 'ease-in-out'
+      };
 
     return (
       <div>
@@ -61,6 +102,16 @@ export default class extends React.Component {
           <header ref='visualization' className='group'>
             { metric }
           </header>
+        </div>
+        <div 
+          className='metric-selector-container' 
+          style={ selectorContainerStyle }
+          ref='selectorContainer'>
+          <div 
+            className='metric-selector'
+            ref='selector'>
+            { fakeClose }
+          </div>
         </div>
       </div>
     );
@@ -71,7 +122,20 @@ export default class extends React.Component {
   }
 
   onSelectMetric(event) {
+    console.log('MetricSelector onSelectMetric()', event);
 
+    this.updateSelectorMaxHeight();
+    MetricSelectorActions.expand();
+  }
+
+  onMetricSelected(event) {
+    console.log('MetricSelector onMetricSelected()', event);
+    MetricSelectorActions.collapse();
+  }
+
+  onMetricSelectorStore(newState) {
+    console.log('MetricSelector onMetricSelectorStore()', newState);
+    this.setState(newState);
   }
 
   onSelectionChange(newSelection) {
@@ -90,4 +154,14 @@ export default class extends React.Component {
 
     return height;
   }
+
+  updateSelectorMaxHeight() {
+    let selector =
+      React.findDOMNode(this.refs.selector);
+    let height = $(selector).height();
+    console.log('MetricSelector updateSelectorMaxHeight()',
+      selector, height);
+    this.setState({ selectorMaxHeight : height });
+  }
+
 }

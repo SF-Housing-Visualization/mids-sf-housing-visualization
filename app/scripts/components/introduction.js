@@ -67,7 +67,13 @@ export default class extends React.Component {
         transitionDuration : '0.5s',
         transitionProperty : 'max-height',
         transitionTimingFunction : 'ease-in-out'
-      } : { maxHeight : 0, overflowY : 'hidden' };
+      } : { 
+        maxHeight : 0, 
+        overflowY : 'hidden',
+        transitionDuration : '0.5s',
+        transitionProperty : 'max-height',
+        transitionTimingFunction : 'ease-in-out'
+      };
 
     return (
       <div className='introduction' ref='introduction'>
