@@ -30,12 +30,23 @@ export default Reflux.createStore({
   transform: function transform(dataGeos) {
     let forward = { };
     let reverse = { };
-
+    
+    /*
     dataGeos.forEach( (mapping) => {
       let id = +( mapping.GeoID );
       let shortName = mapping.ShortName;
       forward[id] = mapping;
       reverse[shortName] = id;
+    });
+    */
+    
+    dataGeos.forEach( (mapping) => {
+      if(mapping.Include==1){
+        let id = +( mapping.GeoID );
+        let shortName = mapping.ShortName;
+        forward[id] = mapping;
+        reverse[shortName] = id;
+      }
     });
 
     return { forward, reverse };
