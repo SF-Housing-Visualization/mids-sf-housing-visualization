@@ -114,8 +114,13 @@ export default class extends React.Component {
 
     // implicitly keep only the last value for any geography/year
     applicable.forEach((row) => {
-      let geography = forwardGeoMapping[row.GeoID].ShortName
-      valueByGeography[geography] = row[metric];
+      if (row && forwardGeoMapping[row.GeoID]) {
+        let geography = forwardGeoMapping[row.GeoID].ShortName
+        valueByGeography[geography] = row[metric];
+      } else {
+        console.log('SidebarVisualization.reshapeMetric() ignored bad data',
+          row);
+      }
     });
 
     let values = _.map(_.keys(valueByGeography), (geography) => {

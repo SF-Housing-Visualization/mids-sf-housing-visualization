@@ -418,6 +418,7 @@ var _default = (function (_React$Component) {
 
       var primaryGroupId = 'CARS';
       var primaryGroup = index.groups[primaryGroupId];
+      var primaryGroupName = primaryGroup.LogicalCategory;
 
       var primaryVariableId = primaryGroup.variableOrder[0];
       var primaryVariable = primaryGroup.variables[primaryVariableId];
@@ -428,7 +429,7 @@ var _default = (function (_React$Component) {
         group: primaryGroupId,
         metric: primaryVariableId,
         display: {
-          group: primaryGroup,
+          group: primaryGroupName,
           metric: primaryMetric
         }
       };
@@ -1487,12 +1488,41 @@ var _metricLoadAction2 = _interopRequireDefault(_metricLoadAction);
 exports['default'] = _reflux2['default'].createStore({
 
   init: function init() {
-    this.state = {};
+    this.state = {
+      pending: {},
+      resolved: {},
+      rejected: {}
+    };
     this.onMetricLoad = this.onMetricLoad.bind(this);
     this.onMetricLoaded = this.onMetricLoaded.bind(this);
 
     this.listenTo(_metricLoadAction2['default'], this.onMetricLoad);
     this.listenTo(_metricLoadAction2['default'].completed, this.onMetricLoaded);
+  },
+
+  getMetricPromise: function getMetricPromise(metricSpecification) {
+    var _this = this;
+
+    console.log('MetricStore.getMetricPromise()', metricSpecification);
+    return new Promise(function (resolve, reject) {
+      var group = metricSpecification.group;
+
+      var memoized = _this.state.resolved[group];
+      if (memoized) {
+        resolve(memoized);
+      } else {
+        var deferred = { resolve: resolve, reject: reject };
+        var pending = _this.state.pending[group] || [];
+        if (pending.length == 0) {
+          _this.state.pending[group] = pending;
+        }
+
+        pending.push(deferred);
+
+        console.log('MetricStore.getMetricPromise() calling MetricLoadAction', 'this.state.pending', _this.state.pending, 'metricSpecification', metricSpecification);
+        (0, _metricLoadAction2['default'])(metricSpecification);
+      }
+    });
   },
 
   onMetricLoad: function onMetricLoad(metricSpecification) {
@@ -1512,14 +1542,27 @@ exports['default'] = _reflux2['default'].createStore({
     var group = groupMetrics.group;
     var metric = groupMetrics.metric;
     var data = groupMetrics.data;
+    var promise = groupMetrics.promise;
 
     var columns = this.transpose(data);
     var rows = this.transform(data);
 
-    this.state[group] = rows;
+    this.state.resolved[group] = rows;
 
     var result = { group: group, metric: metric, columns: columns, rows: rows };
     this.trigger(result);
+
+    // notify promise holders
+    var pending = this.state.pending[group];
+
+    if (pending) {
+      pending.forEach(function (deferred) {
+        deferred.resolve(result);
+      });
+
+      delete this.state.pending[group];
+    }
+
     console.log('MetricStore onMetricLoaded', result);
   },
 
@@ -1588,6 +1631,14 @@ var _metricSelectorActions = require('./metric-selector-actions');
 
 var _metricSelectorActions2 = _interopRequireDefault(_metricSelectorActions);
 
+var _metricLoadAction = require('./metric-load-action');
+
+var _metricLoadAction2 = _interopRequireDefault(_metricLoadAction);
+
+var _selectionActions = require('./selection-actions');
+
+var _selectionActions2 = _interopRequireDefault(_selectionActions);
+
 var _default = (function (_React$Component) {
   var _class = function _default(props) {
     _classCallCheck(this, _class);
@@ -1611,18 +1662,6 @@ var _default = (function (_React$Component) {
       var selectedPrimaryMetric = this.state.selectedPrimaryMetric || {};
       var selectedGroup = selectedPrimaryMetric.group;
       var selectedMetric = selectedPrimaryMetric.metric;
-      var primaryMetricDisplayName = selectedPrimaryMetric ? selectedPrimaryMetric.group + ' > ' + selectedPrimaryMetric.metric : 'Loading ...';
-
-      var fakeClose = _react2['default'].createElement(
-        'button',
-        { className: 'btn btn-default btn-lg',
-          onClick: this.onMetricSelected,
-          'aria-label': primaryMetricDisplayName },
-        _react2['default'].createElement('span', { className: 'glyphicon glyphicon-check',
-          'aria-hidden': 'true' }),
-        ' ',
-        primaryMetricDisplayName
-      );
 
       var index = this.state.index || {};
 
@@ -1760,6 +1799,26 @@ var _default = (function (_React$Component) {
       // a better approach would be to have parent pass in a callback
       // investigate when time
       _metricSelectorActions2['default'].collapse();
+
+      var index = this.state.index;
+
+      var group = index.groups[groupId];
+      var groupName = group.LogicalCategory;
+
+      var variable = group.variables[variableId];
+      var metricName = variable.variableName;
+
+      var metric = {
+        group: groupId,
+        metric: variableId,
+        display: {
+          group: groupName,
+          metric: metricName
+        }
+      };
+
+      (0, _metricLoadAction2['default'])(metric);
+      _selectionActions2['default'].primaryMetricSelectionChange(metric);
     }
   }, {
     key: 'onIndexLoaded',
@@ -1782,7 +1841,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/metrics-grid.js","/app/scripts/components")
-},{"./index-store":10,"./metric-selector-actions":16,"./selection-store":22,"_process":34,"buffer":30,"react":282}],21:[function(require,module,exports){
+},{"./index-store":10,"./metric-load-action":15,"./metric-selector-actions":16,"./selection-actions":21,"./selection-store":22,"_process":34,"buffer":30,"react":282}],21:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -1819,6 +1878,10 @@ var _selectionActions = require('./selection-actions');
 
 var _selectionActions2 = _interopRequireDefault(_selectionActions);
 
+var _metricStore = require('./metric-store');
+
+var _metricStore2 = _interopRequireDefault(_metricStore);
+
 exports['default'] = _reflux2['default'].createStore({
 
   init: function init() {
@@ -1847,8 +1910,13 @@ exports['default'] = _reflux2['default'].createStore({
   },
 
   onPrimaryMetricSelectionChange: function onPrimaryMetricSelectionChange(selectedPrimaryMetric) {
-    this.state.selectedPrimaryMetric = selectedPrimaryMetric;
-    this.trigger({ selectedPrimaryMetric: selectedPrimaryMetric }); // implicit :selectedPrimaryMetric
+    var _this = this;
+
+    _metricStore2['default'].getMetricPromise(selectedPrimaryMetric).then(function (data) {
+      console.log('SelectionStore onPrimaryMetricSelectionChange()', 'resolved promise from MetricStore', data);
+      _this.state.selectedPrimaryMetric = selectedPrimaryMetric;
+      _this.trigger({ selectedPrimaryMetric: selectedPrimaryMetric }); // implicit :selectedPrimaryMetric
+    });
   },
 
   onSecondaryMetricsSelectionChange: function onSecondaryMetricsSelectionChange(selectedSecondaryMetrics) {
@@ -1870,7 +1938,7 @@ exports['default'] = _reflux2['default'].createStore({
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/selection-store.js","/app/scripts/components")
-},{"./selection-actions":21,"_process":34,"buffer":30}],23:[function(require,module,exports){
+},{"./metric-store":19,"./selection-actions":21,"_process":34,"buffer":30}],23:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -2035,8 +2103,12 @@ var _default = (function (_React$Component) {
 
       // implicitly keep only the last value for any geography/year
       applicable.forEach(function (row) {
-        var geography = forwardGeoMapping[row.GeoID].ShortName;
-        valueByGeography[geography] = row[metric];
+        if (row && forwardGeoMapping[row.GeoID]) {
+          var _geography = forwardGeoMapping[row.GeoID].ShortName;
+          valueByGeography[_geography] = row[metric];
+        } else {
+          console.log('SidebarVisualization.reshapeMetric() ignored bad data', row);
+        }
       });
 
       var values = _underscore2['default'].map(_underscore2['default'].keys(valueByGeography), function (geography) {
@@ -2433,9 +2505,13 @@ var _default = (function (_React$Component) {
 
       // implicitly keep only the last value for any geography/year
       rows.forEach(function (row) {
-        var geography = forwardGeoMapping[row.GeoID].ShortName;
-        var year = row.Year;
-        valuesByGeography[geography][year] = row[metric];
+        if (row && forwardGeoMapping[row.GeoID]) {
+          var geography = forwardGeoMapping[row.GeoID].ShortName;
+          var year = row.Year;
+          valuesByGeography[geography][year] = row[metric];
+        } else {
+          console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data', row);
+        }
       });
 
       var geographies = _underscore2['default'].sortBy(_underscore2['default'].keys(valuesByGeography), function (geography) {

@@ -108,6 +108,7 @@ export default class extends React.Component {
 
     let primaryGroupId = 'CARS';
     let primaryGroup = index.groups[primaryGroupId];
+    let primaryGroupName = primaryGroup.LogicalCategory;
 
     let primaryVariableId = primaryGroup.variableOrder[0];
     let primaryVariable = primaryGroup.variables[primaryVariableId];
@@ -118,7 +119,7 @@ export default class extends React.Component {
       group: primaryGroupId,
       metric: primaryVariableId,
       display: {
-        group: primaryGroup,
+        group: primaryGroupName,
         metric: primaryMetric
       }
     };

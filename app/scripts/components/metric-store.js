@@ -6,12 +6,41 @@ import MetricLoadAction from './metric-load-action';
 export default Reflux.createStore({
 
   init: function() { 
-    this.state = { };
+    this.state = { 
+      pending: { },
+      resolved: { },
+      rejected: { }
+    };
     this.onMetricLoad = this.onMetricLoad.bind(this);
     this.onMetricLoaded = this.onMetricLoaded.bind(this);
 
     this.listenTo(MetricLoadAction, this.onMetricLoad);
     this.listenTo(MetricLoadAction.completed, this.onMetricLoaded);
+  },
+
+  getMetricPromise: function getMetricPromise(metricSpecification) {
+    console.log('MetricStore.getMetricPromise()', metricSpecification);
+    return new Promise( (resolve, reject) => {
+      let group = metricSpecification.group;
+
+      let memoized = this.state.resolved[group];
+      if (memoized) {
+        resolve(memoized);
+      } else {
+        let deferred = { resolve, reject };
+        let pending = this.state.pending[group] || [ ];
+        if (pending.length == 0) {
+          this.state.pending[group] = pending;
+        }
+
+        pending.push(deferred);
+
+        console.log('MetricStore.getMetricPromise() calling MetricLoadAction',
+          'this.state.pending', this.state.pending,
+          'metricSpecification', metricSpecification);
+        MetricLoadAction(metricSpecification);
+      }
+    });
   },
 
   onMetricLoad: function onMetricLoad(metricSpecification) {
@@ -31,14 +60,27 @@ export default Reflux.createStore({
     let group = groupMetrics.group;
     let metric = groupMetrics.metric;
     let data = groupMetrics.data;
+    let promise = groupMetrics.promise;
 
     let columns = this.transpose(data);
     let rows = this.transform(data)
 
-    this.state[group] = rows;
+    this.state.resolved[group] = rows;
 
     let result = { group, metric, columns, rows };
     this.trigger(result);
+
+    // notify promise holders
+    let pending = this.state.pending[group];
+
+    if (pending) {
+      pending.forEach( (deferred) => {
+        deferred.resolve(result);
+      });
+
+      delete this.state.pending[group];
+    }
+
     console.log('MetricStore onMetricLoaded', result)
   },
 

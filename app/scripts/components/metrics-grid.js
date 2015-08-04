@@ -5,6 +5,10 @@ import SelectionStore from './selection-store';
 
 import MetricSelectorActions from './metric-selector-actions';
 
+import MetricLoadAction from './metric-load-action';
+
+import SelectionActions from './selection-actions';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -22,19 +26,6 @@ export default class extends React.Component {
     let selectedPrimaryMetric = this.state.selectedPrimaryMetric || { };
     let selectedGroup = selectedPrimaryMetric.group;
     let selectedMetric = selectedPrimaryMetric.metric;
-    let primaryMetricDisplayName =
-      selectedPrimaryMetric
-      ? selectedPrimaryMetric.group + ' > ' + selectedPrimaryMetric.metric
-      : 'Loading ...';
-
-    let fakeClose = (
-      <button className='btn btn-default btn-lg' 
-        onClick={this.onMetricSelected}
-        aria-label={ primaryMetricDisplayName }>
-        <span className='glyphicon glyphicon-check' 
-          aria-hidden='true'></span> { primaryMetricDisplayName }
-      </button>
-    );
 
     let index = this.state.index || { };
 
@@ -162,6 +153,26 @@ export default class extends React.Component {
     // a better approach would be to have parent pass in a callback
     // investigate when time
     MetricSelectorActions.collapse();
+
+    let index = this.state.index;
+
+    let group = index.groups[groupId];
+    let groupName = group.LogicalCategory;
+
+    let variable = group.variables[variableId];
+    let metricName = variable.variableName;
+
+    let metric = {
+      group: groupId,
+      metric: variableId,
+      display: {
+        group: groupName,
+        metric: metricName
+      }
+    };
+
+    MetricLoadAction(metric);
+    SelectionActions.primaryMetricSelectionChange(metric);
   }
 
   onIndexLoaded(index) {

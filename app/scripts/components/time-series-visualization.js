@@ -230,9 +230,14 @@ export default class extends React.Component {
 
     // implicitly keep only the last value for any geography/year
     rows.forEach((row) => {
-      let geography = forwardGeoMapping[row.GeoID].ShortName;
-      let year = row.Year;
-      valuesByGeography[geography][year] = row[metric];
+      if (row && forwardGeoMapping[row.GeoID]) {
+        let geography = forwardGeoMapping[row.GeoID].ShortName;
+        let year = row.Year;
+        valuesByGeography[geography][year] = row[metric];
+      } else {
+        console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
+          row);
+      }
     });
 
     let geographies = _.sortBy(_.keys(valuesByGeography), (geography) => {
