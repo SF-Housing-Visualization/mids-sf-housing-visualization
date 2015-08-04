@@ -33,7 +33,7 @@ export default Reflux.createStore({
 
     index.forEach( (variable) => {
       let groupId = variable.GroupID;
-      let groupName = variable.GroupName;
+      let groupName = variable.LogicalCategory;
       
       let group = groups[groupId] || { 
         groupId, // ES6 implicit :groupId

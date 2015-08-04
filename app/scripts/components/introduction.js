@@ -1,4 +1,6 @@
 import React from 'react';
+import ClassNames from 'classnames';
+
 import $ from 'jquery';
 
 import IntroductionActions from './introduction-actions';
@@ -56,39 +58,62 @@ export default class extends React.Component {
       </button>
     );
 
-    let collapsed = (
-      <div>
-        { expand } { visualize }
-      </div>
-    );
+    let introductoryPageMaxHeight = this.state.introductoryPageMaxHeight;
 
-    let expanded = (
-      <div>
-        { collapse } { visualize }
-        <IntroductoryPage />
-        { collapse } { visualize }
-      </div>
-    );
+    let introductoryPageContainerStyle =
+      (introductoryPageMaxHeight && this.state.expanded)
+      ? { 
+        maxHeight : introductoryPageMaxHeight,
+        transitionDuration : '0.5s',
+        transitionProperty : 'max-height',
+        transitionTimingFunction : 'ease-in-out'
+      } : { 
+        maxHeight : 0, 
+        overflowY : 'hidden',
+        transitionDuration : '0.5s',
+        transitionProperty : 'max-height',
+        transitionTimingFunction : 'ease-in-out'
+      };
 
     return (
       <div className='introduction' ref='introduction'>
         <IntroductoryHook /> 
-        <div className={ this.state.expanded ? 'collapsed gradual' : 'gradual' }>
+        { this.state.expanded ? collapse : expand } { visualize }
+        <div 
+          className='introductory-page-container'
+          style={ introductoryPageContainerStyle }
+          ref='introductoryPageContainer'>
+          <div 
+            className='introductory-page' 
+            ref='introductoryPage'>
+            <IntroductoryPage />
+            { collapse } { visualize }
+          </div>
+        </div>
+
+      </div>
+    );
+
+    /*
+      <div className={ this.state.expanded ? 'collapsed gradual' : 'gradual' }>
           { collapsed }
         </div>
         <div className={ this.state.expanded ? 'gradual' : 'collapsed gradual' }>
           { expanded }
         </div>
-      </div>
-    );
+    */
   }
 
+
+
   componentDidMount() {
+    this.unsubscribeFromIntroductionStore =
+      IntroductionStore.listen(this.onIntroductionStore);
+
     let introduction = React.findDOMNode(this.refs.introduction);
     $(introduction).flowtype(this.state.flowtype);
 
-    this.unsubscribeFromIntroductionStore =
-      IntroductionStore.listen(this.onIntroductionStore);
+    this.updateMaxHeight();
   }
 
   componentWillUnmount() {
@@ -101,6 +126,7 @@ export default class extends React.Component {
 
   onExpand() {
     console.log('onexpand called');
+    this.updateMaxHeight();
     IntroductionActions.expand();
   }
 
@@ -111,6 +137,14 @@ export default class extends React.Component {
   onIntroductionStore(newState) {
     console.log('onIntroductionStore() called with:', newState);
     this.setState(newState);
+  }
+
+  updateMaxHeight() {
+    let introductoryPage =
+      React.findDOMNode(this.refs.introductoryPage);
+    let height = $(introductoryPage).height();
+
+    this.setState({ introductoryPageMaxHeight : height });
   }
 
 }

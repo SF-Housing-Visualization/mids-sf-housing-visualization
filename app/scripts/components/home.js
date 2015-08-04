@@ -5,6 +5,7 @@ import Introduction from './introduction';
 import IntroductionActions from './introduction-actions';
 import IntroductionStore from './introduction-store';
 
+import MetricSelector from './metric-selector';
 import MapVisualization from './map-visualization';
 import SidebarVisualization from './sidebar-visualization';
 import TimeSeriesVisualization from './time-series-visualization';
@@ -21,10 +22,16 @@ import GeoMappingStore from './geo-mapping-store';
 import MetricLoadAction from './metric-load-action';
 import MetricStore from './metric-store';
 
+import DimensionActions from './dimension-actions';
+import DimensionStore from './dimension-store';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { };
+    this.state = { 
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
+    };
 
     this.initial = {
       geography: 'San Francisco',
@@ -36,29 +43,17 @@ export default class extends React.Component {
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onIntroductionStore = this.onIntroductionStore.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
+    this.onDimensionStore = this.onDimensionStore.bind(this);
   }
 
   render() {
     return (
       <div className="root-container">
 
-
-
         <Introduction />
         
-        <header ref='visualization' className="group">
-          <div className="appName">
-            mids-sf-housing-visualization 
-            metric: { 
-              this.state.selectedPrimaryMetric
-              ? this.state.selectedPrimaryMetric.group
-                + ' > '
-                + this.state.selectedPrimaryMetric.metric
-              : 'Loading...' 
-            }
-          </div>
-
-        </header>
+        <MetricSelector ref='visualization' />
 
         <SidebarVisualization />
                 
@@ -79,18 +74,19 @@ export default class extends React.Component {
       SelectionStore.listen(this.onSelectionChange);
     this.unsubscribeFromIntroductionStore =
       IntroductionStore.listen(this.onIntroductionStore);
+    this.unsubscribeFromDimensionStore =
+      DimensionStore.listen(this.onDimensionStore);
 
-    //this.listenTo
+    window.addEventListener('resize', this.onWindowResize);
+    this.onWindowResize();
 
-    const indexUrl = '/mids-sf-housing-sandbox/data/prod/data_variables.csv';
-
-    console.log('Home componentDidMount, indexUrl', indexUrl);
     GeoMappingLoadAction();
-    
-
   }
 
   componentWillUnmount() {
+    window.removeEventListener('resize', this.onWindowResize);
+
+    this.unsubscribeFromDimensionStore();
     this.unsubscribeFromIntroductionStore();
     this.unsubscribeFromSelectionStore();
     this.unsubscribeFromIndexStore();
@@ -110,8 +106,9 @@ export default class extends React.Component {
   onIndexLoaded(index) {
     console.log('Home onIndexLoaded() ', index);
 
-    let primaryGroupId = index.groupOrder[0];
+    let primaryGroupId = 'CARS';
     let primaryGroup = index.groups[primaryGroupId];
+    let primaryGroupName = primaryGroup.LogicalCategory;
 
     let primaryVariableId = primaryGroup.variableOrder[0];
     let primaryVariable = primaryGroup.variables[primaryVariableId];
@@ -122,7 +119,7 @@ export default class extends React.Component {
       group: primaryGroupId,
       metric: primaryVariableId,
       display: {
-        group: primaryGroup,
+        group: primaryGroupName,
         metric: primaryMetric
       }
     };
@@ -149,5 +146,17 @@ export default class extends React.Component {
         scrollTop: $(visualization).offset().top
       }, 500);
     }
+  }
+
+  onWindowResize(event) {
+    let windowWidth = window.innerWidth;
+    let windowHeight = window.innerHeight;
+
+    DimensionActions.resize({ windowWidth, windowHeight });
+  }
+
+  onDimensionStore(newDimensions) {
+    console.log('Home onDimensionStore()', newDimensions);
+    this.setState(newDimensions);
   }
 }

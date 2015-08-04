@@ -20,13 +20,15 @@
    line-height: 1.45;
   }
 
+  .introductory-page-container {
+    transition: all 500ms;
+
+  }
+
+
   .collapsed {
     max-height: 0px;
     overflow: hidden;
-  }
-
-  .gradual {
-    transition: all 500ms;
   }
 
 }

@@ -7,6 +7,8 @@ import SelectionStore from './selection-store';
 import GeographyStore from './geography-store';
 import GeographyLoadAction from './geography-load-action';
 
+import DimensionStore from './dimension-store';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -45,6 +47,7 @@ export default class extends React.Component {
     this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
 
     this.onSelectionChange = this.onSelectionChange.bind(this);
+    this.onDimensionChange = this.onDimensionChange.bind(this);
     
     this.select = this.select.bind(this);
     this.unselect = this.unselect.bind(this);
@@ -54,6 +57,9 @@ export default class extends React.Component {
   }
 
   render() {
+    let componentHeight = this.state.componentHeight;
+    let style = componentHeight ? { height: componentHeight } : { };
+
     const position = [51.505, -0.09];
     const center = [37.7833, -122.4167];
     const zoom = 9;
@@ -67,7 +73,7 @@ export default class extends React.Component {
     const url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
     const mapReactComponent = (
-      <div className="map-application">
+      <div className='map-application' style={ style }>
         <Map ref='map' className="map"
           minZoom={minZoom} maxZoom={maxZoom}
           center={center} zoom={zoom}>
@@ -78,16 +84,12 @@ export default class extends React.Component {
         </Map>
       </div>
     );
-
-    //this.map = mapReactComponent;
-
-    console.log('render() map', mapReactComponent);
     return mapReactComponent;
   }
 
   componentDidMount() {
-    console.log('MapVisualization componentDidMount() SelectionStore', 
-      SelectionStore, 'GeographyStore', GeographyStore);
+    this.unsubscribeFromDimensionStore =
+      DimensionStore.listen(this.onDimensionChange);
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
 
@@ -104,6 +106,19 @@ export default class extends React.Component {
   componentWillUnmount() {
     this.unsubscribeFromSelectionStore();
     this.unsubscribeFromGeographyStore();
+        this.unsubscribeFromDimensionStore();
+  }
+
+  onDimensionChange(newDimension) {
+    console.log('MapVisualization onDimensionChange()', newDimension);
+    let windowHeight = newDimension.windowHeight;
+    let visualizationHeaderHeight = newDimension.visualizationHeaderHeight;
+
+    if (windowHeight && visualizationHeaderHeight) {
+      let componentHeight = 0.40 * (windowHeight - visualizationHeaderHeight);
+      this.setState({ componentHeight });
+    }
+    
   }
 
   onGeographyStoreChange(geographies) {
