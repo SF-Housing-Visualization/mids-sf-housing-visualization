@@ -1,6 +1,8 @@
 import Reflux from 'reflux';
 import SelectionActions from './selection-actions';
 
+import MetricStore from './metric-store';
+
 export default Reflux.createStore({
 
   init: function() {
@@ -46,8 +48,16 @@ export default Reflux.createStore({
   },
 
   onPrimaryMetricSelectionChange: function (selectedPrimaryMetric) {
-    this.state.selectedPrimaryMetric = selectedPrimaryMetric;
-    this.trigger({ selectedPrimaryMetric }); // implicit :selectedPrimaryMetric
+    MetricStore
+      .getMetricPromise(selectedPrimaryMetric)
+      .then( (data) => {
+        console.log('SelectionStore onPrimaryMetricSelectionChange()', 
+          'resolved promise from MetricStore', data);
+        this.state.selectedPrimaryMetric = selectedPrimaryMetric;
+        this.trigger({ selectedPrimaryMetric }); // implicit :selectedPrimaryMetric
+
+      });
+
   },
 
   onSecondaryMetricsSelectionChange: function (selectedSecondaryMetrics) {

@@ -7292,13 +7292,13 @@ button.close {
 .introduction h1, .introduction h2, .introduction h3, .introduction h4, .introduction h5, .introduction h6, .introduction p {
   line-height: 1.45;
 }
+.introduction .introductory-page-container {
+  -webkit-transition: all 500ms;
+          transition: all 500ms;
+}
 .introduction .collapsed {
   max-height: 0px;
   overflow: hidden;
-}
-.introduction .gradual {
-  -webkit-transition: all 500ms;
-          transition: all 500ms;
 }
 
 *,
@@ -7350,8 +7350,10 @@ html {
 }
 
 header {
-  height: 50px;
-  padding: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 50px;
+  padding-right: 50px;
   z-index: 9;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
@@ -7360,6 +7362,13 @@ header {
 
 header .appName {
   float: left;
+}
+
+.metric-selector {
+  padding-top: 25px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 25px;
 }
 
 body {

@@ -47,6 +47,7 @@
     ]
   },
   "browserify-shim": {
+    "classnames": "global:classNames",
     "d3": "global:d3",
     "jquery": "global:jQuery",
     "reflux": "global:Reflux",
