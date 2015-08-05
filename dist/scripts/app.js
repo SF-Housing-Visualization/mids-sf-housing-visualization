@@ -1048,7 +1048,7 @@ var _default = (function (_React$Component) {
       var zoom = 9;
       var minZoom = 0;
       var maxZoom = 18;
-      var attribution = 'Map data &copy; ' + '<a href="http://www.openstreetmap.org">' + 'OpenStreetMap contributors</a>';
+      var attribution = 'Map data &copy; ' + '<a style="color: grey" href="http://www.openstreetmap.org">' + 'OpenStreetMap contributors</a>';
 
       var url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
@@ -1058,8 +1058,11 @@ var _default = (function (_React$Component) {
         _react2['default'].createElement(
           _reactLeaflet.Map,
           { ref: 'map', className: 'map',
-            minZoom: minZoom, maxZoom: maxZoom,
-            center: center, zoom: zoom },
+            center: center,
+            zoom: zoom, zoomControl: false,
+            minZoom: zoom, maxZoom: zoom,
+            dragging: false, touchZoom: false,
+            scrollWheelZoom: false, doubleClickZoom: false },
           _react2['default'].createElement(_reactLeaflet.TileLayer, {
             url: url,
             attribution: attribution
@@ -1073,8 +1076,15 @@ var _default = (function (_React$Component) {
     value: function componentDidMount() {
       this.unsubscribeFromDimensionStore = _dimensionStore2['default'].listen(this.onDimensionChange);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
-
       this.unsubscribeFromGeographyStore = _geographyStore2['default'].listen(this.onGeographyStoreChange);
+
+      var leaflet = this.refs.map.getLeafletElement();
+      console.log('MapVisualization.componentDidMount()', leaflet);
+
+      leaflet.attributionControl.options = {
+        position: 'bottomleft',
+        prefix: false
+      };
 
       // load large static data
       var url = '/mids-sf-housing-sandbox/data/prod/ca-counties.json';
