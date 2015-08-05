@@ -92,7 +92,8 @@ export default class extends React.Component {
         <div className='panel-heading'>
           <h3 className='panel-title'> { title } </h3>
         </div>
-        <ul className='list-group'>
+        <table className='table table-condensed'>
+          <tbody>
           { 
             variableOrder.map( (variableName) => 
               this.renderVariable(
@@ -102,7 +103,8 @@ export default class extends React.Component {
               ) 
             ) 
           }
-        </ul>
+          </tbody>
+        </table>
       </div>
     );
   }
@@ -113,6 +115,7 @@ export default class extends React.Component {
 
     let variableName = variable.variableName;
     let variableId = variable.variableId;
+    let variableDescription = variable.variableDescription;
 
     let displayName = groupName + ' > ' + variableName;
 
@@ -129,9 +132,10 @@ export default class extends React.Component {
 
 
     return (
-      <li key={ variable.variableId } className='list-group-item'>
-        { button }
-      </li>
+      <tr key={ variable.variableId }>
+        <td>{ button }</td>
+        <td> { variableDescription }</td>
+      </tr>
     );
   }
 
