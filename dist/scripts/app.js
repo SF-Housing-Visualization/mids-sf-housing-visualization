@@ -2671,24 +2671,7 @@ var _default = (function (_React$Component) {
     }
   }, {
     key: 'onSelectionChange',
-    value: function onSelectionChange(newSelection) {
-      this.setState(newSelection);
-
-      var metric = this.state.metric;
-
-      if (metric && metric.rows) {
-        var data = this.reshapeMetric(this.state.metric);
-        this.setState({ data: data });
-        console.log('TimeSeriesVisualization onSelectionChange()', metric, data, this.state.selectedGeographies);
-        this.drawChart(data);
-      }
-
-      /*let selectedGeographies = newSelection.selectedGeographies;
-       let chart = this.state.chart;
-      let data = this.state.data;
-       data.forEach((series) => this.darkenSelected(series, selectedGeographies));
-       chart.update();*/
-    }
+    value: function onSelectionChange(newSelection) {}
   }, {
     key: 'onLineHover',
     value: function onLineHover(data) {
@@ -2733,11 +2716,6 @@ var _default = (function (_React$Component) {
     key: 'onMetricChange',
     value: function onMetricChange(metric) {
       console.log('TimeSeriesVisualization onMetricChange() metric', metric);
-      //let data = this.reshapeMetric(metric);
-      //console.log('TimeSeriesVisualization onMetricChange() data', data);
-
-      //this.setState({ metric, data });
-      //this.drawChart(data);
     }
   }, {
     key: 'onTimeSeriesStore',
@@ -2747,64 +2725,6 @@ var _default = (function (_React$Component) {
 
       this.setState({ data: data });
       this.drawChart(data);
-    }
-  }, {
-    key: 'reshapeMetric',
-    value: function reshapeMetric(data) {
-      var _this2 = this;
-
-      var selectedYear = this.state.selectedTimePosition;
-      var selectedGeographies = this.state.selectedGeographies;
-      var geoMapping = this.state.geoMapping;
-      var reverseGeoMapping = geoMapping.reverse;
-      var forwardGeoMapping = geoMapping.forward;
-
-      var baselineColor = '#4f99b4';
-      var selectedColor = '#000000';
-      var group = data.group;
-      var metric = data.metric;
-      var key = group + ' > ' + metric;
-
-      var rows = data.rows;
-
-      var valuesByGeography = _underscore2['default'].mapObject(reverseGeoMapping, function () {
-        return {};
-      });
-
-      // implicitly keep only the last value for any geography/year
-      rows.forEach(function (row) {
-        if (row && forwardGeoMapping[row.GeoID]) {
-          var geography = forwardGeoMapping[row.GeoID].ShortName;
-          var year = row.Year;
-          valuesByGeography[geography][year] = row[metric];
-        } else {
-          //console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
-          //  row);
-        }
-      });
-
-      var geographies = _underscore2['default'].sortBy(_underscore2['default'].keys(valuesByGeography), function (geography) {
-        return _this2.contains(selectedGeographies, geography) ? 1 : 0;
-      });
-
-      var lines = _underscore2['default'].map(geographies, function (geography, series) {
-        var color = _this2.contains(selectedGeographies, geography) ? selectedColor : baselineColor;
-
-        var key = geography;
-        var years = valuesByGeography[geography];
-        var values = _underscore2['default'].map(_underscore2['default'].sortBy(_underscore2['default'].keys(years)), function (year) {
-          var x = year;
-          var y = years[year];
-          return { color: color, series: series, x: x, y: y };
-        });
-        //let values = [ { color, series: index, x: year, y} ]
-
-        return { color: color, key: key, values: values };
-      });
-
-      console.log('reshapeMetric', selectedGeographies, geoMapping, key, valuesByGeography, lines);
-
-      return lines;
     }
   }, {
     key: 'contains',
