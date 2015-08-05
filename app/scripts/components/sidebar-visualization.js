@@ -118,8 +118,8 @@ export default class extends React.Component {
         let geography = forwardGeoMapping[row.GeoID].ShortName
         valueByGeography[geography] = row[metric];
       } else {
-        console.log('SidebarVisualization.reshapeMetric() ignored bad data',
-          row);
+        //console.log('SidebarVisualization.reshapeMetric() ignored bad data',
+        //  row);
       }
     });
 

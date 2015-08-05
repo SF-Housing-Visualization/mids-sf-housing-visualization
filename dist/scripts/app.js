@@ -2183,9 +2183,7 @@ var _default = (function (_React$Component) {
         if (row && forwardGeoMapping[row.GeoID]) {
           var _geography = forwardGeoMapping[row.GeoID].ShortName;
           valueByGeography[_geography] = row[metric];
-        } else {
-          console.log('SidebarVisualization.reshapeMetric() ignored bad data', row);
-        }
+        } else {}
       });
 
       var values = _underscore2['default'].map(_underscore2['default'].keys(valueByGeography), function (geography) {
@@ -2311,6 +2309,9 @@ var _default = (function (_React$Component) {
 
 exports['default'] = _default;
 module.exports = exports['default'];
+
+//console.log('SidebarVisualization.reshapeMetric() ignored bad data',
+//  row);
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/sidebar-visualization.js","/app/scripts/components")
 },{"../data/sidebar-data":27,"./dimension-store":3,"./geo-mapping-store":5,"./metric-store":19,"./selection-actions":21,"./selection-store":22,"_process":34,"buffer":30,"react":282}],24:[function(require,module,exports){
@@ -2587,9 +2588,7 @@ var _default = (function (_React$Component) {
           var geography = forwardGeoMapping[row.GeoID].ShortName;
           var year = row.Year;
           valuesByGeography[geography][year] = row[metric];
-        } else {
-          console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data', row);
-        }
+        } else {}
       });
 
       var geographies = _underscore2['default'].sortBy(_underscore2['default'].keys(valuesByGeography), function (geography) {
@@ -2629,6 +2628,9 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 // useInteractiveGuideline: true
+
+//console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
+//  row);
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/time-series-visualization.js","/app/scripts/components")
 },{"../data/time-series-data":28,"./dimension-store":3,"./geo-mapping-store":5,"./metric-store":19,"./selection-actions":21,"./selection-store":22,"_process":34,"buffer":30,"react":282}],25:[function(require,module,exports){

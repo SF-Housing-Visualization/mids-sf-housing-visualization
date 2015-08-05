@@ -237,8 +237,8 @@ export default class extends React.Component {
         let year = row.Year;
         valuesByGeography[geography][year] = row[metric];
       } else {
-        console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
-          row);
+        //console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
+        //  row);
       }
     });
 
