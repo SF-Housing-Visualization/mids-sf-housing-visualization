@@ -86,7 +86,9 @@ export default class extends React.Component {
     let onLineExit = this.onLineExit;
 
     nv.addGraph(function() {
-      var chart = nv.models.lineWithFocusChart();
+      var chart = nv.models.lineChart().options({
+        // useInteractiveGuideline: true
+      });
 
       chart.xAxis
           .tickFormat(d3.format('f'));
@@ -94,8 +96,8 @@ export default class extends React.Component {
       chart.yAxis
           .tickFormat(d3.format(',.2f'));
 
-      chart.y2Axis
-          .tickFormat(d3.format(',.2f'));
+      //chart.y2Axis
+      //    .tickFormat(d3.format(',.2f'));
 
       chart.showLegend(false);
 

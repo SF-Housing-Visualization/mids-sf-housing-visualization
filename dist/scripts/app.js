@@ -168,6 +168,17 @@ exports['default'] = _reflux2['default'].createStore({
       reverse[shortName] = id;
     });
 
+    /*
+    dataGeos.forEach( (mapping) => {
+      if(mapping.Include==1){
+        let id = +( mapping.GeoID );
+        let shortName = mapping.ShortName;
+        forward[id] = mapping;
+        reverse[shortName] = id;
+      }
+    });
+    */
+
     return { forward: forward, reverse: reverse };
   }
 
@@ -2371,13 +2382,14 @@ var _default = (function (_React$Component) {
       var onLineExit = this.onLineExit;
 
       nv.addGraph(function () {
-        var chart = nv.models.lineWithFocusChart();
+        var chart = nv.models.lineChart().options({});
 
         chart.xAxis.tickFormat(_d32['default'].format('f'));
 
         chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
 
-        chart.y2Axis.tickFormat(_d32['default'].format(',.2f'));
+        //chart.y2Axis
+        //    .tickFormat(d3.format(',.2f'));
 
         chart.showLegend(false);
 
@@ -2549,6 +2561,8 @@ var _default = (function (_React$Component) {
 
 exports['default'] = _default;
 module.exports = exports['default'];
+
+// useInteractiveGuideline: true
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/time-series-visualization.js","/app/scripts/components")
 },{"../data/time-series-data":28,"./dimension-store":3,"./geo-mapping-store":5,"./metric-store":19,"./selection-actions":21,"./selection-store":22,"_process":34,"buffer":30,"react":282}],25:[function(require,module,exports){
