@@ -2426,7 +2426,7 @@ exports['default'] = _reflux2['default'].createStore({
 
     var data = selection.rows;
     // Need to investigate why this is inconsistent
-    var rows = typeof data === 'array' ? data : data.rows;
+    var rows = data.rows ? data.rows : data;
 
     var reverseGeoMapping = geoMapping.reverse;
     var forwardGeoMapping = geoMapping.forward;

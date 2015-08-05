@@ -62,7 +62,7 @@ export default Reflux.createStore({
 
     let data = selection.rows;
     // Need to investigate why this is inconsistent
-    let rows = (typeof data === 'array') ? data : data.rows;
+    let rows = (data.rows) ? data.rows : data;
 
     let reverseGeoMapping = geoMapping.reverse;
     let forwardGeoMapping = geoMapping.forward;
