@@ -17,6 +17,10 @@ export default Reflux.createStore({
     this.listenTo(GeoMappingLoadAction.completed, this.onGeoMappingLoaded);
   },
 
+  getInitialState: function getInitialState() {
+    return this.resolved;
+  },
+
   getGeoMappingPromise: function getGeoMappingPromise() {
     console.log('GeoMappingStore.getGeoMappingPromise()');
     return new Promise( (resolve, reject) => {

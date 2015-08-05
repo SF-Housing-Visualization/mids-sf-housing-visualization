@@ -17,6 +17,10 @@ export default Reflux.createStore({
     this.listenTo(IndexLoadAction.completed, this.onIndexLoaded);
   },
 
+  getInitialState: function getInitialState() {
+    return this.resolved;
+  },
+
   getIndexPromise: function getIndexPromise() {
     console.log('IndexStore.getIndexPromise()');
     return new Promise( (resolve, reject) => {

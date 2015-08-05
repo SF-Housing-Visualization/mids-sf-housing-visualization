@@ -1,6 +1,8 @@
 import Reflux from 'reflux';
+import _ from 'underscore';
 import SelectionActions from './selection-actions';
 
+import IndexStore from './index-store';
 import MetricStore from './metric-store';
 
 export default Reflux.createStore({
@@ -43,36 +45,50 @@ export default Reflux.createStore({
 
 
   onGeographiesSelectionChange: function (selectedGeographies) {
-    this.state.selectedGeographies = selectedGeographies;
-    this.trigger({ selectedGeographies });
+    this.onSelectionChange({ selectedGeographies });
   },
 
   onPrimaryMetricSelectionChange: function (selectedPrimaryMetric) {
-    MetricStore
-      .getMetricPromise(selectedPrimaryMetric)
-      .then( (data) => {
-        console.log('SelectionStore onPrimaryMetricSelectionChange()', 
-          'resolved promise from MetricStore', data);
-        this.state.selectedPrimaryMetric = selectedPrimaryMetric;
-        this.trigger({ selectedPrimaryMetric }); // implicit :selectedPrimaryMetric
-
-      });
-
+     this.onSelectionChange({ selectedPrimaryMetric });
   },
 
   onSecondaryMetricsSelectionChange: function (selectedSecondaryMetrics) {
-    this.state.selectedSecondaryMetrics = selectedSecondaryMetrics;
-    this.trigger({ selectedSecondaryMetrics });
+    this.onSelectionChange({ selectedSecondaryMetrics });
   },
 
-  onTimePositionSelectionChange: function (selectedTimePosition) { 
-    this.state.selectedTimePosition = selectedTimePosition;
-    this.trigger({ selectedTimePosition });
+  onTimePositionSelectionChange: function (selectedTimePosition) {
+    this.onSelectionChange({ selectedTimePosition });
   },
 
   onTimeIntervalSelectionChange: function (selectedTimeInterval) { 
-    this.state.selectedTimeInterval = selectedTimeInterval;
-    this.trigger({ selectedTimeInterval });
+    this.onSelectionChange({ selectedTimeInterval });
+  },
+
+  onSelectionChange: function (changes) {
+    this.state = _.extend(this.state, changes);
+    // ugly workaround to missing Promise.all( m, i ).then( (m, i) => {})
+    let indexPromise = IndexStore.getIndexPromise();
+
+    indexPromise.then( (index) => {
+      let selectedPrimaryMetric = this.state.selectedPrimaryMetric;
+      if (selectedPrimaryMetric) {
+        let metricPromise = MetricStore.getMetricPromise(selectedPrimaryMetric);
+        metricPromise.then( (rows) => {
+
+          let update = _.extend(this.state, { index, rows });
+          
+          console.log('SelectionStore onSelection() triggering', update);
+          this.trigger(update);
+          //this.trigger({ selectedPrimaryMetric, index, metric }); 
+
+        });
+      } else {
+        let update = _.extend(this.state, { index });
+        
+        console.log('SelectionStore onSelection() triggering', update);
+        this.trigger(update);
+      }
+    });
   }
 
 });

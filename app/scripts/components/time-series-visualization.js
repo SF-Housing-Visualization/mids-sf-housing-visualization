@@ -10,6 +10,8 @@ import MetricStore from './metric-store';
 
 import GeoMappingStore from './geo-mapping-store';
 
+import TimeSeriesStore from './time-series-store';
+
 import DimensionStore from './dimension-store';
 
 export default class extends React.Component {
@@ -28,6 +30,7 @@ export default class extends React.Component {
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
     this.onDimensionChange = this.onDimensionChange.bind(this);
+    this.onTimeSeriesStore = this.onTimeSeriesStore.bind(this);
   }
 
   render() {
@@ -50,6 +53,8 @@ export default class extends React.Component {
       SelectionStore.listen(this.onSelectionChange);
     this.unsubscribeFromMetricStore =
       MetricStore.listen(this.onMetricChange);
+    this.unsubscribeFromTimeSeriesStore =
+      TimeSeriesStore.listen(this.onTimeSeriesStore);
 
     let data = this.state.data;
     this.drawChart(data);
@@ -204,10 +209,18 @@ export default class extends React.Component {
 
   onMetricChange(metric) {
     console.log('TimeSeriesVisualization onMetricChange() metric', metric);
-    let data = this.reshapeMetric(metric);
-    console.log('TimeSeriesVisualization onMetricChange() data', data);
+    //let data = this.reshapeMetric(metric);
+    //console.log('TimeSeriesVisualization onMetricChange() data', data);
 
-    this.setState({ metric, data });
+    //this.setState({ metric, data });
+    //this.drawChart(data);
+  }
+
+  onTimeSeriesStore(timeSeries) {
+    console.log('TimeSeriesVisualization onTimeSeriesStore()', timeSeries);
+    let data = timeSeries.lines;
+    
+    this.setState({ data });
     this.drawChart(data);
   }
 
