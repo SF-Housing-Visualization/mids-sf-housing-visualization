@@ -137,12 +137,34 @@ var _geoMappingLoadAction2 = _interopRequireDefault(_geoMappingLoadAction);
 exports['default'] = _reflux2['default'].createStore({
 
   init: function init() {
-    this.state = {};
+    this.state = {
+      pending: [],
+      resolved: null,
+      rejected: null
+    };
     this.onGeoMappingLoad = this.onGeoMappingLoad.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
 
     this.listenTo(_geoMappingLoadAction2['default'], this.onGeoMappingLoad);
     this.listenTo(_geoMappingLoadAction2['default'].completed, this.onGeoMappingLoaded);
+  },
+
+  getGeoMappingPromise: function getGeoMappingPromise() {
+    var _this = this;
+
+    console.log('GeoMappingStore.getGeoMappingPromise()');
+    return new Promise(function (resolve, reject) {
+      var memoized = _this.state.resolved;
+
+      if (memoized) {
+        resolve(memoized);
+      } else {
+        var deferred = { resolve: resolve, reject: reject };
+        _this.state.pending.push(deferred);
+        console.log('GeoMappingStore.getGeoMappingPromise() calling ' + 'GeoMappingLoadAction', 'this.state.pending', _this.state.pending);
+        (0, _geoMappingLoadAction2['default'])();
+      }
+    });
   },
 
   onGeoMappingLoad: function onGeoMappingLoad() {
@@ -152,32 +174,29 @@ exports['default'] = _reflux2['default'].createStore({
 
   onGeoMappingLoaded: function onGeoMappingLoaded(dataGeos) {
     var geoMapping = this.transform(dataGeos);
-    this.state = geoMapping;
+    this.state.resolved = geoMapping;
     this.trigger(geoMapping);
     console.log('GeoMappingStore onGeoMappingLoaded()', geoMapping);
+
+    // notify promise holders
+    this.state.pending.forEach(function (deferred) {
+      deferred.resolve(geoMapping);
+    });
   },
 
   transform: function transform(dataGeos) {
     var forward = {};
     var reverse = {};
 
-    dataGeos.forEach(function (mapping) {
+    var filtered = _.filter(dataGeos, function (mapping) {
+      return mapping.Include == 1;
+    });
+    filtered.forEach(function (mapping) {
       var id = +mapping.GeoID;
       var shortName = mapping.ShortName;
       forward[id] = mapping;
       reverse[shortName] = id;
     });
-
-    /*
-    dataGeos.forEach( (mapping) => {
-      if(mapping.Include==1){
-        let id = +( mapping.GeoID );
-        let shortName = mapping.ShortName;
-        forward[id] = mapping;
-        reverse[shortName] = id;
-      }
-    });
-    */
 
     return { forward: forward, reverse: reverse };
   }
@@ -390,7 +409,8 @@ var _default = (function (_React$Component) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingLoaded);
+      //this.unsubscribeFromGeoMappingStore =
+      //  GeoMappingStore.listen(this.onGeoMappingLoaded);
       //this.unsubscribeFromIndexStore =
       //  IndexStore.listen(this.onIndexLoaded);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
@@ -400,7 +420,8 @@ var _default = (function (_React$Component) {
       window.addEventListener('resize', this.onWindowResize);
       this.onWindowResize();
 
-      (0, _geoMappingLoadAction2['default'])();
+      //GeoMappingLoadAction();
+      _geoMappingStore2['default'].getGeoMappingPromise().then(this.onGeoMappingLoaded);
     }
   }, {
     key: 'componentWillUnmount',
@@ -410,23 +431,19 @@ var _default = (function (_React$Component) {
       this.unsubscribeFromDimensionStore();
       this.unsubscribeFromIntroductionStore();
       this.unsubscribeFromSelectionStore();
-      this.unsubscribeFromIndexStore();
-      this.unsubscribeFromGeoMappingStore();
+      //this.unsubscribeFromIndexStore();
+      //this.unsubscribeFromGeoMappingStore();
     }
   }, {
     key: 'onGeoMappingLoaded',
     value: function onGeoMappingLoaded(geoMapping) {
-      var _this = this;
-
       console.log('Home onGeoMappingLoaded() ', geoMapping);
 
       _selectionActions2['default'].geographiesSelectionChange([this.initial.geography]);
       _selectionActions2['default'].timePositionSelectionChange(this.initial.date);
       _selectionActions2['default'].timeIntervalSelectionChange(this.initial.interval);
       //IndexLoadAction();
-      _indexStore2['default'].getIndexPromise().then(function (index) {
-        return _this.onIndexLoaded(index);
-      });
+      _indexStore2['default'].getIndexPromise().then(this.onIndexLoaded);
     }
   }, {
     key: 'onIndexLoaded',

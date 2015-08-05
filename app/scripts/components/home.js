@@ -66,8 +66,8 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    this.unsubscribeFromGeoMappingStore =
-      GeoMappingStore.listen(this.onGeoMappingLoaded);
+    //this.unsubscribeFromGeoMappingStore =
+    //  GeoMappingStore.listen(this.onGeoMappingLoaded);
     //this.unsubscribeFromIndexStore =
     //  IndexStore.listen(this.onIndexLoaded);
     this.unsubscribeFromSelectionStore =
@@ -80,7 +80,9 @@ export default class extends React.Component {
     window.addEventListener('resize', this.onWindowResize);
     this.onWindowResize();
 
-    GeoMappingLoadAction();
+    //GeoMappingLoadAction();
+    GeoMappingStore.getGeoMappingPromise()
+      .then(this.onGeoMappingLoaded);
   }
 
   componentWillUnmount() {
@@ -89,8 +91,8 @@ export default class extends React.Component {
     this.unsubscribeFromDimensionStore();
     this.unsubscribeFromIntroductionStore();
     this.unsubscribeFromSelectionStore();
-    this.unsubscribeFromIndexStore();
-    this.unsubscribeFromGeoMappingStore();
+    //this.unsubscribeFromIndexStore();
+    //this.unsubscribeFromGeoMappingStore();
   }
 
   onGeoMappingLoaded(geoMapping) {
@@ -101,7 +103,7 @@ export default class extends React.Component {
     SelectionActions.timePositionSelectionChange( this.initial.date );
     SelectionActions.timeIntervalSelectionChange( this.initial.interval );
     //IndexLoadAction();
-    IndexStore.getIndexPromise().then((index) => this.onIndexLoaded(index));
+    IndexStore.getIndexPromise().then(this.onIndexLoaded);
   }
 
   onIndexLoaded(index) {
