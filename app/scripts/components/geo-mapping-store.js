@@ -5,12 +5,38 @@ import GeoMappingLoadAction from './geo-mapping-load-action';
 export default Reflux.createStore({
 
   init: function() { 
-    this.state = { };
+    this.state = { 
+      pending: [ ],
+      resolved: null,
+      rejected: null
+    };
     this.onGeoMappingLoad = this.onGeoMappingLoad.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
 
     this.listenTo(GeoMappingLoadAction, this.onGeoMappingLoad);
     this.listenTo(GeoMappingLoadAction.completed, this.onGeoMappingLoaded);
+  },
+
+  getInitialState: function getInitialState() {
+    return this.resolved;
+  },
+
+  getGeoMappingPromise: function getGeoMappingPromise() {
+    console.log('GeoMappingStore.getGeoMappingPromise()');
+    return new Promise( (resolve, reject) => {
+      let memoized = this.state.resolved;
+
+      if (memoized) {
+        resolve(memoized);
+      } else {
+        let deferred = { resolve, reject };
+        this.state.pending.push(deferred);
+        console.log('GeoMappingStore.getGeoMappingPromise() calling '
+          + 'GeoMappingLoadAction',
+          'this.state.pending', this.state.pending);
+        GeoMappingLoadAction();
+      }
+    });
   },
 
   onGeoMappingLoad: function onGeoMappingLoad() {
@@ -22,16 +48,22 @@ export default Reflux.createStore({
 
   onGeoMappingLoaded: function onGeoMappingLoaded(dataGeos) {
     let geoMapping = this.transform(dataGeos);
-    this.state = geoMapping;
+    this.state.resolved = geoMapping;
     this.trigger(geoMapping);
     console.log('GeoMappingStore onGeoMappingLoaded()', geoMapping);
+
+    // notify promise holders
+    this.state.pending.forEach( (deferred) => {
+      deferred.resolve(geoMapping);
+    });
   },
 
   transform: function transform(dataGeos) {
     let forward = { };
     let reverse = { };
-
-    dataGeos.forEach( (mapping) => {
+    
+    let filtered = _.filter(dataGeos, (mapping) => (mapping.Include == 1));
+    filtered.forEach( (mapping) => {
       let id = +( mapping.GeoID );
       let shortName = mapping.ShortName;
       forward[id] = mapping;

@@ -39,7 +39,7 @@ export default class extends React.Component {
       interval: [1999, 2015]
     };
 
-    this.onIndexLoaded = this.onIndexLoaded.bind(this);
+    //this.onIndexLoaded = this.onIndexLoaded.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onIntroductionStore = this.onIntroductionStore.bind(this);
@@ -66,10 +66,10 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    this.unsubscribeFromGeoMappingStore =
-      GeoMappingStore.listen(this.onGeoMappingLoaded);
-    this.unsubscribeFromIndexStore =
-      IndexStore.listen(this.onIndexLoaded);
+    //this.unsubscribeFromGeoMappingStore =
+    //  GeoMappingStore.listen(this.onGeoMappingLoaded);
+    //this.unsubscribeFromIndexStore =
+    //  IndexStore.listen(this.onIndexLoaded);
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
     this.unsubscribeFromIntroductionStore =
@@ -80,7 +80,9 @@ export default class extends React.Component {
     window.addEventListener('resize', this.onWindowResize);
     this.onWindowResize();
 
-    GeoMappingLoadAction();
+    //GeoMappingLoadAction();
+    GeoMappingStore.getGeoMappingPromise()
+      .then(this.onGeoMappingLoaded);
   }
 
   componentWillUnmount() {
@@ -89,8 +91,8 @@ export default class extends React.Component {
     this.unsubscribeFromDimensionStore();
     this.unsubscribeFromIntroductionStore();
     this.unsubscribeFromSelectionStore();
-    this.unsubscribeFromIndexStore();
-    this.unsubscribeFromGeoMappingStore();
+    //this.unsubscribeFromIndexStore();
+    //this.unsubscribeFromGeoMappingStore();
   }
 
   onGeoMappingLoaded(geoMapping) {
@@ -100,7 +102,8 @@ export default class extends React.Component {
     SelectionActions.geographiesSelectionChange([ this.initial.geography ]);
     SelectionActions.timePositionSelectionChange( this.initial.date );
     SelectionActions.timeIntervalSelectionChange( this.initial.interval );
-    IndexLoadAction();
+    //IndexLoadAction();
+    IndexStore.getIndexPromise().then(this.onIndexLoaded);
   }
 
   onIndexLoaded(index) {
