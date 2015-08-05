@@ -113,6 +113,7 @@ export default class extends React.Component {
 
     let variableName = variable.variableName;
     let variableId = variable.variableId;
+    let variableDescription = variable.variableDescription;
 
     let displayName = groupName + ' > ' + variableName;
 
@@ -131,6 +132,7 @@ export default class extends React.Component {
     return (
       <li key={ variable.variableId } className='list-group-item'>
         { button }
+        <span> { variableDescription }</span>
       </li>
     );
   }

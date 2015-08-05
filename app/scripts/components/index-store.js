@@ -49,7 +49,7 @@ export default Reflux.createStore({
 
       let variableId = variable.VariableID;
       let variableName = variable.VariableName;
-      let variableDescription = variable.variableDescription;
+      let variableDescription = variable.VariableDescription;
 
       let variableObject = {
         variableId, // ES6 implicit :variableId

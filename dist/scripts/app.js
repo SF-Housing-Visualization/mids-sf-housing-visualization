@@ -579,7 +579,7 @@ exports['default'] = _reflux2['default'].createStore({
 
       var variableId = variable.VariableID;
       var variableName = variable.VariableName;
-      var variableDescription = variable.variableDescription;
+      var variableDescription = variable.VariableDescription;
 
       var variableObject = {
         variableId: variableId, // ES6 implicit :variableId
@@ -1766,6 +1766,7 @@ var _default = (function (_React$Component) {
 
       var variableName = variable.variableName;
       var variableId = variable.variableId;
+      var variableDescription = variable.variableDescription;
 
       var displayName = groupName + ' > ' + variableName;
 
@@ -1787,7 +1788,13 @@ var _default = (function (_React$Component) {
       return _react2['default'].createElement(
         'li',
         { key: variable.variableId, className: 'list-group-item' },
-        button
+        button,
+        _react2['default'].createElement(
+          'span',
+          null,
+          ' ',
+          variableDescription
+        )
       );
     }
   }, {
