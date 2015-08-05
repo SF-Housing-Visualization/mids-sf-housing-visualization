@@ -39,7 +39,7 @@ export default class extends React.Component {
       interval: [1999, 2015]
     };
 
-    this.onIndexLoaded = this.onIndexLoaded.bind(this);
+    //this.onIndexLoaded = this.onIndexLoaded.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onIntroductionStore = this.onIntroductionStore.bind(this);
@@ -68,8 +68,8 @@ export default class extends React.Component {
   componentDidMount() {
     this.unsubscribeFromGeoMappingStore =
       GeoMappingStore.listen(this.onGeoMappingLoaded);
-    this.unsubscribeFromIndexStore =
-      IndexStore.listen(this.onIndexLoaded);
+    //this.unsubscribeFromIndexStore =
+    //  IndexStore.listen(this.onIndexLoaded);
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
     this.unsubscribeFromIntroductionStore =
@@ -100,7 +100,8 @@ export default class extends React.Component {
     SelectionActions.geographiesSelectionChange([ this.initial.geography ]);
     SelectionActions.timePositionSelectionChange( this.initial.date );
     SelectionActions.timeIntervalSelectionChange( this.initial.interval );
-    IndexLoadAction();
+    //IndexLoadAction();
+    IndexStore.getIndexPromise().then((index) => this.onIndexLoaded(index));
   }
 
   onIndexLoaded(index) {

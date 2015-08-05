@@ -134,7 +134,7 @@ export default class extends React.Component {
     return (
       <tr key={ variable.variableId }>
         <td>{ button }</td>
-        <td width='*'> { variableDescription }</td>
+        <td> { variableDescription }</td>
       </tr>
     );
   }

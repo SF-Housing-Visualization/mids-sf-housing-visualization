@@ -5,12 +5,34 @@ import IndexLoadAction from './index-load-action';
 export default Reflux.createStore({
 
   init: function() { 
-    this.state = { };
+    this.state = { 
+      pending: [ ],
+      resolved: null,
+      rejected: null
+    };
     this.onIndexLoad = this.onIndexLoad.bind(this);
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
 
     this.listenTo(IndexLoadAction, this.onIndexLoad);
     this.listenTo(IndexLoadAction.completed, this.onIndexLoaded);
+  },
+
+  getIndexPromise: function getIndexPromise() {
+    console.log('IndexStore.getIndexPromise()');
+    return new Promise( (resolve, reject) => {
+      let memoized = this.state.resolved;
+
+      if (memoized) {
+        resolve(memoized);
+      } else {
+        let deferred = { resolve, reject };
+        this.state.pending.push(deferred);
+        console.log('IndexStore.getIndexPromise calling IndexLoadAction',
+          'this.state.pending', this.state.pending);
+
+        IndexLoadAction();
+      }
+    });
   },
 
   onIndexLoad: function onIndexLoad() {
@@ -23,8 +45,13 @@ export default Reflux.createStore({
 
   onIndexLoaded: function onIndexLoaded(index) {
     let shapedIndex = this.shape(index);
-    this.state = shapedIndex;
+    this.state.index = shapedIndex;
     this.trigger(shapedIndex);
+
+    // notify promise holders
+    this.state.pending.forEach( (deferred) => {
+      deferred.resolve(shapedIndex);
+    });
   },
 
   shape: function shape(index) {

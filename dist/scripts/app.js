@@ -364,7 +364,7 @@ var _default = (function (_React$Component) {
       interval: [1999, 2015]
     };
 
-    this.onIndexLoaded = this.onIndexLoaded.bind(this);
+    //this.onIndexLoaded = this.onIndexLoaded.bind(this);
     this.onGeoMappingLoaded = this.onGeoMappingLoaded.bind(this);
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onIntroductionStore = this.onIntroductionStore.bind(this);
@@ -391,7 +391,8 @@ var _default = (function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       this.unsubscribeFromGeoMappingStore = _geoMappingStore2['default'].listen(this.onGeoMappingLoaded);
-      this.unsubscribeFromIndexStore = _indexStore2['default'].listen(this.onIndexLoaded);
+      //this.unsubscribeFromIndexStore =
+      //  IndexStore.listen(this.onIndexLoaded);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
       this.unsubscribeFromIntroductionStore = _introductionStore2['default'].listen(this.onIntroductionStore);
       this.unsubscribeFromDimensionStore = _dimensionStore2['default'].listen(this.onDimensionStore);
@@ -415,12 +416,17 @@ var _default = (function (_React$Component) {
   }, {
     key: 'onGeoMappingLoaded',
     value: function onGeoMappingLoaded(geoMapping) {
+      var _this = this;
+
       console.log('Home onGeoMappingLoaded() ', geoMapping);
 
       _selectionActions2['default'].geographiesSelectionChange([this.initial.geography]);
       _selectionActions2['default'].timePositionSelectionChange(this.initial.date);
       _selectionActions2['default'].timeIntervalSelectionChange(this.initial.interval);
-      (0, _indexLoadAction2['default'])();
+      //IndexLoadAction();
+      _indexStore2['default'].getIndexPromise().then(function (index) {
+        return _this.onIndexLoaded(index);
+      });
     }
   }, {
     key: 'onIndexLoaded',
@@ -537,12 +543,35 @@ var _indexLoadAction2 = _interopRequireDefault(_indexLoadAction);
 exports['default'] = _reflux2['default'].createStore({
 
   init: function init() {
-    this.state = {};
+    this.state = {
+      pending: [],
+      resolved: null,
+      rejected: null
+    };
     this.onIndexLoad = this.onIndexLoad.bind(this);
     this.onIndexLoaded = this.onIndexLoaded.bind(this);
 
     this.listenTo(_indexLoadAction2['default'], this.onIndexLoad);
     this.listenTo(_indexLoadAction2['default'].completed, this.onIndexLoaded);
+  },
+
+  getIndexPromise: function getIndexPromise() {
+    var _this = this;
+
+    console.log('IndexStore.getIndexPromise()');
+    return new Promise(function (resolve, reject) {
+      var memoized = _this.state.resolved;
+
+      if (memoized) {
+        resolve(memoized);
+      } else {
+        var deferred = { resolve: resolve, reject: reject };
+        _this.state.pending.push(deferred);
+        console.log('IndexStore.getIndexPromise calling IndexLoadAction', 'this.state.pending', _this.state.pending);
+
+        (0, _indexLoadAction2['default'])();
+      }
+    });
   },
 
   onIndexLoad: function onIndexLoad() {
@@ -553,8 +582,13 @@ exports['default'] = _reflux2['default'].createStore({
 
   onIndexLoaded: function onIndexLoaded(index) {
     var shapedIndex = this.shape(index);
-    this.state = shapedIndex;
+    this.state.index = shapedIndex;
     this.trigger(shapedIndex);
+
+    // notify promise holders
+    this.state.pending.forEach(function (deferred) {
+      deferred.resolve(shapedIndex);
+    });
   },
 
   shape: function shape(index) {
@@ -1799,7 +1833,7 @@ var _default = (function (_React$Component) {
         ),
         _react2['default'].createElement(
           'td',
-          { width: '*' },
+          null,
           ' ',
           variableDescription
         )
