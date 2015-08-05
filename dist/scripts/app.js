@@ -1748,11 +1748,15 @@ var _default = (function (_React$Component) {
           )
         ),
         _react2['default'].createElement(
-          'ul',
-          { className: 'list-group' },
-          variableOrder.map(function (variableName) {
-            return _this2.renderVariable(group, variables[variableName], overrideGroupName);
-          })
+          'table',
+          { className: 'table table-condensed' },
+          _react2['default'].createElement(
+            'tbody',
+            null,
+            variableOrder.map(function (variableName) {
+              return _this2.renderVariable(group, variables[variableName], overrideGroupName);
+            })
+          )
         )
       );
     }
@@ -1786,12 +1790,16 @@ var _default = (function (_React$Component) {
       );
 
       return _react2['default'].createElement(
-        'li',
-        { key: variable.variableId, className: 'list-group-item' },
-        button,
+        'tr',
+        { key: variable.variableId },
         _react2['default'].createElement(
-          'span',
+          'td',
           null,
+          button
+        ),
+        _react2['default'].createElement(
+          'td',
+          { width: '*' },
           ' ',
           variableDescription
         )
