@@ -2211,7 +2211,7 @@ var _default = (function (_React$Component) {
           return d.color;
         }).showValues(true) //Show bar value next to each bar.
         //.transitionDuration(350)
-        .showControls(true); //Allow user to switch between "Grouped" and "Stacked" mode.
+        .showLegend(false).showControls(false); //Allow user to switch between "Grouped" and "Stacked" mode.
 
         chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
 

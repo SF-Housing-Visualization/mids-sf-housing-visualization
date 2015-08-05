@@ -209,7 +209,8 @@ export default class extends React.Component {
           .barColor( (d) => d.color )
           .showValues(true)           //Show bar value next to each bar.
           //.transitionDuration(350)
-          .showControls(true);        //Allow user to switch between "Grouped" and "Stacked" mode.
+          .showLegend(false)
+          .showControls(false);        //Allow user to switch between "Grouped" and "Stacked" mode.
 
       chart.yAxis
           .tickFormat(d3.format(',.2f'));
