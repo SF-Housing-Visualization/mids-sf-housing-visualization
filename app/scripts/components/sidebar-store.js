@@ -26,7 +26,7 @@ export default Reflux.createStore({
 
     //let [selection, geoMapping] = updates;
 
-    console.log('TimeSeriesStore onSelectionStore() updates', 
+    console.log('SidebarStore onSelectionStore() updates', 
         'selection', selection);
     if (selection.selectedPrimaryMetric
       && selection.index
@@ -34,11 +34,11 @@ export default Reflux.createStore({
 
 
       GeoMappingStore.getGeoMappingPromise().then( (geoMapping) => {
-        console.log('TimeSeriesStore onSelectionStore() reshaping', 
+        console.log('SidebarStore onSelectionStore() reshaping', 
           selection, geoMapping);
-        let lines = this.reshapeLines(selection, geoMapping);
-        let update = _.extend(_.clone(selection), { lines });
-        console.log('TimeSeriesStore onSelectionStore() triggering', update);
+        let bars = this.reshapeBars(selection, geoMapping);
+        let update = _.extend(_.clone(selection), { bars });
+        console.log('SidebarStore onSelectionStore() triggering', update);
         this.trigger(update);
       });
       
@@ -46,18 +46,19 @@ export default Reflux.createStore({
   },
 
   onGeoMappingStore(geoMapping) {
-    console.log('TimeSeriesStore onGeoMappingStore()',
+    console.log('SidebarStore onGeoMappingStore()',
       'geoMapping', geoMapping);
 
     this.state.geoMapping = geoMapping;
   },
 
-  reshapeLines(selection, geoMapping) {
+  reshapeBars(selection, geoMapping) {
     let selectedPrimaryMetric = selection.selectedPrimaryMetric;
     let selectedYear = selection.selectedTimePosition;
     let selectedGeographies = selection.selectedGeographies;
     let selectedMetric = selection.metric;
     let index = selection.index;
+    let year = selection.selectedTimePosition;
     //let data = selection.rows;
 
     let data = selection.rows;
@@ -72,55 +73,39 @@ export default Reflux.createStore({
     
     let key = group + ' > ' + metric;
 
-    const baselineColor = '#4f99b4';
-    const selectedColor = '#000000';
+    const color = '#4f99b4';
 
-    let valuesByGeography = _.mapObject(reverseGeoMapping, () => {
-      return { }
-    });
+    let geography = selectedGeographies[0];
 
-    
-    
+    let applicable = _.filter(rows, (row) => 
+      row.Year === year
+    );
+
+    let valueByGeography = { };
+
     // implicitly keep only the last value for any geography/year
-    rows.forEach((row) => {
+    applicable.forEach((row) => {
       if (row && forwardGeoMapping[row.GeoID]) {
-        let geography = forwardGeoMapping[row.GeoID].ShortName;
-        let year = row.Year;
-        valuesByGeography[geography][year] = row[metric];
+        let geography = forwardGeoMapping[row.GeoID].ShortName
+        valueByGeography[geography] = row[metric];
       } else {
-        //console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
+        //console.log('SidebarVisualization.reshapeMetric() ignored bad data',
         //  row);
       }
     });
 
-    let geographies = _.sortBy(_.keys(valuesByGeography), (geography) => {
-      return this.contains(selectedGeographies, geography) ? 1 : 0;
+    let values = _.map(_.keys(valueByGeography), (geography) => {
+      let label = geography;
+      let series = 0;
+      let value = valueByGeography[geography];
+      return { color, key, label, series, value};
     });
 
-    let lines = _.map(geographies, (geography, series) => {
-      let color = 
-        this.contains(selectedGeographies, geography)
-        ? selectedColor
-        : baselineColor;
+    console.log('SidebarStore.reshapeBars', year, geography, geoMapping, color, key, 
+       applicable, valueByGeography, values);
 
-      let key = geography;
-      let years = valuesByGeography[geography];
-      let values = _.map(_.sortBy(_.keys(years)), (year) => {
-        let x = year;
-        let y = years[year];
-        return {color, series, x, y}
-      });
-      //let values = [ { color, series: index, x: year, y} ]
-      
-      return { color, key, values };
-    });
+    return [{ color, key, values }];
 
-
-    console.log('TimeSeriesStore.reshapeLines()', 
-      selectedGeographies, geoMapping, key, 
-       valuesByGeography, lines);
-
-    return lines;
   },
 
   contains(array, item) {

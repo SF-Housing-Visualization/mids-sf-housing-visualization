@@ -13,6 +13,8 @@ import GeoMappingStore from './geo-mapping-store';
 
 import DimensionStore from './dimension-store';
 
+import SidebarStore from './sidebar-store';
+
 
 export default class extends React.Component {
   constructor(props) {
@@ -30,6 +32,7 @@ export default class extends React.Component {
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
     this.onDimensionChange = this.onDimensionChange.bind(this);
+    this.onSidebarStore = this.onSidebarStore.bind(this);
   }
 
   render() {
@@ -52,10 +55,13 @@ export default class extends React.Component {
       SelectionStore.listen(this.onSelectionChange);
     this.unsubscribeFromMetricStore =
       MetricStore.listen(this.onMetricChange);
+    this.unsubscribeFromSidebarStore =
+      SidebarStore.listen(this.onSidebarStore);
   }
 
 
   componentWillUnmount() {
+    this.unsubscribeFromSidebarStore();
     this.unsubscribeFromMetricStore();
     this.unsubscribeFromSelectionStore();
     this.unsubscribeFromGeoMappingStore();
@@ -81,62 +87,22 @@ export default class extends React.Component {
     this.setState({ geoMapping });
   }
 
+  onSidebarStore(barChart) {
+    console.log('SidebarVisualization onSidebarStore()', barChart);
+    let data = barChart.bars;
+    this.setState({ data });
+    this.drawChart(data);
+
+  }
+
   onMetricChange(metric) {
     console.log('SidebarVisualization onMetricChange() metric', metric);
 
-    let data = this.reshapeMetric(metric);
-    console.log('SidebarVisualization onMetricChange() data', data);
+    //let data = this.reshapeMetric(metric);
+    //console.log('SidebarVisualization onMetricChange() data', data);
 
-    this.setState({ data });
-    this.drawChart(data);
-  }
-
-  reshapeMetric(data) {
-    let year = this.state.selectedTimePosition;
-    let geography = this.state.selectedGeographies[0];
-    let geoMapping = this.state.geoMapping;
-    let forwardGeoMapping = geoMapping.forward;
-
-    let color = '#4f99b4';
-    let group = data.group;
-    let metric = data.metric;
-    let key = group + ' > ' + metric;
-
-    let geoId = geoMapping.reverse[geography];
-
-    let rows = data.rows;
-
-    let applicable = _.filter(rows, (row) => 
-      row.Year === year
-    );
-
-    let valueByGeography = { };
-
-    // implicitly keep only the last value for any geography/year
-    applicable.forEach((row) => {
-      if (row && forwardGeoMapping[row.GeoID]) {
-        let geography = forwardGeoMapping[row.GeoID].ShortName
-        valueByGeography[geography] = row[metric];
-      } else {
-        //console.log('SidebarVisualization.reshapeMetric() ignored bad data',
-        //  row);
-      }
-    });
-
-    let values = _.map(_.keys(valueByGeography), (geography) => {
-      let label = geography;
-      let series = 0;
-      let value = valueByGeography[geography];
-      return { color, key, label, series, value};
-    });
-
-
-
-
-    console.log('reshapeMetric', year, geography, geoMapping, color, key, 
-       applicable, valueByGeography, values);
-
-    return [{ color, key, values }];
+    //this.setState({ data });
+    //this.drawChart(data);
   }
 
   onSelectionChange(newSelection) {
