@@ -1,5 +1,12 @@
-### Bay Area Housing Affordability
+### Why the Rent is Too Damn High
 
-This is a short summary of our project that should make you want to read more.
+Everyone's got a theory...
+> It's the Techies!
 
-Some hipster ipsum: Flexitarian mollit flannel placeat, cliche ex paleo ea anim trust fund you probably haven't heard of them. Stumptown raw denim crucifix VHS 3 wolf moon PBR, cupidatat letterpress swag brunch plaid.
+> It's the Permits!
+
+> It's all these people from _______!
+
+While few would dispute the San Francisco Bay Area has a high cost of living, it isn’t always clear what information is based on facts, and what is based on the latest coffee shop gossip.
+
+Here's your change to prove them wrong. Or right. Or just wow them with data.

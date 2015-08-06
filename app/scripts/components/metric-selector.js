@@ -55,28 +55,16 @@ export default class extends React.Component {
 
   render() {
     let selectedPrimaryMetric = this.state.selectedPrimaryMetric;
+    let index = this.state.index;
+
+    let metric = this.renderMetric(selectedPrimaryMetric, index);
+    
     let primaryMetricDisplayName =
       selectedPrimaryMetric
       ? selectedPrimaryMetric.group + ' > ' + selectedPrimaryMetric.metric
       : 'Loading ...';
 
-    let metric = (
-      <button className='btn btn-default btn-lg' 
-        onClick={this.onSelectMetric}
-        aria-label={ primaryMetricDisplayName }>
-        <span className='glyphicon glyphicon-check' 
-          aria-hidden='true'></span> { primaryMetricDisplayName }
-      </button>
-    );
-
-    let fakeClose = (
-      <button className='btn btn-default btn-lg' 
-        onClick={this.onMetricSelected}
-        aria-label={ primaryMetricDisplayName }>
-        <span className='glyphicon glyphicon-check' 
-          aria-hidden='true'></span> { primaryMetricDisplayName }
-      </button>
-    );
+    
 
     let selectorMaxHeight = this.state.selectorMaxHeight;
     console.log('MetricSelector render()',
@@ -117,6 +105,55 @@ export default class extends React.Component {
         </div>
       </div>
     );
+  }
+
+  renderMetric(selected, index) {
+
+    let display = { 
+      group: 'Data', 
+      metric: 'Loading ...',
+      description: 'Thank you for your patience while the data is loading.'
+    };
+
+    if (selected && index) {
+      let groupId = selected.group;
+      let metricId = selected.metric;
+      
+      let group = index.groups[groupId];
+      let variable = group.variables[metricId];
+
+      display.group = group.groupName;
+      display.metric = variable.variableName;
+      display.description = variable.variableDescription;
+    }
+
+    let metric = (
+      <div className='metric-headline'>
+        <button className='btn btn-default btn-lg' 
+          onClick={ this.onSelectMetric }
+          aria-label={ display.metric }>
+          <span className='glyphicon glyphicon-check' 
+            aria-hidden='true'></span> 
+
+          <span className='metric-group'> { display.group } </span>
+
+          <span className='glyphicon glyphicon-menu-right' 
+            aria-hidden='true'></span> 
+          <span className='metric-metric'> { display.metric } </span>
+        </button>
+
+        <span>&nbsp;</span>
+
+        <button 
+          className='btn btn-default btn-lg disabled metric-description'
+          ref='description'
+          dataToggle='tooltip' dataPlacement='bottom'> 
+          { display.description } 
+        </button>
+      </div>
+    );
+
+    return metric;
   }
 
   onDimensionStore(event) {

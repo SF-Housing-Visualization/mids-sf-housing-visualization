@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'underscore';
 
 import IndexStore from './index-store';
 import SelectionStore from './selection-store';
@@ -29,20 +30,24 @@ export default class extends React.Component {
 
     let index = this.state.index || { };
 
-    let groupOrder = index.groupOrder || [ ];
+    
     let groups = index.groups || { };
 
+    let displayGroups = this.regroupByGroupName(groups);
+    let groupOrder = _.sortBy(_.keys(displayGroups));
 
     return (
       <div className='metrics-grid'>
         <div className='well'>
           { 
-            this.renderSelectedVirtualGroup(groups, selectedPrimaryMetric) 
+            this.renderSelectedVirtualGroup(
+              groups, selectedPrimaryMetric, index
+            ) 
           }
         </div>
         { 
           groupOrder.map( (groupName) => 
-            this.renderGroup(groups[groupName]) 
+            this.renderGroup(displayGroups[groupName]) 
           ) 
         }
         
@@ -50,24 +55,63 @@ export default class extends React.Component {
     );
   }
 
-  renderSelectedVirtualGroup(groups, selected) {
-    if (selected) {
+  regroupByGroupName(groups) {
+    let displayGroups = { };
+
+    _.keys(groups).forEach( (groupId) => {
+      let group = groups[groupId];
+      let groupName = group.groupName;
+
+      let displayGroup = displayGroups[groupName] || { };
+      
+      if (_.isEmpty(displayGroup)) {
+        displayGroups[groupName] = displayGroup;
+        displayGroup.groupName = groupName;
+        displayGroup.variables = { };
+      }
+
+      let displayVariables = displayGroup.variables;
+      let displayVariableOrder = displayGroup.variableOrder;
+
+      group.variableOrder.forEach( (variableId) => {
+        let variable = group.variables[variableId];
+        let displayVariable = _.extend(_.clone(variable), { groupId });
+        
+        displayVariables[variableId] = displayVariable;
+      });
+    });
+
+    return displayGroups;
+  }
+
+  renderSelectedVirtualGroup(groups, selected, index) {
+    if (selected 
+        && selected.group
+        && selected.metric
+        && index
+        && index.groups) {
       let display = selected.display || { };
       let selectedGroupId = selected.group;
-      let selectedGroupName = selected.group;
       let selectedVariableId = selected.metric;
-      let selectedVariableName = display.metric;
+
+      let selectedGroup = index.groups[selectedGroupId];
+      let selectedMetric = selectedGroup.variables[selectedVariableId];
+
+      let selectedGroupName = selectedGroup.groupName;
+      let selectedVariableName = selectedMetric.variableName;
+      let selectedVariableDescription = selectedMetric.variableDescription;
 
       let virtualVariables = { };
       virtualVariables[selectedVariableId] = {
+        groupId: selectedGroupId,
         variableId: selectedVariableId,
-        variableName: selectedVariableName
+        variableName: selectedVariableName,
+        variableDescription: selectedVariableDescription
       };
 
       let virtualGroup = {
         groupId: selectedGroupId,
         groupName: selectedGroupName,
-        variableOrder: [ selectedVariableId ],
         variables: virtualVariables
       };
 
@@ -84,20 +128,20 @@ export default class extends React.Component {
     let variableOrder = group.variableOrder || [ ];
     let variables = group.variables || { };
 
-    let key = overrideKey || group.groupId;
+    let groupId = overrideKey || group.groupId;
     let title = overrideTitle || group.groupName;
 
     return (
-      <div key={ key } className='panel panel-default'>
+      <div key={ groupId } className='panel panel-default'>
         <div className='panel-heading'>
           <h3 className='panel-title'> { title } </h3>
         </div>
         <table className='table table-condensed'>
           <tbody>
           { 
-            variableOrder.map( (variableName) => 
+            _.sortBy(_.keys(variables)).map( (variableName) => 
               this.renderVariable(
-                group, 
+                group,
                 variables[variableName], 
                 overrideGroupName
               ) 
@@ -111,8 +155,8 @@ export default class extends React.Component {
 
   renderVariable(group, variable, overrideGroupName) {
     let groupName = overrideGroupName || group.groupName;
-    let groupId = group.groupId;
 
+    let groupId = variable.groupId;
     let variableName = variable.variableName;
     let variableId = variable.variableId;
     let variableDescription = variable.variableDescription;

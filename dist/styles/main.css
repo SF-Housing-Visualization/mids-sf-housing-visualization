@@ -7371,6 +7371,21 @@ header .appName {
   padding-bottom: 25px;
 }
 
+.metric-headline {
+  white-space: nowrap;
+}
+.metric-headline button {
+  display: inline-block;
+}
+
+.metric-description {
+  max-width: 500px;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 body {
   background: #fafafa;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
