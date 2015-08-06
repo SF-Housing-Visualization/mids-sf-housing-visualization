@@ -1411,29 +1411,11 @@ var _default = (function (_React$Component) {
     key: 'render',
     value: function render() {
       var selectedPrimaryMetric = this.state.selectedPrimaryMetric;
+      var index = this.state.index;
+
+      var metric = this.renderMetric(selectedPrimaryMetric, index);
+
       var primaryMetricDisplayName = selectedPrimaryMetric ? selectedPrimaryMetric.group + ' > ' + selectedPrimaryMetric.metric : 'Loading ...';
-
-      var metric = _react2['default'].createElement(
-        'button',
-        { className: 'btn btn-default btn-lg',
-          onClick: this.onSelectMetric,
-          'aria-label': primaryMetricDisplayName },
-        _react2['default'].createElement('span', { className: 'glyphicon glyphicon-check',
-          'aria-hidden': 'true' }),
-        ' ',
-        primaryMetricDisplayName
-      );
-
-      var fakeClose = _react2['default'].createElement(
-        'button',
-        { className: 'btn btn-default btn-lg',
-          onClick: this.onMetricSelected,
-          'aria-label': primaryMetricDisplayName },
-        _react2['default'].createElement('span', { className: 'glyphicon glyphicon-check',
-          'aria-hidden': 'true' }),
-        ' ',
-        primaryMetricDisplayName
-      );
 
       var selectorMaxHeight = this.state.selectorMaxHeight;
       console.log('MetricSelector render()', 'selectorMaxHeight', selectorMaxHeight, 'state.expanded', this.state.expanded);
@@ -1478,6 +1460,72 @@ var _default = (function (_React$Component) {
           )
         )
       );
+    }
+  }, {
+    key: 'renderMetric',
+    value: function renderMetric(selected, index) {
+
+      var display = {
+        group: 'Data',
+        metric: 'Loading ...',
+        description: 'Thank you for your patience while the data is loading.'
+      };
+
+      if (selected && index) {
+        var groupId = selected.group;
+        var metricId = selected.metric;
+
+        var group = index.groups[groupId];
+        var variable = group.variables[metricId];
+
+        display.group = group.groupName;
+        display.metric = variable.variableName;
+        display.description = variable.variableDescription;
+      }
+
+      var metric = _react2['default'].createElement(
+        'div',
+        { className: 'metric-headline' },
+        _react2['default'].createElement(
+          'button',
+          { className: 'btn btn-default btn-lg',
+            onClick: this.onSelectMetric,
+            'aria-label': display.metric },
+          _react2['default'].createElement('span', { className: 'glyphicon glyphicon-check',
+            'aria-hidden': 'true' }),
+          _react2['default'].createElement(
+            'span',
+            { className: 'metric-group' },
+            ' ',
+            display.group,
+            ' '
+          ),
+          _react2['default'].createElement('span', { className: 'glyphicon glyphicon-menu-right',
+            'aria-hidden': 'true' }),
+          _react2['default'].createElement(
+            'span',
+            { className: 'metric-metric' },
+            ' ',
+            display.metric,
+            ' '
+          )
+        ),
+        _react2['default'].createElement(
+          'span',
+          null,
+          ' '
+        ),
+        _react2['default'].createElement(
+          'button',
+          {
+            className: 'btn btn-default btn-lg disabled metric-description',
+            ref: 'description',
+            dataToggle: 'tooltip', dataPlacement: 'bottom' },
+          display.description
+        )
+      );
+
+      return metric;
     }
   }, {
     key: 'onDimensionStore',
@@ -1699,6 +1747,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _underscore = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _indexStore = require('./index-store');
 
 var _indexStore2 = _interopRequireDefault(_indexStore);
@@ -1745,8 +1797,10 @@ var _default = (function (_React$Component) {
 
       var index = this.state.index || {};
 
-      var groupOrder = index.groupOrder || [];
       var groups = index.groups || {};
+
+      var displayGroups = this.regroupByGroupName(groups);
+      var groupOrder = _underscore2['default'].sortBy(_underscore2['default'].keys(displayGroups));
 
       return _react2['default'].createElement(
         'div',
@@ -1754,33 +1808,69 @@ var _default = (function (_React$Component) {
         _react2['default'].createElement(
           'div',
           { className: 'well' },
-          this.renderSelectedVirtualGroup(groups, selectedPrimaryMetric)
+          this.renderSelectedVirtualGroup(groups, selectedPrimaryMetric, index)
         ),
         groupOrder.map(function (groupName) {
-          return _this.renderGroup(groups[groupName]);
+          return _this.renderGroup(displayGroups[groupName]);
         })
       );
     }
   }, {
+    key: 'regroupByGroupName',
+    value: function regroupByGroupName(groups) {
+      var displayGroups = {};
+
+      _underscore2['default'].keys(groups).forEach(function (groupId) {
+        var group = groups[groupId];
+        var groupName = group.groupName;
+
+        var displayGroup = displayGroups[groupName] || {};
+
+        if (_underscore2['default'].isEmpty(displayGroup)) {
+          displayGroups[groupName] = displayGroup;
+          displayGroup.groupName = groupName;
+          displayGroup.variables = {};
+        }
+
+        var displayVariables = displayGroup.variables;
+        var displayVariableOrder = displayGroup.variableOrder;
+
+        group.variableOrder.forEach(function (variableId) {
+          var variable = group.variables[variableId];
+          var displayVariable = _underscore2['default'].extend(_underscore2['default'].clone(variable), { groupId: groupId });
+
+          displayVariables[variableId] = displayVariable;
+        });
+      });
+
+      return displayGroups;
+    }
+  }, {
     key: 'renderSelectedVirtualGroup',
-    value: function renderSelectedVirtualGroup(groups, selected) {
-      if (selected) {
+    value: function renderSelectedVirtualGroup(groups, selected, index) {
+      if (selected && selected.group && selected.metric && index && index.groups) {
         var display = selected.display || {};
         var selectedGroupId = selected.group;
-        var selectedGroupName = selected.group;
         var selectedVariableId = selected.metric;
-        var selectedVariableName = display.metric;
+
+        var selectedGroup = index.groups[selectedGroupId];
+        var selectedMetric = selectedGroup.variables[selectedVariableId];
+
+        var selectedGroupName = selectedGroup.groupName;
+        var selectedVariableName = selectedMetric.variableName;
+        var selectedVariableDescription = selectedMetric.variableDescription;
 
         var virtualVariables = {};
         virtualVariables[selectedVariableId] = {
+          groupId: selectedGroupId,
           variableId: selectedVariableId,
-          variableName: selectedVariableName
+          variableName: selectedVariableName,
+          variableDescription: selectedVariableDescription
         };
 
         var virtualGroup = {
           groupId: selectedGroupId,
           groupName: selectedGroupName,
-          variableOrder: [selectedVariableId],
           variables: virtualVariables
         };
 
@@ -1799,12 +1889,12 @@ var _default = (function (_React$Component) {
       var variableOrder = group.variableOrder || [];
       var variables = group.variables || {};
 
-      var key = overrideKey || group.groupId;
+      var groupId = overrideKey || group.groupId;
       var title = overrideTitle || group.groupName;
 
       return _react2['default'].createElement(
         'div',
-        { key: key, className: 'panel panel-default' },
+        { key: groupId, className: 'panel panel-default' },
         _react2['default'].createElement(
           'div',
           { className: 'panel-heading' },
@@ -1822,7 +1912,7 @@ var _default = (function (_React$Component) {
           _react2['default'].createElement(
             'tbody',
             null,
-            variableOrder.map(function (variableName) {
+            _underscore2['default'].sortBy(_underscore2['default'].keys(variables)).map(function (variableName) {
               return _this2.renderVariable(group, variables[variableName], overrideGroupName);
             })
           )
@@ -1835,8 +1925,8 @@ var _default = (function (_React$Component) {
       var _this3 = this;
 
       var groupName = overrideGroupName || group.groupName;
-      var groupId = group.groupId;
 
+      var groupId = variable.groupId;
       var variableName = variable.variableName;
       var variableId = variable.variableId;
       var variableDescription = variable.variableDescription;
