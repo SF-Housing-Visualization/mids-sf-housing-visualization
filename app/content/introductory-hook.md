@@ -1,5 +1,5 @@
 ### Bay Area Housing Affordability
 
-This is a short summary of our project that should make you want to read more.
+While few would dispute the San Francisco Bay Area has a high cost of living, it isn’t always clear what information is based on facts, and what is based on the latest coffee shop gossip.
 
-Some hipster ipsum: Flexitarian mollit flannel placeat, cliche ex paleo ea anim trust fund you probably haven't heard of them. Stumptown raw denim crucifix VHS 3 wolf moon PBR, cupidatat letterpress swag brunch plaid.
+Here are the facts.
