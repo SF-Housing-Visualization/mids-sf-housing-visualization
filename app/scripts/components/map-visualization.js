@@ -67,16 +67,19 @@ export default class extends React.Component {
     const maxZoom = 18;
     const attribution = 
       'Map data &copy; '
-      + '<a href="http://www.openstreetmap.org">'
+      + '<a style="color: grey" href="http://www.openstreetmap.org">'
       + 'OpenStreetMap contributors</a>';
 
     const url = 'http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png';
 
     const mapReactComponent = (
       <div className='map-application' style={ style }>
-        <Map ref='map' className="map"
-          minZoom={minZoom} maxZoom={maxZoom}
-          center={center} zoom={zoom}>
+        <Map ref='map' className='map'
+          center={center} 
+          zoom={ zoom } zoomControl={ false }
+          minZoom={ zoom } maxZoom={ zoom }
+          dragging={ false } touchZoom={ false } 
+          scrollWheelZoom={ false } doubleClickZoom={ false }>
           <TileLayer
             url={url}
             attribution={attribution}
@@ -92,11 +95,17 @@ export default class extends React.Component {
       DimensionStore.listen(this.onDimensionChange);
     this.unsubscribeFromSelectionStore =
       SelectionStore.listen(this.onSelectionChange);
-
-
-
     this.unsubscribeFromGeographyStore =
       GeographyStore.listen(this.onGeographyStoreChange);
+
+    let leaflet = this.refs.map.getLeafletElement();
+    console.log('MapVisualization.componentDidMount()', leaflet);
+
+    leaflet.attributionControl.options = { 
+      position: 'bottomleft',
+      prefix: false
+    };
+    
 
     // load large static data
     const url = '/mids-sf-housing-sandbox/data/prod/ca-counties.json';

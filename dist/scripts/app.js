@@ -1689,6 +1689,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _underscore = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _indexStore = require('./index-store');
 
 var _indexStore2 = _interopRequireDefault(_indexStore);
@@ -1735,8 +1739,10 @@ var _default = (function (_React$Component) {
 
       var index = this.state.index || {};
 
-      var groupOrder = index.groupOrder || [];
       var groups = index.groups || {};
+
+      var displayGroups = this.regroupByGroupName(groups);
+      var groupOrder = _underscore2['default'].sortBy(_underscore2['default'].keys(displayGroups));
 
       return _react2['default'].createElement(
         'div',
@@ -1744,33 +1750,69 @@ var _default = (function (_React$Component) {
         _react2['default'].createElement(
           'div',
           { className: 'well' },
-          this.renderSelectedVirtualGroup(groups, selectedPrimaryMetric)
+          this.renderSelectedVirtualGroup(groups, selectedPrimaryMetric, index)
         ),
         groupOrder.map(function (groupName) {
-          return _this.renderGroup(groups[groupName]);
+          return _this.renderGroup(displayGroups[groupName]);
         })
       );
     }
   }, {
+    key: 'regroupByGroupName',
+    value: function regroupByGroupName(groups) {
+      var displayGroups = {};
+
+      _underscore2['default'].keys(groups).forEach(function (groupId) {
+        var group = groups[groupId];
+        var groupName = group.groupName;
+
+        var displayGroup = displayGroups[groupName] || {};
+
+        if (_underscore2['default'].isEmpty(displayGroup)) {
+          displayGroups[groupName] = displayGroup;
+          displayGroup.groupName = groupName;
+          displayGroup.variables = {};
+        }
+
+        var displayVariables = displayGroup.variables;
+        var displayVariableOrder = displayGroup.variableOrder;
+
+        group.variableOrder.forEach(function (variableId) {
+          var variable = group.variables[variableId];
+          var displayVariable = _underscore2['default'].extend(_underscore2['default'].clone(variable), { groupId: groupId });
+
+          displayVariables[variableId] = displayVariable;
+        });
+      });
+
+      return displayGroups;
+    }
+  }, {
     key: 'renderSelectedVirtualGroup',
-    value: function renderSelectedVirtualGroup(groups, selected) {
-      if (selected) {
+    value: function renderSelectedVirtualGroup(groups, selected, index) {
+      if (selected && selected.group && selected.metric && index && index.groups) {
         var display = selected.display || {};
         var selectedGroupId = selected.group;
-        var selectedGroupName = selected.group;
         var selectedVariableId = selected.metric;
-        var selectedVariableName = display.metric;
+
+        var selectedGroup = index.groups[selectedGroupId];
+        var selectedMetric = selectedGroup.variables[selectedVariableId];
+
+        var selectedGroupName = selectedGroup.groupName;
+        var selectedVariableName = selectedMetric.variableName;
+        var selectedVariableDescription = selectedMetric.variableDescription;
 
         var virtualVariables = {};
         virtualVariables[selectedVariableId] = {
+          groupId: selectedGroupId,
           variableId: selectedVariableId,
-          variableName: selectedVariableName
+          variableName: selectedVariableName,
+          variableDescription: selectedVariableDescription
         };
 
         var virtualGroup = {
           groupId: selectedGroupId,
           groupName: selectedGroupName,
-          variableOrder: [selectedVariableId],
           variables: virtualVariables
         };
 
@@ -1789,12 +1831,12 @@ var _default = (function (_React$Component) {
       var variableOrder = group.variableOrder || [];
       var variables = group.variables || {};
 
-      var key = overrideKey || group.groupId;
+      var groupId = overrideKey || group.groupId;
       var title = overrideTitle || group.groupName;
 
       return _react2['default'].createElement(
         'div',
-        { key: key, className: 'panel panel-default' },
+        { key: groupId, className: 'panel panel-default' },
         _react2['default'].createElement(
           'div',
           { className: 'panel-heading' },
@@ -1812,7 +1854,7 @@ var _default = (function (_React$Component) {
           _react2['default'].createElement(
             'tbody',
             null,
-            variableOrder.map(function (variableName) {
+            _underscore2['default'].sortBy(_underscore2['default'].keys(variables)).map(function (variableName) {
               return _this2.renderVariable(group, variables[variableName], overrideGroupName);
             })
           )
@@ -1825,8 +1867,8 @@ var _default = (function (_React$Component) {
       var _this3 = this;
 
       var groupName = overrideGroupName || group.groupName;
-      var groupId = group.groupId;
 
+      var groupId = variable.groupId;
       var variableName = variable.variableName;
       var variableId = variable.variableId;
       var variableDescription = variable.variableDescription;
@@ -2401,7 +2443,7 @@ exports['default'] = _reflux2['default'].createStore({
       _geoMappingStore2['default'].getGeoMappingPromise().then(function (geoMapping) {
         console.log('TimeSeriesStore onSelectionStore() reshaping', selection, geoMapping);
         var lines = _this.reshapeLines(selection, geoMapping);
-        var update = _.extend(selection, { lines: lines });
+        var update = _.extend(_.clone(selection), { lines: lines });
         console.log('TimeSeriesStore onSelectionStore() triggering', update);
         _this.trigger(update);
       });
@@ -2671,24 +2713,7 @@ var _default = (function (_React$Component) {
     }
   }, {
     key: 'onSelectionChange',
-    value: function onSelectionChange(newSelection) {
-      this.setState(newSelection);
-
-      var metric = this.state.metric;
-
-      if (metric && metric.rows) {
-        var data = this.reshapeMetric(this.state.metric);
-        this.setState({ data: data });
-        console.log('TimeSeriesVisualization onSelectionChange()', metric, data, this.state.selectedGeographies);
-        this.drawChart(data);
-      }
-
-      /*let selectedGeographies = newSelection.selectedGeographies;
-       let chart = this.state.chart;
-      let data = this.state.data;
-       data.forEach((series) => this.darkenSelected(series, selectedGeographies));
-       chart.update();*/
-    }
+    value: function onSelectionChange(newSelection) {}
   }, {
     key: 'onLineHover',
     value: function onLineHover(data) {
@@ -2733,11 +2758,6 @@ var _default = (function (_React$Component) {
     key: 'onMetricChange',
     value: function onMetricChange(metric) {
       console.log('TimeSeriesVisualization onMetricChange() metric', metric);
-      //let data = this.reshapeMetric(metric);
-      //console.log('TimeSeriesVisualization onMetricChange() data', data);
-
-      //this.setState({ metric, data });
-      //this.drawChart(data);
     }
   }, {
     key: 'onTimeSeriesStore',
@@ -2747,64 +2767,6 @@ var _default = (function (_React$Component) {
 
       this.setState({ data: data });
       this.drawChart(data);
-    }
-  }, {
-    key: 'reshapeMetric',
-    value: function reshapeMetric(data) {
-      var _this2 = this;
-
-      var selectedYear = this.state.selectedTimePosition;
-      var selectedGeographies = this.state.selectedGeographies;
-      var geoMapping = this.state.geoMapping;
-      var reverseGeoMapping = geoMapping.reverse;
-      var forwardGeoMapping = geoMapping.forward;
-
-      var baselineColor = '#4f99b4';
-      var selectedColor = '#000000';
-      var group = data.group;
-      var metric = data.metric;
-      var key = group + ' > ' + metric;
-
-      var rows = data.rows;
-
-      var valuesByGeography = _underscore2['default'].mapObject(reverseGeoMapping, function () {
-        return {};
-      });
-
-      // implicitly keep only the last value for any geography/year
-      rows.forEach(function (row) {
-        if (row && forwardGeoMapping[row.GeoID]) {
-          var geography = forwardGeoMapping[row.GeoID].ShortName;
-          var year = row.Year;
-          valuesByGeography[geography][year] = row[metric];
-        } else {
-          //console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
-          //  row);
-        }
-      });
-
-      var geographies = _underscore2['default'].sortBy(_underscore2['default'].keys(valuesByGeography), function (geography) {
-        return _this2.contains(selectedGeographies, geography) ? 1 : 0;
-      });
-
-      var lines = _underscore2['default'].map(geographies, function (geography, series) {
-        var color = _this2.contains(selectedGeographies, geography) ? selectedColor : baselineColor;
-
-        var key = geography;
-        var years = valuesByGeography[geography];
-        var values = _underscore2['default'].map(_underscore2['default'].sortBy(_underscore2['default'].keys(years)), function (year) {
-          var x = year;
-          var y = years[year];
-          return { color: color, series: series, x: x, y: y };
-        });
-        //let values = [ { color, series: index, x: year, y} ]
-
-        return { color: color, key: key, values: values };
-      });
-
-      console.log('reshapeMetric', selectedGeographies, geoMapping, key, valuesByGeography, lines);
-
-      return lines;
     }
   }, {
     key: 'contains',
@@ -2861,17 +2823,49 @@ var _default = (function (_React$Component) {
                         _react2['default'].createElement(
                               'h3',
                               null,
-                              'Bay Area Housing Affordability'
+                              'Why the Rent is Too Damn High'
                         ),
                         _react2['default'].createElement(
                               'p',
                               null,
-                              'This is a short summary of our project that should make you want to read more.'
+                              'Everyone’s got a theory...'
+                        ),
+                        _react2['default'].createElement(
+                              'blockquote',
+                              null,
+                              _react2['default'].createElement(
+                                    'p',
+                                    null,
+                                    'It’s the Techies!'
+                              )
+                        ),
+                        _react2['default'].createElement(
+                              'blockquote',
+                              null,
+                              _react2['default'].createElement(
+                                    'p',
+                                    null,
+                                    'It’s the Permits!'
+                              )
+                        ),
+                        _react2['default'].createElement(
+                              'blockquote',
+                              null,
+                              _react2['default'].createElement(
+                                    'p',
+                                    null,
+                                    'It’s all these people from _______!'
+                              )
                         ),
                         _react2['default'].createElement(
                               'p',
                               null,
-                              'Some hipster ipsum: Flexitarian mollit flannel placeat, cliche ex paleo ea anim trust fund you probably haven’t heard of them. Stumptown raw denim crucifix VHS 3 wolf moon PBR, cupidatat letterpress swag brunch plaid.'
+                              'While few would dispute the San Francisco Bay Area has a high cost of living, it isn’t always clear what information is based on facts, and what is based on the latest coffee shop gossip.'
+                        ),
+                        _react2['default'].createElement(
+                              'p',
+                              null,
+                              'Here’s your change to prove them wrong. Or right. Or just wow them with data.'
                         )
                   );
             }
@@ -2886,21 +2880,21 @@ module.exports = exports['default'];
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/content/introductory-hook.js","/app/scripts/content")
 },{"_process":35,"buffer":31,"react":283}],27:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-"use strict";
+'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
       value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var _react = require('react');
 
@@ -2912,129 +2906,174 @@ var _default = (function (_React$Component) {
       function _default(props) {
             _classCallCheck(this, _default);
 
-            _get(Object.getPrototypeOf(_default.prototype), "constructor", this).call(this, props);
+            _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).call(this, props);
       }
 
       _createClass(_default, [{
-            key: "render",
+            key: 'render',
             value: function render() {
-                  return _react2["default"].createElement(
-                        "div",
+                  return _react2['default'].createElement(
+                        'div',
                         null,
-                        "      ",
-                        _react2["default"].createElement(
-                              "h2",
+                        '      ',
+                        _react2['default'].createElement(
+                              'h1',
                               null,
-                              "Motivation"
+                              'Grounds for Truth'
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              "Two members of our group of three people have moved to the San Francisco Bay Area in the past year and forced to wrangle with the housing affordability crisis. Between sensational word of mouth and news stories, we struggled to get a grip on the reality of the crisis."
+                              'It seems to be common knowledge that the San Francisco Bay Area is an expensive place to live. Angela heard it is impossible to find affordable rent when she moved to Santa Clara County from Canada. Ross heard it is impossible to find a house near his work when he moved to San Mateo from the New York. For both Angela and Ross, the foretold impossible was possible.'
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              "For example, a quote from ",
-                              _react2["default"].createElement(
-                                    "a",
-                                    { href: "http://www.mercurynews.com/business/ci_25095612/high-prices-sending-bay-area-renters-and-homebuyers" },
-                                    "this article"
-                              ),
-                              " suggests the housing crisis is new?"
+                              'Is there any truth to the reputation the Bay Area has received? Listening to people in the coffee shop you might think the media sensationalized housing crisis is a new thing that happened suddenly. You might also think it is the “high paid technology workers” that are driving prices up.  Is the Bay Area really that unaffordable?'
                         ),
-                        _react2["default"].createElement(
-                              "blockquote",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              _react2["default"].createElement(
-                                    "p",
+                              'This site will help you learn the truth to the coffee shop chatter. Looking over nine years of US Census data, you can discover what is really happening in the Bay Area and what should be chocked up to be just coffee gossip.'
+                        ),
+                        _react2['default'].createElement(
+                              'p',
+                              null,
+                              ' '
+                        ),
+                        _react2['default'].createElement(
+                              'p',
+                              null,
+                              _react2['default'].createElement(
+                                    'strong',
                                     null,
-                                    "“I’ve spent my entire life on the Peninsula,” said Poncia, a 38-year-old teacher at a school in San Mateo. “I’m at a point where I have to make a major change in my career or move out due to high rents. I feel like I’m barely staying afloat as a teacher.”"
+                                    'Some interesting findings to get you started (we’ve included our own observations looking at San Francisco County):'
                               )
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              "But another from the same article suggests this problem has been around for decades."
-                        ),
-                        _react2["default"].createElement(
-                              "blockquote",
-                              null,
-                              _react2["default"].createElement(
-                                    "p",
+                              _react2['default'].createElement(
+                                    'em',
                                     null,
-                                    "“I came here in the late 1990s and even then it was very clear that there had been a failure to keep up with demand going back at least 10 years before that.”"
+                                    'How many technical workers are there in the Bay Area counties, and how has it changed over time?'
+                              ),
+                              ' [Demographic > Percent of Workers in Computer and Mathematical Operations]'
+                        ),
+                        _react2['default'].createElement(
+                              'ul',
+                              null,
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'In San Francisco County it is 14%'
+                              ),
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'Notice the climbing trend in San Francisco County, but not in Santa Clara County (home to Apple, Google, LinkedIn and Facebook, to name a few).'
                               )
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              _react2["default"].createElement(
-                                    "a",
-                                    { href: "http://www.bizjournals.com/sanfrancisco/print-edition/2015/01/02/the-housing-crisis-2015-forecast.html" },
-                                    "Another article"
+                              _react2['default'].createElement(
+                                    'em',
+                                    null,
+                                    'How much does the lowest quintile median income differ from the highest quintile median income?'
                               ),
-                              " suggests that people are flowing to the periphery of the bay area. How much more affordable is it? Is the bay area turning into a region of elites?"
+                              ' [Income > Lowest Quintile Income] [Income > Highest Quintile Income]'
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'ul',
                               null,
-                              _react2["default"].createElement(
-                                    "a",
-                                    { href: "http://kalw.org/post/bay-area-housing-bubble-or-housing-crisis" },
-                                    "Yet another article"
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'In San Francisco County, $11,943 compared to $323,053.'
                               ),
-                              " asks whether this is a housing bubble (valuations are too high) or housing crisis (not enough housing supply)? How does the current housing problem compare to history, particularly the dot-com bubble and mid 2000’s housing bubble?"
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'Just across the Golden Gate Bridge is Marin County, with $19,745 as the lowest quintile median income and $417,041 as the highest quintile median income.'
+                              )
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              _react2["default"].createElement(
-                                    "a",
-                                    { href: "https://www.redfin.com/blog/2015/05/the-digital-diaspora.html#.VX9fVhNVikr" },
-                                    "One final article"
+                              _react2['default'].createElement(
+                                    'em',
+                                    null,
+                                    'Compare San Francisco County and Marin County on the median income for the top 5%.'
                               ),
-                              " asks if people are leaving Northern California altogether because housing is so unaffordable."
+                              ' [Income > Top 5 Percent Income]'
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'ul',
                               null,
-                              "Indeed, we have our own practical questions. Where can I actually afford to live & what income levels does it take to be able to afford to live in the bay area?"
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'San Francisco County: $586,684'
+                              ),
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'Marin County: $801,606'
+                              )
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              "We found that these questions very often ached for geographical and historical context among several different variables that articles and gossip lack. This is where we hope our visualization can step in. Our goal is to provide clarity and context into a debate that often gets emotional and untethered from reality. Playing around with our visualization can both help you formulate questions about the bay area housing market and find answers."
+                              _react2['default'].createElement(
+                                    'em',
+                                    null,
+                                    'What percentage of homes are actually are worth over one million dollars?'
+                              ),
+                              ' [Housing > Percent of Homes over $1million]'
                         ),
-                        _react2["default"].createElement(
-                              "h2",
+                        _react2['default'].createElement(
+                              'ul',
                               null,
-                              "Example"
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'In San Francisco County, 28% - just lower than the high of 31% in 2007'
+                              ),
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'In Santa Cruz, the percentage is actually 12 percentage points lower than its high in 2007.'
+                              )
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'p',
                               null,
-                              "[This would be basically the same as the screen-shots we showed in midterm presentation interactive display or could alternatively be some of Angela’s interesting observations - still I think the difference in affordability of outlying counties vs “core” counties today vs 2005 is quite notable]."
+                              _react2['default'].createElement(
+                                    'em',
+                                    null,
+                                    'How much do people spend of their income to pay rent (suggested rent should be no more than 30% of household income)?'
+                              ),
+                              ' [Housing > Median Gross REnt as a Percentage of Household Income]'
                         ),
-                        _react2["default"].createElement(
-                              "p",
+                        _react2['default'].createElement(
+                              'ul',
                               null,
-                              "We start with a broad overview of bay area affordability. We are particularly interested in San Mateo and Santa Clara counties so we highlight those. We see that those are two of the least affordable counties and that counties farther away from “the peninsula” are much more affordable. However, we notice that peak of the housing crisis there almost no affordable counties. We can focus on that period for more information and can see that in fact Santa Clara and San Mateo were relatively more affordable at the time."
-                        ),
-                        _react2["default"].createElement(
-                              "p",
-                              null,
-                              "So, we learned a lot about some of the questions that articles and word of mouth raise. The outlying counties are much more affordable than the peninsula, so people moving makes a lot of sense. We also learned that the current crisis differs significantly from the 2005 housing bubble, in that the several counties are still quite affordable. We can also see that the affordability levels in Santa Clara and San Mateo counties are far from unprecedented, showing that this is not new a problem."
+                              _react2['default'].createElement(
+                                    'li',
+                                    null,
+                                    'In San Francisco, the median is 27.7%, and is actually the lowest of all the counties'
+                              )
                         )
                   );
             }
       }]);
 
       return _default;
-})(_react2["default"].Component);
+})(_react2['default'].Component);
 
-exports["default"] = _default;
-module.exports = exports["default"];
+exports['default'] = _default;
+module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/content/introductory-page.js","/app/scripts/content")
 },{"_process":35,"buffer":31,"react":283}],28:[function(require,module,exports){

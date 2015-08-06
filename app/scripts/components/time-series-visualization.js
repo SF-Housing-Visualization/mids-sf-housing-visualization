@@ -142,29 +142,7 @@ export default class extends React.Component {
   }
 
   onSelectionChange(newSelection) {
-    this.setState(newSelection);
 
-    let metric = this.state.metric;
-
-    if (metric && metric.rows) {
-      let data = this.reshapeMetric(this.state.metric);
-      this.setState({ data });
-      console.log('TimeSeriesVisualization onSelectionChange()', 
-        metric, data, this.state.selectedGeographies);
-      this.drawChart(data);
-    }
-
-    
-    
-
-    /*let selectedGeographies = newSelection.selectedGeographies;
-
-    let chart = this.state.chart;
-    let data = this.state.data;
-
-    data.forEach((series) => this.darkenSelected(series, selectedGeographies));
-
-    chart.update();*/
   }
 
   onLineHover(data) {
@@ -209,11 +187,6 @@ export default class extends React.Component {
 
   onMetricChange(metric) {
     console.log('TimeSeriesVisualization onMetricChange() metric', metric);
-    //let data = this.reshapeMetric(metric);
-    //console.log('TimeSeriesVisualization onMetricChange() data', data);
-
-    //this.setState({ metric, data });
-    //this.drawChart(data);
   }
 
   onTimeSeriesStore(timeSeries) {
@@ -222,68 +195,6 @@ export default class extends React.Component {
     
     this.setState({ data });
     this.drawChart(data);
-  }
-
-  reshapeMetric(data) {
-    let selectedYear = this.state.selectedTimePosition;
-    let selectedGeographies = this.state.selectedGeographies;
-    let geoMapping = this.state.geoMapping;
-    let reverseGeoMapping = geoMapping.reverse;
-    let forwardGeoMapping = geoMapping.forward;
-
-    let baselineColor = '#4f99b4';
-    let selectedColor = '#000000';
-    let group = data.group;
-    let metric = data.metric;
-    let key = group + ' > ' + metric;
-
-    let rows = data.rows;
-
-    let valuesByGeography = _.mapObject(reverseGeoMapping, () => {
-      return { }
-    });
-
-    // implicitly keep only the last value for any geography/year
-    rows.forEach((row) => {
-      if (row && forwardGeoMapping[row.GeoID]) {
-        let geography = forwardGeoMapping[row.GeoID].ShortName;
-        let year = row.Year;
-        valuesByGeography[geography][year] = row[metric];
-      } else {
-        //console.log('TimeSeriesVisualization.reshapeMetric() ignored bad data',
-        //  row);
-      }
-    });
-
-    let geographies = _.sortBy(_.keys(valuesByGeography), (geography) => {
-      return this.contains(selectedGeographies, geography) ? 1 : 0;
-    });
-
-    let lines = _.map(geographies, (geography, series) => {
-      let color = 
-        this.contains(selectedGeographies, geography)
-        ? selectedColor
-        : baselineColor;
-
-      let key = geography;
-      let years = valuesByGeography[geography];
-      let values = _.map(_.sortBy(_.keys(years)), (year) => {
-        let x = year;
-        let y = years[year];
-        return {color, series, x, y}
-      });
-      //let values = [ { color, series: index, x: year, y} ]
-      
-      return { color, key, values };
-    });
-
-
-
-
-    console.log('reshapeMetric', selectedGeographies, geoMapping, key, 
-       valuesByGeography, lines);
-
-    return lines;
   }
 
   contains(array, item) {
