@@ -1059,9 +1059,9 @@ var _default = (function (_React$Component) {
           _reactLeaflet.Map,
           { ref: 'map', className: 'map',
             center: center,
-            zoom: zoom, zoomControl: false,
-            minZoom: zoom, maxZoom: zoom,
-            dragging: false, touchZoom: false,
+            zoom: zoom, zoomControl: true,
+            minZoom: minZoom, maxZoom: maxZoom,
+            dragging: true, touchZoom: false,
             scrollWheelZoom: false, doubleClickZoom: false },
           _react2['default'].createElement(_reactLeaflet.TileLayer, {
             url: url,
