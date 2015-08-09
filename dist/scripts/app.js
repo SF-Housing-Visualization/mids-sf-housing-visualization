@@ -2983,7 +2983,7 @@ var _default = (function (_React$Component) {
                         _react2['default'].createElement(
                               'p',
                               null,
-                              'Everyone’s got a theory...'
+                              'Everyone’s got a theory about expensive Bay Area housing...'
                         ),
                         _react2['default'].createElement(
                               'blockquote',
@@ -3020,7 +3020,7 @@ var _default = (function (_React$Component) {
                         _react2['default'].createElement(
                               'p',
                               null,
-                              'Here’s your change to prove them wrong. Or right. Or just wow them with data.'
+                              'Here’s your chance to prove them wrong. Or right. Or just wow them with data.'
                         )
                   );
             }
