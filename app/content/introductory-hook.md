@@ -1,6 +1,6 @@
 ### Why the Rent is Too Damn High
 
-Everyone's got a theory...
+Everyone's got a theory about expensive Bay Area housing...
 > It's the Techies!
 
 > It's the Permits!
@@ -9,4 +9,4 @@ Everyone's got a theory...
 
 While few would dispute the San Francisco Bay Area has a high cost of living, it isn’t always clear what information is based on facts, and what is based on the latest coffee shop gossip.
 
-Here's your change to prove them wrong. Or right. Or just wow them with data.
+Here's your chance to prove them wrong. Or right. Or just wow them with data.
