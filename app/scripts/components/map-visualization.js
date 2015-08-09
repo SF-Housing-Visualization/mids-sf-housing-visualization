@@ -76,9 +76,9 @@ export default class extends React.Component {
       <div className='map-application' style={ style }>
         <Map ref='map' className='map'
           center={center} 
-          zoom={ zoom } zoomControl={ false }
-          minZoom={ zoom } maxZoom={ zoom }
-          dragging={ false } touchZoom={ false } 
+          zoom={ zoom } zoomControl={ true }
+          minZoom={ minZoom } maxZoom={ maxZoom }
+          dragging={ true } touchZoom={ false } 
           scrollWheelZoom={ false } doubleClickZoom={ false }>
           <TileLayer
             url={url}
