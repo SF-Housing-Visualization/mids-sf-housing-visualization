@@ -198,6 +198,7 @@ exports['default'] = _reflux2['default'].createStore({
     filtered.forEach(function (mapping) {
       var id = +mapping.GeoID;
       var shortName = mapping.ShortName;
+      mapping.Value = Math.random();
       forward[id] = mapping;
       reverse[shortName] = id;
     });
@@ -956,6 +957,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _d3 = (typeof window !== "undefined" ? window.d3 : typeof global !== "undefined" ? global.d3 : null);
+
+var _d32 = _interopRequireDefault(_d3);
+
 var _leaflet = require('leaflet');
 
 var _leaflet2 = _interopRequireDefault(_leaflet);
@@ -982,6 +987,10 @@ var _geographyLoadAction = require('./geography-load-action');
 
 var _geographyLoadAction2 = _interopRequireDefault(_geographyLoadAction);
 
+var _sidebarStore = require('./sidebar-store');
+
+var _sidebarStore2 = _interopRequireDefault(_sidebarStore);
+
 var _dimensionStore = require('./dimension-store');
 
 var _dimensionStore2 = _interopRequireDefault(_dimensionStore);
@@ -996,28 +1005,31 @@ var _default = (function (_React$Component) {
     this.state = {
       selected: [],
       layers: {},
-      hover: []
+      hover: [],
+      heatmapData: {},
+      colorDomain: [0, 1],
+      colorRange: ["white", "#4F99B4"]
     };
 
     this.geoStyles = {
       baseline: {
-        fillColor: "#E3E3E3",
+        //fillColor: "#E3E3E3",
         weight: 1,
         opacity: 0.4,
-        color: 'gray',
-        fillOpacity: 0.3
+        color: 'white',
+        fillOpacity: 0.6
       },
       hover: {
         weight: 2,
-        color: '#666',
+        color: '#F7ED38',
         dashArray: '',
-        fillOpacity: 0.7
+        opacity: 0.7
       },
       selected: {
         weight: 4,
-        color: '#333',
+        color: '#F7ED38',
         dashArray: '',
-        fillOpacity: 0.9
+        opacity: 0.9
       }
     };
 
@@ -1026,14 +1038,19 @@ var _default = (function (_React$Component) {
     this.onGeoClick = this.onGeoClick.bind(this);
 
     this.onGeographyStoreChange = this.onGeographyStoreChange.bind(this);
+    this.onSidebarStore = this.onSidebarStore.bind(this);
 
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onDimensionChange = this.onDimensionChange.bind(this);
+
+    //this.onGeoMappingChange = this.onGeoMappingChange.bind(this);
 
     this.select = this.select.bind(this);
     this.unselect = this.unselect.bind(this);
     this.hover = this.hover.bind(this);
     this.unhover = this.unhover.bind(this);
+    this.reheat = this.reheat.bind(this);
+    this.value2color = this.value2color.bind(this);
     //this.setState = this.setState.bind(this);
   }
 
@@ -1077,6 +1094,7 @@ var _default = (function (_React$Component) {
       this.unsubscribeFromDimensionStore = _dimensionStore2['default'].listen(this.onDimensionChange);
       this.unsubscribeFromSelectionStore = _selectionStore2['default'].listen(this.onSelectionChange);
       this.unsubscribeFromGeographyStore = _geographyStore2['default'].listen(this.onGeographyStoreChange);
+      this.unsubscribeFromSidebarStore = _sidebarStore2['default'].listen(this.onSidebarStore);
 
       var leaflet = this.refs.map.getLeafletElement();
       console.log('MapVisualization.componentDidMount()', leaflet);
@@ -1096,6 +1114,7 @@ var _default = (function (_React$Component) {
       this.unsubscribeFromSelectionStore();
       this.unsubscribeFromGeographyStore();
       this.unsubscribeFromDimensionStore();
+      this.unsubscribeFromSidebarStore();
     }
   }, {
     key: 'onDimensionChange',
@@ -1229,6 +1248,52 @@ var _default = (function (_React$Component) {
     value: function getGeographyName(layer) {
       return layer.feature.properties['name'];
     }
+  }, {
+    key: 'onSidebarStore',
+    value: function onSidebarStore(barChart) {
+      console.log('MapVisualization onSidebarStore()', barChart);
+      var values = barChart.bars[0].values;
+      var heatmapData = _underscore2['default'].object(_underscore2['default'].pluck(values, 'label'), _underscore2['default'].pluck(values, 'value'));
+      this.setState({ heatmapData: heatmapData });
+      console.log('MapVisualization onSidebarStore() heatmapData', this.state.heatmapData);
+      this.reheat();
+    }
+  }, {
+    key: 'reheat',
+    value: function reheat() {
+      var _this = this;
+
+      var geos = _underscore2['default'].keys(this.state.layers);
+      var heatmapData = this.state.heatmapData;
+      var valueMax = _underscore2['default'].max(_underscore2['default'].values(heatmapData));
+      var valueMin = _underscore2['default'].min(_underscore2['default'].values(heatmapData));
+      var colorDomain = [valueMin, valueMax];
+      this.setState({ colorDomain: colorDomain });
+      //_.each(geos, function(geo){
+      geos.forEach(function (geo) {
+        var layer = _this.state.layers[geo];
+
+        console.log('MapVisualization value2color geo:', geo, ', value:', heatmapData[geo]);
+
+        layer.setStyle({ fillColor: _this.value2color(heatmapData[geo]) });
+      });
+    }
+  }, {
+    key: 'value2color',
+    value: function value2color(value) {
+      var colorMap = _d32['default'].scale.linear().domain(this.state.colorDomain).range(this.state.colorRange);
+
+      return colorMap(value);
+      /*
+      if(value > 0.25){
+        return '#4F99B4'
+      }else if(value <= 0.25){
+        return '#FF6666'
+      }else{
+        return "#E3E3E3"
+      }
+      */
+    }
   }]);
 
   return _default;
@@ -1238,7 +1303,7 @@ exports['default'] = _default;
 module.exports = exports['default'];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/app/scripts/components/map-visualization.js","/app/scripts/components")
-},{"./dimension-store":3,"./geography-load-action":6,"./geography-store":7,"./selection-actions":21,"./selection-store":22,"_process":36,"buffer":32,"leaflet":37,"react":284,"react-leaflet":58}],15:[function(require,module,exports){
+},{"./dimension-store":3,"./geography-load-action":6,"./geography-store":7,"./selection-actions":21,"./selection-store":22,"./sidebar-store":23,"_process":36,"buffer":32,"leaflet":37,"react":284,"react-leaflet":58}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
