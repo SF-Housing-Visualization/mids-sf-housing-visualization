@@ -70,6 +70,8 @@ export default Reflux.createStore({
 
     let group = selectedPrimaryMetric.group;
     let metric = selectedPrimaryMetric.metric;
+
+    let formatString = index.groups[group].variables[metric].formatString
     
     let key = group + ' > ' + metric;
 
@@ -104,7 +106,7 @@ export default Reflux.createStore({
     console.log('SidebarStore.reshapeBars', year, geography, geoMapping, color, key, 
        applicable, valueByGeography, values);
 
-    return [{ color, key, values }];
+    return [{ color, key, values, formatString}];
 
   },
 

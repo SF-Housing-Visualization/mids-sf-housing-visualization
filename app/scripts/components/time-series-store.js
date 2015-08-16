@@ -69,6 +69,7 @@ export default Reflux.createStore({
 
     let group = selectedPrimaryMetric.group;
     let metric = selectedPrimaryMetric.metric;
+    let formatString = index.groups[group].variables[metric].formatString
     
     let key = group + ' > ' + metric;
 
@@ -112,7 +113,7 @@ export default Reflux.createStore({
       });
       //let values = [ { color, series: index, x: year, y} ]
       
-      return { color, key, values };
+      return { color, key, values, formatString};
     });
 
 

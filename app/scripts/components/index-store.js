@@ -59,6 +59,8 @@ export default Reflux.createStore({
   },
 
   shape: function shape(index) {
+    console.log('IndexStore shape()', index)
+
     let groups = { };
     let groupOrder = [ ];
 
@@ -81,11 +83,13 @@ export default Reflux.createStore({
       let variableId = variable.VariableID;
       let variableName = variable.VariableName;
       let variableDescription = variable.VariableDescription;
+      let formatString = variable.FormatString
 
       let variableObject = {
         variableId, // ES6 implicit :variableId
         variableName, // ES6 implicit :variableName
-        variableDescription // ES6 implicit :variableDescription
+        variableDescription, // ES6 implicit :variableDescription
+        formatString
       };
 
       group.variables[variableId] = variableObject;
