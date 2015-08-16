@@ -133,7 +133,8 @@ gulp.task('serve', function() {
         {
           source: '/mids-sf-housing-sandbox',
           target: 
-            'http://sf-housing-visualization.github.io/mids-sf-housing-sandbox'
+            //'http://sf-housing-visualization.github.io/mids-sf-housing-sandbox'
+            'http://localhost:19000'
         }
       ]
     }));
