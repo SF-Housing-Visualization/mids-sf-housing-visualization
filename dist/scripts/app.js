@@ -198,7 +198,6 @@ exports['default'] = _reflux2['default'].createStore({
     filtered.forEach(function (mapping) {
       var id = +mapping.GeoID;
       var shortName = mapping.ShortName;
-      mapping.Value = Math.random();
       forward[id] = mapping;
       reverse[shortName] = id;
     });
@@ -618,6 +617,8 @@ exports['default'] = _reflux2['default'].createStore({
   },
 
   shape: function shape(index) {
+    console.log('IndexStore shape()', index);
+
     var groups = {};
     var groupOrder = [];
 
@@ -640,11 +641,13 @@ exports['default'] = _reflux2['default'].createStore({
       var variableId = variable.VariableID;
       var variableName = variable.VariableName;
       var variableDescription = variable.VariableDescription;
+      var formatString = variable.FormatString;
 
       var variableObject = {
         variableId: variableId, // ES6 implicit :variableId
         variableName: variableName, // ES6 implicit :variableName
-        variableDescription: variableDescription // ES6 implicit :variableDescription
+        variableDescription: variableDescription, // ES6 implicit :variableDescription
+        formatString: formatString
       };
 
       group.variables[variableId] = variableObject;
@@ -806,19 +809,19 @@ var _default = (function (_React$Component) {
       var collapse = _react2['default'].createElement(
         'button',
         { className: 'btn btn-default btn-lg', onClick: this.onCollapse,
-          'aria-label': 'Show less' },
+          'aria-label': 'More words' },
         _react2['default'].createElement('span', { className: 'glyphicon glyphicon-menu-up',
           'aria-hidden': 'true' }),
-        ' Show less'
+        ' More Words'
       );
 
       var expand = _react2['default'].createElement(
         'button',
         { className: 'btn btn-default btn-lg', onClick: this.onExpand,
-          'aria-label': 'Show more' },
+          'aria-label': 'Less words' },
         _react2['default'].createElement('span', { className: 'glyphicon glyphicon-menu-down',
           'aria-hidden': 'true' }),
-        ' Show more'
+        ' Less words'
       );
 
       var visualize = _react2['default'].createElement(
@@ -2299,6 +2302,8 @@ exports['default'] = _reflux2['default'].createStore({
     var group = selectedPrimaryMetric.group;
     var metric = selectedPrimaryMetric.metric;
 
+    var formatString = index.groups[group].variables[metric].formatString;
+
     var key = group + ' > ' + metric;
 
     var color = '#4f99b4';
@@ -2331,7 +2336,7 @@ exports['default'] = _reflux2['default'].createStore({
 
     console.log('SidebarStore.reshapeBars', year, geography, geoMapping, color, key, applicable, valueByGeography, values);
 
-    return [{ color: color, key: key, values: values }];
+    return [{ color: color, key: key, values: values, formatString: formatString }];
   },
 
   contains: function contains(array, item) {
@@ -2560,6 +2565,9 @@ var _default = (function (_React$Component) {
 
       var setState = this.setState.bind(this);
 
+      var formatString = data[0].formatString;
+      console.log('SidebarVisualization drawChart() formatString', formatString);
+
       var selectedGeographies = this.state.selectedGeographies;
       data.forEach(function (series) {
         return _this2.darkenSelected(series, selectedGeographies);
@@ -2576,9 +2584,18 @@ var _default = (function (_React$Component) {
         //.transitionDuration(350)
         .showLegend(false).showControls(false); //Allow user to switch between "Grouped" and "Stacked" mode.
 
-        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
+        // use custom axis format
+        chart.yAxis.tickFormat(_d32['default'].format(formatString));
+
+        chart.valueFormat(_d32['default'].format(formatString));
 
         chart.tooltip.enabled();
+
+        // Use custom tool tip
+        chart.tooltipContent(function (data) {
+          console.log(data);
+          return 'County: ' + data.value + ', Value: ' + _d32['default'].format(formatString)(data.series[0].value);
+        });
 
         _d32['default'].select(svg).datum(data).call(chart);
 
@@ -2695,6 +2712,7 @@ exports['default'] = _reflux2['default'].createStore({
 
     var group = selectedPrimaryMetric.group;
     var metric = selectedPrimaryMetric.metric;
+    var formatString = index.groups[group].variables[metric].formatString;
 
     var key = group + ' > ' + metric;
 
@@ -2733,7 +2751,7 @@ exports['default'] = _reflux2['default'].createStore({
       });
       //let values = [ { color, series: index, x: year, y} ]
 
-      return { color: color, key: key, values: values };
+      return { color: color, key: key, values: values, formatString: formatString };
     });
 
     console.log('TimeSeriesStore.reshapeLines()', selectedGeographies, geoMapping, key, valuesByGeography, lines);
@@ -2867,6 +2885,7 @@ var _default = (function (_React$Component) {
       var svg = _react2['default'].findDOMNode(this.refs.svg);
 
       console.log('TimeSeriesVisualization drawChart(data)', data);
+      var formatString = data[0].formatString;
 
       // WORKAROUND: https://github.com/novus/nvd3/issues/998
       // Issue: NVD3 does not clean up its tooltips when re-drawing
@@ -2895,7 +2914,9 @@ var _default = (function (_React$Component) {
 
         chart.xAxis.tickFormat(_d32['default'].format('f'));
 
-        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
+        chart.yAxis.tickFormat(_d32['default'].format(formatString));
+
+        //chart.valueFormat(d3.format(formatString));
 
         //chart.y2Axis
         //    .tickFormat(d3.format(',.2f'));

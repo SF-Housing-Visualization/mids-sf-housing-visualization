@@ -69,6 +69,7 @@ export default class extends React.Component {
     let svg = React.findDOMNode(this.refs.svg);
 
     console.log('TimeSeriesVisualization drawChart(data)', data);
+    let formatString = data[0].formatString;
 
     // WORKAROUND: https://github.com/novus/nvd3/issues/998
     // Issue: NVD3 does not clean up its tooltips when re-drawing
@@ -99,7 +100,9 @@ export default class extends React.Component {
           .tickFormat(d3.format('f'));
 
       chart.yAxis
-          .tickFormat(d3.format(',.2f'));
+          .tickFormat(d3.format(formatString));
+
+      //chart.valueFormat(d3.format(formatString));
 
       //chart.y2Axis
       //    .tickFormat(d3.format(',.2f'));

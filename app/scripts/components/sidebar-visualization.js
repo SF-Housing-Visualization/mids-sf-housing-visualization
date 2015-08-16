@@ -164,6 +164,9 @@ export default class extends React.Component {
 
     let setState = this.setState.bind(this);
 
+    let formatString = data[0].formatString;
+    console.log('SidebarVisualization drawChart() formatString', formatString)
+
     let selectedGeographies = this.state.selectedGeographies;
     data.forEach((series) => this.darkenSelected(series, selectedGeographies));
 
@@ -178,10 +181,19 @@ export default class extends React.Component {
           .showLegend(false)
           .showControls(false);        //Allow user to switch between "Grouped" and "Stacked" mode.
 
+      // use custom axis format
       chart.yAxis
-          .tickFormat(d3.format(',.2f'));
+          .tickFormat(d3.format(formatString));
+      
+      chart.valueFormat(d3.format(formatString));
 
       chart.tooltip.enabled();
+
+      // Use custom tool tip
+      chart.tooltipContent(function(data) {
+        console.log(data)
+        return 'County: ' + data.value + ', Value: ' + d3.format(formatString)(data.series[0].value)
+      });
 
       d3.select(svg)
           .datum(data)
