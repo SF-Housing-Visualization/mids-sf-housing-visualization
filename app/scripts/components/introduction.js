@@ -36,17 +36,17 @@ export default class extends React.Component {
 
     let collapse = (
       <button className='btn btn-default btn-lg' onClick={this.onCollapse}
-        aria-label='More words'>
+        aria-label='Less words'>
         <span className='glyphicon glyphicon-menu-up' 
-          aria-hidden='true'></span> More Words
+          aria-hidden='true'></span> Less words
       </button>
     );
 
     let expand = (
       <button className='btn btn-default btn-lg' onClick={this.onExpand}
-        aria-label='Less words'>
+        aria-label='More words'>
         <span className='glyphicon glyphicon-menu-down' 
-          aria-hidden='true'></span> Less words
+          aria-hidden='true'></span> More words
       </button>
     );
 

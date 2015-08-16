@@ -809,19 +809,19 @@ var _default = (function (_React$Component) {
       var collapse = _react2['default'].createElement(
         'button',
         { className: 'btn btn-default btn-lg', onClick: this.onCollapse,
-          'aria-label': 'More words' },
+          'aria-label': 'Less words' },
         _react2['default'].createElement('span', { className: 'glyphicon glyphicon-menu-up',
           'aria-hidden': 'true' }),
-        ' More Words'
+        ' Less words'
       );
 
       var expand = _react2['default'].createElement(
         'button',
         { className: 'btn btn-default btn-lg', onClick: this.onExpand,
-          'aria-label': 'Less words' },
+          'aria-label': 'More words' },
         _react2['default'].createElement('span', { className: 'glyphicon glyphicon-menu-down',
           'aria-hidden': 'true' }),
-        ' Less words'
+        ' More words'
       );
 
       var visualize = _react2['default'].createElement(
