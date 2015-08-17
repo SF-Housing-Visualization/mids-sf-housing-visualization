@@ -1,0 +1,7 @@
+### What Is This?
+
+This was created by _Ross Boberg_, _John Bocharov_, and _Angela Gunn_ to help people explore some great data already available about the San Franscisco Bay Area's housing crisis.
+
+### Where Did the Data Come From?
+
+Our data sources are foo, bar, and baz. You can find them on [example.org](example.org).

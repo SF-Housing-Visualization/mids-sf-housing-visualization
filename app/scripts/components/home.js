@@ -25,6 +25,8 @@ import MetricStore from './metric-store';
 import DimensionActions from './dimension-actions';
 import DimensionStore from './dimension-store';
 
+import Footer from './footer';
+
 export default class extends React.Component {
   constructor(props) {
     super(props);
@@ -60,6 +62,8 @@ export default class extends React.Component {
         <MapVisualization />
 
         <TimeSeriesVisualization />
+
+        <Footer/>
 
       </div>
     );
