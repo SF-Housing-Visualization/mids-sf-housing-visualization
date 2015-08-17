@@ -20,7 +20,8 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data : SidebarData
+      data : SidebarData,
+      format : ',.2f'
     };
     console.log(this.state);
 
@@ -90,8 +91,9 @@ export default class extends React.Component {
   onSidebarStore(barChart) {
     console.log('SidebarVisualization onSidebarStore()', barChart);
     let data = barChart.bars;
-    this.setState({ data });
-    this.drawChart(data);
+    let format = this.getPrimaryMetricFormat(barChart);
+    this.setState({ data, format });
+    this.drawChart(data, format);
 
   }
 
@@ -108,7 +110,8 @@ export default class extends React.Component {
   onSelectionChange(newSelection) {
     this.setState(newSelection);
     let data = this.state.data;
-    this.drawChart(data);
+    let format = this.state.format;
+    this.drawChart(data, format);
 
     console.log('SidebarVisualization onSelectionChange() new state:', this.state);
   }
@@ -121,6 +124,9 @@ export default class extends React.Component {
     if (windowHeight && visualizationHeaderHeight) {
       let componentHeight = windowHeight - visualizationHeaderHeight;
       this.setState({ componentHeight });
+      let data = this.state.data;
+      let format = this.state.format;
+      this.drawChart(data, format);
     }
     
   }
@@ -134,11 +140,11 @@ export default class extends React.Component {
       valueObject.color =
         this.contains(selectedGeographies, label)
         ? selectedColor
-        : baselineColor;
+        : valueObject.color;
     });
   }
 
-  drawChart(data) {
+  drawChart(data, format) {
     let svg = React.findDOMNode(this.refs.svg);
 
     console.log('SidebarVisualization drawChart() data', data);
@@ -216,6 +222,18 @@ export default class extends React.Component {
 
   contains(array, item) {
     return (_.indexOf(array, item) > -1);
+  }
+
+  // TODO (jab): DRY violation (shared with time series)
+  getPrimaryMetricFormat(barChart) {
+    console.log('SidebarVisualization getPrimaryMetricFormat()', barChart);
+    let selected = barChart.selectedPrimaryMetric;
+    let group = selected.group;
+    let metric = selected.metric;
+    let index = barChart.index;
+
+    return index.groups[group].variables[metric].formatString;
+
   }
   
 }
