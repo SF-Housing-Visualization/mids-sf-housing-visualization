@@ -269,31 +269,39 @@ export default class extends React.Component {
 
   onSidebarStore(barChart) {
     console.log('MapVisualization onSidebarStore()', barChart);
-    let values = barChart.bars[0].values;
-    let heatmapData = _.object(_.pluck(values, 'label'), _.pluck(values, 'value'))
+
+    let primaryMetric = barChart.bars[0];
+    let values = primaryMetric.values;
+    let heatmapData = _.object(
+      _.pluck(values, 'label'), _.pluck(values, 'color')
+    );
     this.setState({ heatmapData });
-    console.log('MapVisualization onSidebarStore() heatmapData', this.state.heatmapData)
-    this.reheat()
+    console.log('MapVisualization onSidebarStore() heatmapData', 
+      this.state.heatmapData);
+    this.reheat();
   }
 
   reheat(){
     let geos = _.keys(this.state.layers);
     let heatmapData = this.state.heatmapData;
-    let valueMax = _.max(_.values(heatmapData))
-    let valueMin = _.min(_.values(heatmapData))
-    let colorDomain = [valueMin, valueMax]
-    this.setState({ colorDomain })
+    //let valueMax = _.max(_.values(heatmapData))
+    //let valueMin = _.min(_.values(heatmapData))
+    //let colorDomain = [valueMin, valueMax]
+    //this.setState({ colorDomain })
     //_.each(geos, function(geo){
     geos.forEach((geo) => {
       let layer = this.state.layers[geo]
 
-      console.log('MapVisualization value2color geo:', geo, ', value:', heatmapData[geo])
+      //console.log('MapVisualization value2color geo:', geo, ', value:', heatmapData[geo])
 
-      layer.setStyle({fillColor: this.value2color(heatmapData[geo])})
+      layer.setStyle({fillColor: 
+        //this.value2color(heatmapData[geo])
+        heatmapData[geo]
+      })
     })
   }
 
-  value2color(value) {
+  value2color(value) { // TODO (jab): remove dead code after review with rb
     let colorMap = d3.scale.linear().domain(this.state.colorDomain).range(this.state.colorRange)
 
     return colorMap(value)

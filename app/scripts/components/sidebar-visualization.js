@@ -134,7 +134,7 @@ export default class extends React.Component {
       valueObject.color =
         this.contains(selectedGeographies, label)
         ? selectedColor
-        : baselineColor;
+        : valueObject.color;
     });
   }
 

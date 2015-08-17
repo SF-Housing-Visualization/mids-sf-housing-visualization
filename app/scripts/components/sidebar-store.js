@@ -1,4 +1,6 @@
 import Reflux from 'reflux';
+import d3 from 'd3';
+
 import SelectionStore from './selection-store';
 import GeoMappingStore from './geo-mapping-store';
 
@@ -75,7 +77,7 @@ export default Reflux.createStore({
     
     let key = group + ' > ' + metric;
 
-    const color = '#4f99b4';
+    const baseColor = '#4f99b4';
 
     let geography = selectedGeographies[0];
 
@@ -96,17 +98,28 @@ export default Reflux.createStore({
       }
     });
 
+    let rawValues = _.values(valueByGeography);
+    let domain = [_.min(rawValues), _.max(rawValues)];
+    let colorRange = ['#4F99B4', '#3C73E1'];
+    let colorScale = d3.scale.linear().domain(domain).range(colorRange);
+    console.log('SidebarStore.reshapeBars() colors domain=', domain,
+      'colorRange=', colorRange, 'colorScale=', colorScale,
+      'colorScale(0.0)', colorScale(0.0), colorScale(0.5), colorScale(1.0));
+
     let values = _.map(_.keys(valueByGeography), (geography) => {
       let label = geography;
       let series = 0;
       let value = valueByGeography[geography];
+      let color = colorScale(value);
+
       return { color, key, label, series, value};
     });
+    
 
-    console.log('SidebarStore.reshapeBars', year, geography, geoMapping, color, key, 
-       applicable, valueByGeography, values);
+    console.log('SidebarStore.reshapeBars()', year, geography, geoMapping, 
+      baseColor, key, applicable, valueByGeography, values);
 
-    return [{ color, key, values, formatString}];
+    return [{ color: baseColor, key, values, formatString }];
 
   },
 

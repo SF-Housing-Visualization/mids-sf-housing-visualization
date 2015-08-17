@@ -1255,8 +1255,10 @@ var _default = (function (_React$Component) {
     key: 'onSidebarStore',
     value: function onSidebarStore(barChart) {
       console.log('MapVisualization onSidebarStore()', barChart);
-      var values = barChart.bars[0].values;
-      var heatmapData = _underscore2['default'].object(_underscore2['default'].pluck(values, 'label'), _underscore2['default'].pluck(values, 'value'));
+
+      var primaryMetric = barChart.bars[0];
+      var values = primaryMetric.values;
+      var heatmapData = _underscore2['default'].object(_underscore2['default'].pluck(values, 'label'), _underscore2['default'].pluck(values, 'color'));
       this.setState({ heatmapData: heatmapData });
       console.log('MapVisualization onSidebarStore() heatmapData', this.state.heatmapData);
       this.reheat();
@@ -1268,22 +1270,26 @@ var _default = (function (_React$Component) {
 
       var geos = _underscore2['default'].keys(this.state.layers);
       var heatmapData = this.state.heatmapData;
-      var valueMax = _underscore2['default'].max(_underscore2['default'].values(heatmapData));
-      var valueMin = _underscore2['default'].min(_underscore2['default'].values(heatmapData));
-      var colorDomain = [valueMin, valueMax];
-      this.setState({ colorDomain: colorDomain });
+      //let valueMax = _.max(_.values(heatmapData))
+      //let valueMin = _.min(_.values(heatmapData))
+      //let colorDomain = [valueMin, valueMax]
+      //this.setState({ colorDomain })
       //_.each(geos, function(geo){
       geos.forEach(function (geo) {
         var layer = _this.state.layers[geo];
 
-        console.log('MapVisualization value2color geo:', geo, ', value:', heatmapData[geo]);
+        //console.log('MapVisualization value2color geo:', geo, ', value:', heatmapData[geo])
 
-        layer.setStyle({ fillColor: _this.value2color(heatmapData[geo]) });
+        layer.setStyle({ fillColor:
+          //this.value2color(heatmapData[geo])
+          heatmapData[geo]
+        });
       });
     }
   }, {
     key: 'value2color',
     value: function value2color(value) {
+      // TODO (jab): remove dead code after review with rb
       var colorMap = _d32['default'].scale.linear().domain(this.state.colorDomain).range(this.state.colorRange);
 
       return colorMap(value);
@@ -2231,6 +2237,10 @@ var _reflux = (typeof window !== "undefined" ? window.Reflux : typeof global !==
 
 var _reflux2 = _interopRequireDefault(_reflux);
 
+var _d3 = (typeof window !== "undefined" ? window.d3 : typeof global !== "undefined" ? global.d3 : null);
+
+var _d32 = _interopRequireDefault(_d3);
+
 var _selectionStore = require('./selection-store');
 
 var _selectionStore2 = _interopRequireDefault(_selectionStore);
@@ -2306,7 +2316,7 @@ exports['default'] = _reflux2['default'].createStore({
 
     var key = group + ' > ' + metric;
 
-    var color = '#4f99b4';
+    var baseColor = '#4f99b4';
 
     var geography = selectedGeographies[0];
 
@@ -2327,16 +2337,24 @@ exports['default'] = _reflux2['default'].createStore({
       }
     });
 
+    var rawValues = _.values(valueByGeography);
+    var domain = [_.min(rawValues), _.max(rawValues)];
+    var colorRange = ['#4F99B4', '#3C73E1'];
+    var colorScale = _d32['default'].scale.linear().domain(domain).range(colorRange);
+    console.log('SidebarStore.reshapeBars() colors domain=', domain, 'colorRange=', colorRange, 'colorScale=', colorScale, 'colorScale(0.0)', colorScale(0.0), colorScale(0.5), colorScale(1.0));
+
     var values = _.map(_.keys(valueByGeography), function (geography) {
       var label = geography;
       var series = 0;
       var value = valueByGeography[geography];
+      var color = colorScale(value);
+
       return { color: color, key: key, label: label, series: series, value: value };
     });
 
-    console.log('SidebarStore.reshapeBars', year, geography, geoMapping, color, key, applicable, valueByGeography, values);
+    console.log('SidebarStore.reshapeBars()', year, geography, geoMapping, baseColor, key, applicable, valueByGeography, values);
 
-    return [{ color: color, key: key, values: values, formatString: formatString }];
+    return [{ color: baseColor, key: key, values: values, formatString: formatString }];
   },
 
   contains: function contains(array, item) {
@@ -2532,7 +2550,7 @@ var _default = (function (_React$Component) {
 
       series.values.forEach(function (valueObject) {
         var label = valueObject.label;
-        valueObject.color = _this.contains(selectedGeographies, label) ? selectedColor : baselineColor;
+        valueObject.color = _this.contains(selectedGeographies, label) ? selectedColor : valueObject.color;
       });
     }
   }, {
