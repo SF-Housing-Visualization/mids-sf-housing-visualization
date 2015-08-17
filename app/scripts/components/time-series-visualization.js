@@ -18,7 +18,8 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data : TimeSeriesData
+      data : TimeSeriesData,
+      format : ',.2f'
     };
     console.log(this.state);
 
@@ -57,7 +58,8 @@ export default class extends React.Component {
       TimeSeriesStore.listen(this.onTimeSeriesStore);
 
     let data = this.state.data;
-    this.drawChart(data);
+    let format = this.state.format;
+    this.drawChart(data, format);
   }
 
   componentWillUnmount() {
@@ -65,7 +67,7 @@ export default class extends React.Component {
     this.unsubscribeFromDimensionStore();
   }
 
-  drawChart(data) {
+  drawChart(data, format) {
     let svg = React.findDOMNode(this.refs.svg);
 
     console.log('TimeSeriesVisualization drawChart(data)', data);
@@ -197,9 +199,21 @@ export default class extends React.Component {
   onTimeSeriesStore(timeSeries) {
     console.log('TimeSeriesVisualization onTimeSeriesStore()', timeSeries);
     let data = timeSeries.lines;
+    let format = this.getPrimaryMetricFormat(timeSeries);
     
-    this.setState({ data });
-    this.drawChart(data);
+    this.setState({ data, format });
+    this.drawChart(data, format);
+  }
+
+  getPrimaryMetricFormat(timeSeries) {
+    console.log('TimeSeriesVisualization getPrimaryMetricFormat()', timeSeries);
+    let selected = timeSeries.selectedPrimaryMetric;
+    let group = selected.group;
+    let metric = selected.metric;
+    let index = timeSeries.index;
+
+    return index.groups[group].variables[metric].formatString;
+
   }
 
   contains(array, item) {

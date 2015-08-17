@@ -83,13 +83,13 @@ export default Reflux.createStore({
       let variableId = variable.VariableID;
       let variableName = variable.VariableName;
       let variableDescription = variable.VariableDescription;
-      let formatString = variable.FormatString
+      let formatString = variable.FormatString;
 
       let variableObject = {
         variableId, // ES6 implicit :variableId
         variableName, // ES6 implicit :variableName
         variableDescription, // ES6 implicit :variableDescription
-        formatString
+        formatString // ES6 implicit :formatString
       };
 
       group.variables[variableId] = variableObject;

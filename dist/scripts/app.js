@@ -647,7 +647,7 @@ exports['default'] = _reflux2['default'].createStore({
         variableId: variableId, // ES6 implicit :variableId
         variableName: variableName, // ES6 implicit :variableName
         variableDescription: variableDescription, // ES6 implicit :variableDescription
-        formatString: formatString
+        formatString: formatString // ES6 implicit :formatString
       };
 
       group.variables[variableId] = variableObject;
@@ -2432,7 +2432,8 @@ var _default = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).call(this, props);
     this.state = {
-      data: _dataSidebarData2['default']
+      data: _dataSidebarData2['default'],
+      format: ',.2f'
     };
     console.log(this.state);
 
@@ -2505,8 +2506,9 @@ var _default = (function (_React$Component) {
     value: function onSidebarStore(barChart) {
       console.log('SidebarVisualization onSidebarStore()', barChart);
       var data = barChart.bars;
-      this.setState({ data: data });
-      this.drawChart(data);
+      var format = this.getPrimaryMetricFormat(barChart);
+      this.setState({ data: data, format: format });
+      this.drawChart(data, format);
     }
   }, {
     key: 'onMetricChange',
@@ -2524,7 +2526,8 @@ var _default = (function (_React$Component) {
     value: function onSelectionChange(newSelection) {
       this.setState(newSelection);
       var data = this.state.data;
-      this.drawChart(data);
+      var format = this.state.format;
+      this.drawChart(data, format);
 
       console.log('SidebarVisualization onSelectionChange() new state:', this.state);
     }
@@ -2538,6 +2541,9 @@ var _default = (function (_React$Component) {
       if (windowHeight && visualizationHeaderHeight) {
         var componentHeight = windowHeight - visualizationHeaderHeight;
         this.setState({ componentHeight: componentHeight });
+        var data = this.state.data;
+        var format = this.state.format;
+        this.drawChart(data, format);
       }
     }
   }, {
@@ -2555,7 +2561,7 @@ var _default = (function (_React$Component) {
     }
   }, {
     key: 'drawChart',
-    value: function drawChart(data) {
+    value: function drawChart(data, format) {
       var _this2 = this;
 
       var svg = _react2['default'].findDOMNode(this.refs.svg);
@@ -2602,10 +2608,12 @@ var _default = (function (_React$Component) {
         //.transitionDuration(350)
         .showLegend(false).showControls(false); //Allow user to switch between "Grouped" and "Stacked" mode.
 
+        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
         // use custom axis format
         chart.yAxis.tickFormat(_d32['default'].format(formatString));
 
         chart.valueFormat(_d32['default'].format(formatString));
+        chart.yAxis.tickFormat(_d32['default'].format(format));
 
         chart.tooltip.enabled();
 
@@ -2635,6 +2643,19 @@ var _default = (function (_React$Component) {
     key: 'contains',
     value: function contains(array, item) {
       return _underscore2['default'].indexOf(array, item) > -1;
+    }
+
+    // TODO (jab): DRY violation (shared with time series)
+  }, {
+    key: 'getPrimaryMetricFormat',
+    value: function getPrimaryMetricFormat(barChart) {
+      console.log('SidebarVisualization getPrimaryMetricFormat()', barChart);
+      var selected = barChart.selectedPrimaryMetric;
+      var group = selected.group;
+      var metric = selected.metric;
+      var index = barChart.index;
+
+      return index.groups[group].variables[metric].formatString;
     }
   }]);
 
@@ -2852,7 +2873,8 @@ var _default = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).call(this, props);
     this.state = {
-      data: _dataTimeSeriesData2['default']
+      data: _dataTimeSeriesData2['default'],
+      format: ',.2f'
     };
     console.log(this.state);
 
@@ -2889,7 +2911,8 @@ var _default = (function (_React$Component) {
       this.unsubscribeFromTimeSeriesStore = _timeSeriesStore2['default'].listen(this.onTimeSeriesStore);
 
       var data = this.state.data;
-      this.drawChart(data);
+      var format = this.state.format;
+      this.drawChart(data, format);
     }
   }, {
     key: 'componentWillUnmount',
@@ -2899,7 +2922,7 @@ var _default = (function (_React$Component) {
     }
   }, {
     key: 'drawChart',
-    value: function drawChart(data) {
+    value: function drawChart(data, format) {
       var svg = _react2['default'].findDOMNode(this.refs.svg);
 
       console.log('TimeSeriesVisualization drawChart(data)', data);
@@ -2932,9 +2955,11 @@ var _default = (function (_React$Component) {
 
         chart.xAxis.tickFormat(_d32['default'].format('f'));
 
+        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
         chart.yAxis.tickFormat(_d32['default'].format(formatString));
 
         //chart.valueFormat(d3.format(formatString));
+        chart.yAxis.tickFormat(_d32['default'].format(format));
 
         //chart.y2Axis
         //    .tickFormat(d3.format(',.2f'));
@@ -3025,9 +3050,21 @@ var _default = (function (_React$Component) {
     value: function onTimeSeriesStore(timeSeries) {
       console.log('TimeSeriesVisualization onTimeSeriesStore()', timeSeries);
       var data = timeSeries.lines;
+      var format = this.getPrimaryMetricFormat(timeSeries);
 
-      this.setState({ data: data });
-      this.drawChart(data);
+      this.setState({ data: data, format: format });
+      this.drawChart(data, format);
+    }
+  }, {
+    key: 'getPrimaryMetricFormat',
+    value: function getPrimaryMetricFormat(timeSeries) {
+      console.log('TimeSeriesVisualization getPrimaryMetricFormat()', timeSeries);
+      var selected = timeSeries.selectedPrimaryMetric;
+      var group = selected.group;
+      var metric = selected.metric;
+      var index = timeSeries.index;
+
+      return index.groups[group].variables[metric].formatString;
     }
   }, {
     key: 'contains',
