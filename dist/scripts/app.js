@@ -2708,12 +2708,10 @@ var _default = (function (_React$Component) {
         //.transitionDuration(350)
         .showLegend(false).showControls(false); //Allow user to switch between "Grouped" and "Stacked" mode.
 
-        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
         // use custom axis format
         chart.yAxis.tickFormat(_d32['default'].format(formatString));
 
         chart.valueFormat(_d32['default'].format(formatString));
-        chart.yAxis.tickFormat(_d32['default'].format(format));
 
         chart.tooltip.enabled();
 
@@ -3055,11 +3053,9 @@ var _default = (function (_React$Component) {
 
         chart.xAxis.tickFormat(_d32['default'].format('f'));
 
-        chart.yAxis.tickFormat(_d32['default'].format(',.2f'));
         chart.yAxis.tickFormat(_d32['default'].format(formatString));
 
         //chart.valueFormat(d3.format(formatString));
-        chart.yAxis.tickFormat(_d32['default'].format(format));
 
         //chart.y2Axis
         //    .tickFormat(d3.format(',.2f'));
