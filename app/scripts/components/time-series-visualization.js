@@ -159,6 +159,8 @@ export default class extends React.Component {
   onLineClick(event) {
     console.log('onLineClick data: ', event);
     var geography = event.series.key;
+    var year = event.point.x | 0; // to integer
+    SelectionActions.timePositionSelectionChange( year );
     SelectionActions.geographiesSelectionChange([ geography ]);
   }
 

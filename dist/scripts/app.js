@@ -2988,6 +2988,8 @@ var _default = (function (_React$Component) {
     value: function onLineClick(event) {
       console.log('onLineClick data: ', event);
       var geography = event.series.key;
+      var year = event.point.x | 0; // to integer
+      _selectionActions2['default'].timePositionSelectionChange(year);
       _selectionActions2['default'].geographiesSelectionChange([geography]);
     }
   }, {
