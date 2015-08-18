@@ -73,8 +73,8 @@ export default Reflux.createStore({
     
     let key = group + ' > ' + metric;
 
-    const baselineColor = '#4f99b4';
-    const selectedColor = '#000000';
+    const baselineColor = '#3C73E1';
+    const selectedColor = '#F38630';
 
     let valuesByGeography = _.mapObject(reverseGeoMapping, () => {
       return { }

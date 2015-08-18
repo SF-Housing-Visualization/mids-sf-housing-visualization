@@ -1116,21 +1116,20 @@ var _default = (function (_React$Component) {
 
     this.geoStyles = {
       baseline: {
-        //fillColor: "#E3E3E3",
         weight: 1,
-        opacity: 0.4,
+        opacity: 0.3,
         color: 'white',
-        fillOpacity: 0.6
+        fillOpacity: 0.5
       },
       hover: {
         weight: 2,
-        color: '#F7ED38',
+        color: '#F38630',
         dashArray: '',
         opacity: 0.7
       },
       selected: {
-        weight: 4,
-        color: '#F7ED38',
+        weight: 3,
+        color: '#F38630',
         dashArray: '',
         opacity: 0.9
       }
@@ -1153,7 +1152,6 @@ var _default = (function (_React$Component) {
     this.hover = this.hover.bind(this);
     this.unhover = this.unhover.bind(this);
     this.reheat = this.reheat.bind(this);
-    this.value2color = this.value2color.bind(this);
     //this.setState = this.setState.bind(this);
   }
 
@@ -1315,9 +1313,12 @@ var _default = (function (_React$Component) {
   }, {
     key: 'select',
     value: function select(geography) {
+      var heatmapData = this.state.heatmapData;
       var layer = this.state.layers[geography];
-      var style = this.contains(this.state.hover, geography) ? this.geoStyles.hover : this.geoStyles.selected;
-      layer.setStyle(style);
+      if (heatmapData[geography]) {
+        var style = this.contains(this.state.hover, geography) ? this.geoStyles.hover : this.geoStyles.selected;
+        layer.setStyle(style);
+      }
     }
   }, {
     key: 'unselect',
@@ -1329,16 +1330,20 @@ var _default = (function (_React$Component) {
   }, {
     key: 'hover',
     value: function hover(geography) {
-      var layer = this.state.layers[geography];
-      // when entering an area, the hover style always wins
-      var style = this.geoStyles.hover;
-      layer.setStyle(style);
+      var heatmapData = this.state.heatmapData;
+      if (heatmapData[geography]) {
+        var layer = this.state.layers[geography];
+        // when entering an area, the hover style always wins
+        var style = this.geoStyles.hover;
+        layer.setStyle(style);
+      }
     }
   }, {
     key: 'unhover',
     value: function unhover(geography) {
+      var heatmapData = this.state.heatmapData;
       var layer = this.state.layers[geography];
-      var style = this.contains(this.state.selected, geography) ? this.geoStyles.selected : this.geoStyles.baseline;
+      var style = this.contains(this.state.selected, geography) && heatmapData[geography] ? this.geoStyles.selected : this.geoStyles.baseline;
       layer.setStyle(style);
     }
   }, {
@@ -1358,7 +1363,7 @@ var _default = (function (_React$Component) {
 
       var primaryMetric = barChart.bars[0];
       var values = primaryMetric.values;
-      var heatmapData = _underscore2['default'].object(_underscore2['default'].pluck(values, 'label'), _underscore2['default'].pluck(values, 'color'));
+      var heatmapData = _underscore2['default'].object(_underscore2['default'].pluck(values, 'label'), _underscore2['default'].pluck(values, 'fillColor'));
       this.setState({ heatmapData: heatmapData });
       console.log('MapVisualization onSidebarStore() heatmapData', this.state.heatmapData);
       this.reheat();
@@ -1370,38 +1375,14 @@ var _default = (function (_React$Component) {
 
       var geos = _underscore2['default'].keys(this.state.layers);
       var heatmapData = this.state.heatmapData;
-      //let valueMax = _.max(_.values(heatmapData))
-      //let valueMin = _.min(_.values(heatmapData))
-      //let colorDomain = [valueMin, valueMax]
-      //this.setState({ colorDomain })
-      //_.each(geos, function(geo){
       geos.forEach(function (geo) {
         var layer = _this.state.layers[geo];
-
-        //console.log('MapVisualization value2color geo:', geo, ', value:', heatmapData[geo])
-
-        layer.setStyle({ fillColor:
-          //this.value2color(heatmapData[geo])
-          heatmapData[geo]
-        });
+        var geo_color = heatmapData[geo] ? heatmapData[geo] : 'gray';
+        if (_this.contains(_this.state.selected, geo) && heatmapData[geo]) {
+          layer.setStyle(_this.geoStyles.selected);
+        }
+        layer.setStyle({ fillColor: geo_color });
       });
-    }
-  }, {
-    key: 'value2color',
-    value: function value2color(value) {
-      // TODO (jab): remove dead code after review with rb
-      var colorMap = _d32['default'].scale.linear().domain(this.state.colorDomain).range(this.state.colorRange);
-
-      return colorMap(value);
-      /*
-      if(value > 0.25){
-        return '#4F99B4'
-      }else if(value <= 0.25){
-        return '#FF6666'
-      }else{
-        return "#E3E3E3"
-      }
-      */
     }
   }]);
 
@@ -2439,7 +2420,8 @@ exports['default'] = _reflux2['default'].createStore({
 
     var rawValues = _.values(valueByGeography);
     var domain = [_.min(rawValues), _.max(rawValues)];
-    var colorRange = ['#4F99B4', '#3C73E1'];
+    //let colorRange = ['#4F99B4', '#3C73E1'];
+    var colorRange = ['#D0DCEB', '#3C73E1'];
     var colorScale = _d32['default'].scale.linear().domain(domain).range(colorRange);
     console.log('SidebarStore.reshapeBars() colors domain=', domain, 'colorRange=', colorRange, 'colorScale=', colorScale, 'colorScale(0.0)', colorScale(0.0), colorScale(0.5), colorScale(1.0));
 
@@ -2448,8 +2430,9 @@ exports['default'] = _reflux2['default'].createStore({
       var series = 0;
       var value = valueByGeography[geography];
       var color = colorScale(value);
+      var fillColor = color;
 
-      return { color: color, key: key, label: label, series: series, value: value };
+      return { color: color, fillColor: fillColor, key: key, label: label, series: series, value: value };
     });
 
     console.log('SidebarStore.reshapeBars()', year, geography, geoMapping, baseColor, key, applicable, valueByGeography, values);
@@ -2652,7 +2635,7 @@ var _default = (function (_React$Component) {
       var _this = this;
 
       var baselineColor = series.color;
-      var selectedColor = '#000000';
+      var selectedColor = '#F38630';
 
       series.values.forEach(function (valueObject) {
         var label = valueObject.label;
@@ -2853,8 +2836,8 @@ exports['default'] = _reflux2['default'].createStore({
 
     var key = group + ' > ' + metric;
 
-    var baselineColor = '#4f99b4';
-    var selectedColor = '#000000';
+    var baselineColor = '#3C73E1';
+    var selectedColor = '#F38630';
 
     var valuesByGeography = _.mapObject(reverseGeoMapping, function () {
       return {};
@@ -3120,8 +3103,8 @@ var _default = (function (_React$Component) {
 
       var key = series.key;
 
-      var baselineColor = '#AAAAAA';
-      var selectedColor = '#000000';
+      var baselineColor = '#3C73E1';
+      var selectedColor = '#F38630';
 
       series.color = this.contains(selectedGeographies, key) ? selectedColor : baselineColor;
 

@@ -25,21 +25,20 @@ export default class extends React.Component {
 
     this.geoStyles = {
       baseline: {
-        //fillColor: "#E3E3E3",
         weight: 1,
-        opacity: 0.4,
+        opacity: 0.3,
         color: 'white',
-        fillOpacity: 0.6
+        fillOpacity: 0.5
       },
       hover: {
         weight: 2,
-        color: '#F7ED38',
+        color: '#F38630',
         dashArray: '',
         opacity: 0.7
       },
       selected: {
-        weight: 4,
-        color: '#F7ED38',
+        weight: 3,
+        color: '#F38630',
         dashArray: '',
         opacity: 0.9
       }
@@ -63,7 +62,6 @@ export default class extends React.Component {
     this.hover = this.hover.bind(this);
     this.unhover = this.unhover.bind(this);
     this.reheat = this.reheat.bind(this)
-    this.value2color = this.value2color.bind(this)
     //this.setState = this.setState.bind(this);
   }
 
@@ -229,11 +227,14 @@ export default class extends React.Component {
   }
 
   select(geography) {
+    let heatmapData = this.state.heatmapData;
     let layer = this.state.layers[geography];
-    let style = this.contains(this.state.hover, geography)
-      ? this.geoStyles.hover
-      : this.geoStyles.selected;
-    layer.setStyle(style);
+    if(heatmapData[geography]){
+      let style = this.contains(this.state.hover, geography)
+        ? this.geoStyles.hover
+        : this.geoStyles.selected;
+      layer.setStyle(style);
+    }
   }
 
   unselect(geography) {
@@ -245,15 +246,19 @@ export default class extends React.Component {
   }
 
   hover(geography) {
-    let layer = this.state.layers[geography];
-    // when entering an area, the hover style always wins
-    let style = this.geoStyles.hover;
-    layer.setStyle(style);
+    let heatmapData = this.state.heatmapData;
+    if(heatmapData[geography]){
+      let layer = this.state.layers[geography];
+      // when entering an area, the hover style always wins
+      let style = this.geoStyles.hover;
+      layer.setStyle(style);
+    }
   }
 
   unhover(geography) {
+    let heatmapData = this.state.heatmapData;
     let layer = this.state.layers[geography];
-    let style = this.contains(this.state.selected, geography)
+    let style = (this.contains(this.state.selected, geography) && heatmapData[geography])
       ? this.geoStyles.selected
       : this.geoStyles.baseline;
     layer.setStyle(style);
@@ -273,7 +278,7 @@ export default class extends React.Component {
     let primaryMetric = barChart.bars[0];
     let values = primaryMetric.values;
     let heatmapData = _.object(
-      _.pluck(values, 'label'), _.pluck(values, 'color')
+      _.pluck(values, 'label'), _.pluck(values, 'fillColor')
     );
     this.setState({ heatmapData });
     console.log('MapVisualization onSidebarStore() heatmapData', 
@@ -284,35 +289,14 @@ export default class extends React.Component {
   reheat(){
     let geos = _.keys(this.state.layers);
     let heatmapData = this.state.heatmapData;
-    //let valueMax = _.max(_.values(heatmapData))
-    //let valueMin = _.min(_.values(heatmapData))
-    //let colorDomain = [valueMin, valueMax]
-    //this.setState({ colorDomain })
-    //_.each(geos, function(geo){
     geos.forEach((geo) => {
       let layer = this.state.layers[geo]
-
-      //console.log('MapVisualization value2color geo:', geo, ', value:', heatmapData[geo])
-
-      layer.setStyle({fillColor: 
-        //this.value2color(heatmapData[geo])
-        heatmapData[geo]
-      })
+      let geo_color = heatmapData[geo] ? heatmapData[geo] : 'gray'
+      if((this.contains(this.state.selected, geo) && heatmapData[geo])){
+        layer.setStyle(this.geoStyles.selected)
+      }
+      layer.setStyle({fillColor: geo_color})
     })
   }
 
-  value2color(value) { // TODO (jab): remove dead code after review with rb
-    let colorMap = d3.scale.linear().domain(this.state.colorDomain).range(this.state.colorRange)
-
-    return colorMap(value)
-    /*
-    if(value > 0.25){
-      return '#4F99B4'
-    }else if(value <= 0.25){
-      return '#FF6666'
-    }else{
-      return "#E3E3E3"
-    }
-    */
-  }
 }

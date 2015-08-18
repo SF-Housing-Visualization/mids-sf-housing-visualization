@@ -100,7 +100,8 @@ export default Reflux.createStore({
 
     let rawValues = _.values(valueByGeography);
     let domain = [_.min(rawValues), _.max(rawValues)];
-    let colorRange = ['#4F99B4', '#3C73E1'];
+    //let colorRange = ['#4F99B4', '#3C73E1'];
+    let colorRange = ['#D0DCEB', '#3C73E1'];
     let colorScale = d3.scale.linear().domain(domain).range(colorRange);
     console.log('SidebarStore.reshapeBars() colors domain=', domain,
       'colorRange=', colorRange, 'colorScale=', colorScale,
@@ -111,11 +112,11 @@ export default Reflux.createStore({
       let series = 0;
       let value = valueByGeography[geography];
       let color = colorScale(value);
+      let fillColor = color;
 
-      return { color, key, label, series, value};
+      return { color, fillColor, key, label, series, value};
     });
     
-
     console.log('SidebarStore.reshapeBars()', year, geography, geoMapping, 
       baseColor, key, applicable, valueByGeography, values);
 

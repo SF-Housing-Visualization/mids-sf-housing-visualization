@@ -169,14 +169,13 @@ export default class extends React.Component {
   darkenSelected(series, selectedGeographies) {
     let key = series.key;
 
-    let baselineColor = '#AAAAAA';
-    let selectedColor = '#000000';
+    let baselineColor = '#3C73E1';
+    let selectedColor = '#F38630';
 
     series.color =
       this.contains(selectedGeographies, key)
       ? selectedColor
       : baselineColor;
-
 
     series.values.forEach((valueObject) => {
       let label = valueObject.label;

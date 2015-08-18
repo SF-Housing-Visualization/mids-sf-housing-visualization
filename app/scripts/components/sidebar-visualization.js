@@ -133,7 +133,7 @@ export default class extends React.Component {
 
   darkenSelected(series, selectedGeographies) {
     let baselineColor = series.color;
-    let selectedColor = '#000000';
+    let selectedColor = '#F38630';
 
     series.values.forEach((valueObject) => {
       let label = valueObject.label;
