@@ -11,26 +11,26 @@ This site will help you learn the truth to the coffee shop chatter. Looking over
 
 **Some interesting findings to get you started (we’ve included our own observations looking at San Francisco County):**
 
-*How many technical workers are there in the Bay Area counties, and how has it changed over time?* [Demographic > Percent of Workers in Computer and Mathematical Operations]
+*How many technical workers are there in the Bay Area counties, and how has it changed over time?* [Demographic > Tech Workers]
 
- * In San Francisco County it is 14%
- * Notice the climbing trend in San Francisco County, but not in Santa Clara County (home to Apple, Google, LinkedIn and Facebook, to name a few).
+    * In San Francisco County it is 14%
+    * Notice the climbing trend in San Francisco County, but not in Santa Clara County (home to Apple, Google, LinkedIn and Facebook, to name a few).
 
-*How much does the lowest quintile median income differ from the highest quintile median income?* [Income > Lowest Quintile Income] [Income > Highest Quintile Income]
+*How much does the lowest quintile median income differ from the highest quintile median income?* [Income > Lowest 20% Income] [Income > Top 20% Income]
 
- * In San Francisco County, $11,943 compared to $323,053.
- * Just across the Golden Gate Bridge is Marin County, with $19,745 as the lowest quintile median income and $417,041 as the highest quintile median income.
+    * In San Francisco County, $11,943 compared to $323,053.
+    * Just across the Golden Gate Bridge is Marin County, with $19,745 as the lowest quintile median income and $417,041 as the highest quintile median income.
 
-*Compare San Francisco County and Marin County on the median income for the top 5%.* [Income > Top 5 Percent Income]
+*Compare San Francisco County and Marin County on the median income for the top 5%.* [Income > Top 5% Income]
  
- * San Francisco County: $586,684
- * Marin County: $801,606
+    * San Francisco County: $586,684
+    * Marin County: $801,606
 
-*What percentage of homes are actually are worth over one million dollars?* [Housing > Percent of Homes over $1million]
+*What percentage of homes are actually are worth over one million dollars?* [Housing > Percent of Homes over $1 million]
 
- * In San Francisco County, 28% - just lower than the high of 31% in 2007
- * In Santa Cruz, the percentage is actually 12 percentage points lower than its high in 2007.
+    * In San Francisco County, 28% - just lower than the high of 31% in 2007
+    * In Santa Cruz, the percentage is actually 12 percentage points lower than its high in 2007.
 
-*How much do people spend of their income to pay rent (suggested rent should be no more than 30% of household income)?* [Housing > Median Gross REnt as a Percentage of Household Income]
+*How much do people spend of their income to pay rent (suggested rent should be no more than 30% of household income)?* [Housing > Gross Rent (% of Income)]
 
- * In San Francisco, the median is 27.7%, and is actually the lowest of all the counties
+    * In San Francisco, the median is 27.7%, and is actually the lowest of all the counties
