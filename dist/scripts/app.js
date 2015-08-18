@@ -2516,7 +2516,9 @@ var _default = (function (_React$Component) {
     _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).call(this, props);
     this.state = {
       data: _dataSidebarData2['default'],
-      format: ',.2f'
+      format: ',.2f',
+      metric: '(loading metrics...)',
+      year: '(loading years...)'
     };
     console.log(this.state);
 
@@ -2540,6 +2542,25 @@ var _default = (function (_React$Component) {
       return _react2['default'].createElement(
         'div',
         { className: 'sidebar', style: style },
+        _react2['default'].createElement(
+          'div',
+          { style: { marginTop: 10,
+              marginLeft: 125,
+              position: 'absolute'
+            } },
+          'Showing ',
+          _react2['default'].createElement(
+            'i',
+            null,
+            this.state.metric
+          ),
+          ' for ',
+          _react2['default'].createElement(
+            'i',
+            null,
+            this.state.year
+          )
+        ),
         _react2['default'].createElement('svg', { ref: 'svg' })
       );
     }
@@ -2590,7 +2611,21 @@ var _default = (function (_React$Component) {
       console.log('SidebarVisualization onSidebarStore()', barChart);
       var data = barChart.bars;
       var format = this.getPrimaryMetricFormat(barChart);
-      this.setState({ data: data, format: format });
+      var selectedPrimaryMetric = barChart.selectedPrimaryMetric;
+      var index = barChart.index;
+
+      var metric = this.state.metric;
+
+      if (selectedPrimaryMetric.group && selectedPrimaryMetric.metric) {
+        var groupObject = index.groups[selectedPrimaryMetric.group];
+        var group = groupObject.groupName;
+        var variableObject = groupObject.variables[selectedPrimaryMetric.metric];
+        var variable = variableObject.variableName;
+        metric = group + ' > ' + variable;
+      }
+
+      var year = barChart.selectedTimePosition;
+      this.setState({ data: data, format: format, metric: metric, year: year });
       this.drawChart(data, format);
     }
   }, {

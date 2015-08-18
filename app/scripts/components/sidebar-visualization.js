@@ -21,7 +21,9 @@ export default class extends React.Component {
     super(props);
     this.state = {
       data : SidebarData,
-      format : ',.2f'
+      format : ',.2f',
+      metric: '(loading metrics...)',
+      year: '(loading years...)'
     };
     console.log(this.state);
 
@@ -42,6 +44,12 @@ export default class extends React.Component {
     
     return (
       <div className='sidebar' style={ style }>
+        <div style = { { marginTop: 10, 
+            marginLeft : 125, 
+            position: 'absolute'
+          } }> 
+          Showing <i>{ this.state.metric }</i> for <i>{ this.state.year }</i>
+        </div>
         <svg ref='svg'></svg>
       </div>
     );
@@ -92,7 +100,21 @@ export default class extends React.Component {
     console.log('SidebarVisualization onSidebarStore()', barChart);
     let data = barChart.bars;
     let format = this.getPrimaryMetricFormat(barChart);
-    this.setState({ data, format });
+    let selectedPrimaryMetric = barChart.selectedPrimaryMetric;
+    let index = barChart.index;
+
+    var metric = this.state.metric;
+
+    if (selectedPrimaryMetric.group && selectedPrimaryMetric.metric) {
+      let groupObject = index.groups[selectedPrimaryMetric.group];
+      let group = groupObject.groupName;
+      let variableObject = groupObject.variables[selectedPrimaryMetric.metric];
+      let variable = variableObject.variableName;
+      metric = group + ' > ' + variable;
+    }
+
+    let year = barChart.selectedTimePosition;
+    this.setState({ data, format, metric, year });
     this.drawChart(data, format);
 
   }
