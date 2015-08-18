@@ -98,6 +98,9 @@ export default Reflux.createStore({
       return this.contains(selectedGeographies, geography) ? 1 : 0;
     });
 
+    let min = Number.MAX_SAFE_INTEGER;
+    let max = Number.MIN_SAFE_INTEGER;
+
     let lines = _.map(geographies, (geography, series) => {
       let color = 
         this.contains(selectedGeographies, geography)
@@ -109,12 +112,18 @@ export default Reflux.createStore({
       let values = _.map(_.sortBy(_.keys(years)), (year) => {
         let x = year;
         let y = years[year];
+        if (y < min) { min = y; }
+        if (y > max) { max = y; }
         return {color, series, x, y}
       });
-      //let values = [ { color, series: index, x: year, y} ]
       
       return { color, key, values, formatString};
     });
+
+    let yearMarker = this.generateYearMarker(
+      selectedYear, geographies.length, min, max);
+
+    lines.push(yearMarker);
 
 
     console.log('TimeSeriesStore.reshapeLines()', 
@@ -122,6 +131,17 @@ export default Reflux.createStore({
        valuesByGeography, lines);
 
     return lines;
+  },
+
+  generateYearMarker(year, series, min, max) {
+    const color = '#F38630';
+    const key = 'Currently selected: ' + year;
+    let bottom = { color, series, x: year, y: min };
+    let top = { color, series, x: year, y: max };
+    let values = [ bottom, top ];
+    let formatString = '4f';
+
+    return { color, key, values, formatString };
   },
 
   contains(array, item) {

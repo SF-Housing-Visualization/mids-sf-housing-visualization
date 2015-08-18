@@ -2859,6 +2859,9 @@ exports['default'] = _reflux2['default'].createStore({
       return _this2.contains(selectedGeographies, geography) ? 1 : 0;
     });
 
+    var min = Number.MAX_SAFE_INTEGER;
+    var max = Number.MIN_SAFE_INTEGER;
+
     var lines = _.map(geographies, function (geography, series) {
       var color = _this2.contains(selectedGeographies, geography) ? selectedColor : baselineColor;
 
@@ -2867,16 +2870,36 @@ exports['default'] = _reflux2['default'].createStore({
       var values = _.map(_.sortBy(_.keys(years)), function (year) {
         var x = year;
         var y = years[year];
+        if (y < min) {
+          min = y;
+        }
+        if (y > max) {
+          max = y;
+        }
         return { color: color, series: series, x: x, y: y };
       });
-      //let values = [ { color, series: index, x: year, y} ]
 
       return { color: color, key: key, values: values, formatString: formatString };
     });
 
+    var yearMarker = this.generateYearMarker(selectedYear, geographies.length, min, max);
+
+    lines.push(yearMarker);
+
     console.log('TimeSeriesStore.reshapeLines()', selectedGeographies, geoMapping, key, valuesByGeography, lines);
 
     return lines;
+  },
+
+  generateYearMarker: function generateYearMarker(year, series, min, max) {
+    var color = '#F38630';
+    var key = 'Currently selected: ' + year;
+    var bottom = { color: color, series: series, x: year, y: min };
+    var top = { color: color, series: series, x: year, y: max };
+    var values = [bottom, top];
+    var formatString = '4f';
+
+    return { color: color, key: key, values: values, formatString: formatString };
   },
 
   contains: function contains(array, item) {
