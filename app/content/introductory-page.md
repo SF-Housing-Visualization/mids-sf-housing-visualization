@@ -14,12 +14,14 @@ This site will help you learn the truth to the coffee shop chatter. Looking over
 *How many technical workers are there in the Bay Area counties, and how has it changed over time?* [Demographic > Tech Workers]
 
     * In San Francisco County it is 14%
-    * Notice the climbing trend in San Francisco County, but not in Santa Clara County (home to Apple, Google, LinkedIn and Facebook, to name a few).
+    * Notice the climbing trend in San Francisco County, but not in Santa Clara County 
+    (home to Apple, Google, LinkedIn and Facebook, to name a few).
 
 *How much does the lowest quintile median income differ from the highest quintile median income?* [Income > Lowest 20% Income] [Income > Top 20% Income]
 
     * In San Francisco County, $11,943 compared to $323,053.
-    * Just across the Golden Gate Bridge is Marin County, with $19,745 as the lowest quintile median income and $417,041 as the highest quintile median income.
+    * Just across the Golden Gate Bridge is Marin County, 
+    with $19,745 as the lowest quintile median income and $417,041 as the highest quintile median income.
 
 *Compare San Francisco County and Marin County on the median income for the top 5%.* [Income > Top 5% Income]
  
