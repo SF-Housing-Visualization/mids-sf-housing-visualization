@@ -4,4 +4,6 @@ This was created by _Ross Boberg_, _John Bocharov_, and _Angela Gunn_ to help pe
 
 ### Where Did the Data Come From?
 
-Our data sources are foo, bar, and baz. You can find them on [example.org](example.org).
+Data came from the US Census and the California Association of Realtors (CARS). 
+US Census:  http://factfinder.census.gov/faces/nav/jsf/pages/index.xhtml
+CARS: http://www.car.org/marketdata/data/
