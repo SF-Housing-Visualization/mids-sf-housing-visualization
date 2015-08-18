@@ -2,7 +2,7 @@
 
 It seems to be common knowledge that the San Francisco Bay Area is an expensive place to live. Angela heard it is impossible to find affordable rent when she moved to Santa Clara County from Canada. Ross heard it is impossible to find a house near his work when he moved to San Mateo from the New York. For both Angela and Ross, the foretold impossible was possible.
 
-Is there any truth to the reputation the Bay Area has received? Listening to people in the coffee shop you might think the media sensationalized housing crisis is a new thing that happened suddenly. You might also think it is the “high paid technology workers” that are driving prices up.  Is the Bay Area really that unaffordable?
+Is there any truth to the reputation the Bay Area has received? Listening to people in a coffee shop you might think the  "housing crisis" is a something that happened unexpectedly. You might also think it is the “high paid technology workers” who are driving prices up.  Is the Bay Area really that unaffordable?
 
 This site will help you learn the truth to the coffee shop chatter. Looking over nine years of US Census data, you can discover what is really happening in the Bay Area and what should be chocked up to be just coffee gossip.
 
