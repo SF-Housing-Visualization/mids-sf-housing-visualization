@@ -4,6 +4,7 @@ This was created by _Ross Boberg_, _John Bocharov_, and _Angela Gunn_ to help pe
 
 ### Where Did the Data Come From?
 
-Data came from the US Census and the California Association of Realtors (CARS). 
-US Census:  http://factfinder.census.gov/faces/nav/jsf/pages/index.xhtml
-CARS: http://www.car.org/marketdata/data/
+Our data sources are:
+> * US Census: [http://factfinder.census.gov/faces/nav/jsf/pages/index.xhtml](http://factfinder.census.gov/faces/nav/jsf/pages/index.xhtml)
+> * California Association of Realtors (CARS): [http://www.car.org/marketdata/data/](http://www.car.org/marketdata/data/)
+
