@@ -1,4 +1,4 @@
-import React from 'react';export default class extends React.Component {  constructor(props) { super(props); }  render() {    return (      <div>      <h3>Why the Rent is Too Damn High</h3>
+import React from 'react';export default class extends React.Component {  constructor(props) { super(props); }  render() {    return (      <div>      <h2>Why the Rent is Too Damn High</h2>
 <p>Everyone’s got a theory about expensive Bay Area housing...</p>
 <blockquote>
 <p>“It’s the Techies!”   “It’s the Permits!”   “It’s all these people from _______!”</p>

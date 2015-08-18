@@ -3299,6 +3299,11 @@ var _default = (function (_React$Component) {
                         _react2["default"].createElement(
                               "p",
                               null,
+                              "Our data sources are:"
+                        ),
+                        _react2["default"].createElement(
+                              "blockquote",
+                              null,
                               _react2["default"].createElement(
                                     "ul",
                                     null,
@@ -3374,7 +3379,7 @@ var _default = (function (_React$Component) {
                         null,
                         '      ',
                         _react2['default'].createElement(
-                              'h3',
+                              'h2',
                               null,
                               'Why the Rent is Too Damn High'
                         ),
@@ -3389,26 +3394,6 @@ var _default = (function (_React$Component) {
                               _react2['default'].createElement(
                                     'p',
                                     null,
-                                    'It’s the Techies! It’s the Permits! It’s all these people from _______!'
-                                    'It’s the Techies!'
-                              )
-                        ),
-                        _react2['default'].createElement(
-                              'blockquote',
-                              null,
-                              _react2['default'].createElement(
-                                    'p',
-                                    null,
-                                    'It’s the Permits!'
-                              )
-                        ),
-                        _react2['default'].createElement(
-                              'blockquote',
-                              null,
-                              _react2['default'].createElement(
-                                    'p',
-                                    null,
-                                    'It’s all these people from _______!'
                                     '“It’s the Techies!”   “It’s the Permits!”   “It’s all these people from _______!”'
                               )
                         ),
@@ -3484,7 +3469,7 @@ var _default = (function (_React$Component) {
                         _react2['default'].createElement(
                               'p',
                               null,
-                              'Is there any truth to the reputation the Bay Area has received? Listening to people in the coffee shop you might think the media sensationalized housing crisis is a new thing that happened suddenly. You might also think it is the “high paid technology workers” that are driving prices up.  Is the Bay Area really that unaffordable?'
+                              'Is there any truth to the reputation the Bay Area has received? Listening to people in a coffee shop you might think the  “housing crisis” is a something that happened unexpectedly. You might also think it is the “high paid technology workers” who are driving prices up.  Is the Bay Area really that unaffordable?'
                         ),
                         _react2['default'].createElement(
                               'p',
@@ -3512,26 +3497,14 @@ var _default = (function (_React$Component) {
                                     'em',
                                     null,
                                     'How many technical workers are there in the Bay Area counties, and how has it changed over time?'
-                              ),
-                              ' [Demographic > Tech Workers]'
-                              ),
-                              ' [Demographic > Percent of Workers in Computer and Mathematical Operations]'
                               )
                         ),
                         _react2['default'].createElement(
-                              'pre',
-                              'ul',
                               'blockquote',
                               null,
                               _react2['default'].createElement(
-                                    'code',
-                                    'li',
                                     'p',
                                     null,
-                                    'In San Francisco County it is 14%'
-                              ),
-                              _react2['default'].createElement(
-                                    'li',
                                     _react2['default'].createElement(
                                           'em',
                                           null,
@@ -3541,8 +3514,6 @@ var _default = (function (_React$Component) {
                               _react2['default'].createElement(
                                     'ul',
                                     null,
-                                    '* In San Francisco County it is 14% * Notice the climbing trend in San Francisco County, but not in Santa Clara County (home to Apple, Google, LinkedIn and Facebook, to name a few).'
-                                    'Notice the climbing trend in San Francisco County, but not in Santa Clara County (home to Apple, Google, LinkedIn and Facebook, to name a few).'
                                     _react2['default'].createElement(
                                           'li',
                                           null,
@@ -3562,26 +3533,14 @@ var _default = (function (_React$Component) {
                                     'em',
                                     null,
                                     'How much does the lowest quintile median income differ from the highest quintile median income?'
-                              ),
-                              ' [Income > Lowest 20% Income] [Income > Top 20% Income]'
-                              ),
-                              ' [Income > Lowest Quintile Income] [Income > Highest Quintile Income]'
                               )
                         ),
                         _react2['default'].createElement(
-                              'pre',
-                              'ul',
                               'blockquote',
                               null,
                               _react2['default'].createElement(
-                                    'code',
-                                    'li',
                                     'p',
                                     null,
-                                    'In San Francisco County, $11,943 compared to $323,053.'
-                              ),
-                              _react2['default'].createElement(
-                                    'li',
                                     _react2['default'].createElement(
                                           'em',
                                           null,
@@ -3597,8 +3556,6 @@ var _default = (function (_React$Component) {
                               _react2['default'].createElement(
                                     'ul',
                                     null,
-                                    '* In San Francisco County, $11,943 compared to $323,053. * Just across the Golden Gate Bridge is Marin County, with $19,745 as the lowest quintile median income and $417,041 as the highest quintile median income.'
-                                    'Just across the Golden Gate Bridge is Marin County, with $19,745 as the lowest quintile median income and $417,041 as the highest quintile median income.'
                                     _react2['default'].createElement(
                                           'li',
                                           null,
@@ -3618,26 +3575,14 @@ var _default = (function (_React$Component) {
                                     'em',
                                     null,
                                     'Compare San Francisco County and Marin County on the median income for the top 5%.'
-                              ),
-                              ' [Income > Top 5% Income]'
-                              ),
-                              ' [Income > Top 5 Percent Income]'
                               )
                         ),
                         _react2['default'].createElement(
-                              'pre',
-                              'ul',
                               'blockquote',
                               null,
                               _react2['default'].createElement(
-                                    'code',
-                                    'li',
                                     'p',
                                     null,
-                                    'San Francisco County: $586,684'
-                              ),
-                              _react2['default'].createElement(
-                                    'li',
                                     _react2['default'].createElement(
                                           'em',
                                           null,
@@ -3647,8 +3592,6 @@ var _default = (function (_React$Component) {
                               _react2['default'].createElement(
                                     'ul',
                                     null,
-                                    '* San Francisco County: $586,684 * Marin County: $801,606'
-                                    'Marin County: $801,606'
                                     _react2['default'].createElement(
                                           'li',
                                           null,
@@ -3668,26 +3611,14 @@ var _default = (function (_React$Component) {
                                     'em',
                                     null,
                                     'What percentage of homes are actually are worth over one million dollars?'
-                              ),
-                              ' [Housing > Percent of Homes over $1 million]'
-                              ),
-                              ' [Housing > Percent of Homes over $1million]'
                               )
                         ),
                         _react2['default'].createElement(
-                              'pre',
-                              'ul',
                               'blockquote',
                               null,
                               _react2['default'].createElement(
-                                    'code',
-                                    'li',
                                     'p',
                                     null,
-                                    'In San Francisco County, 28% - just lower than the high of 31% in 2007'
-                              ),
-                              _react2['default'].createElement(
-                                    'li',
                                     _react2['default'].createElement(
                                           'em',
                                           null,
@@ -3697,8 +3628,6 @@ var _default = (function (_React$Component) {
                               _react2['default'].createElement(
                                     'ul',
                                     null,
-                                    '* In San Francisco County, 28% - just lower than the high of 31% in 2007 * In Santa Cruz, the percentage is actually 12 percentage points lower than its high in 2007.'
-                                    'In Santa Cruz, the percentage is actually 12 percentage points lower than its high in 2007.'
                                     _react2['default'].createElement(
                                           'li',
                                           null,
@@ -3718,20 +3647,12 @@ var _default = (function (_React$Component) {
                                     'em',
                                     null,
                                     'How much do people spend of their income to pay rent (suggested rent should be no more than 30% of household income)?'
-                              ),
-                              ' [Housing > Gross Rent (% of Income)]'
-                              ),
-                              ' [Housing > Median Gross REnt as a Percentage of Household Income]'
                               )
                         ),
                         _react2['default'].createElement(
-                              'pre',
-                              'ul',
                               'blockquote',
                               null,
                               _react2['default'].createElement(
-                                    'code',
-                                    'li',
                                     'p',
                                     null,
                                     _react2['default'].createElement(
@@ -3743,8 +3664,6 @@ var _default = (function (_React$Component) {
                               _react2['default'].createElement(
                                     'ul',
                                     null,
-                                    '* In San Francisco, the median is 27.7%, and is actually the lowest of all the counties'
-                                    'In San Francisco, the median is 27.7%, and is actually the lowest of all the counties'
                                     _react2['default'].createElement(
                                           'li',
                                           null,
