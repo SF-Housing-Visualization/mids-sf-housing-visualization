@@ -1159,7 +1159,15 @@ var _default = (function (_React$Component) {
     key: 'render',
     value: function render() {
       var componentHeight = this.state.componentHeight;
-      var style = componentHeight ? { height: componentHeight } : {};
+      var style = {
+        paddingTop: 10,
+        paddingLeft: 35,
+        paddingRight: 20
+      };
+
+      if (componentHeight) {
+        style.height = componentHeight;
+      }
 
       var position = [51.505, -0.09];
       var center = [37.7833, -122.4167];
@@ -2720,7 +2728,7 @@ var _default = (function (_React$Component) {
           return d.label;
         }).y(function (d) {
           return d.value;
-        }).margin({ top: 30, right: 20, bottom: 50, left: 125 }).barColor(function (d) {
+        }).margin({ top: 30, right: 20, bottom: 45, left: 125 }).barColor(function (d) {
           return d.color;
         }).showValues(true) //Show bar value next to each bar.
         //.transitionDuration(350)

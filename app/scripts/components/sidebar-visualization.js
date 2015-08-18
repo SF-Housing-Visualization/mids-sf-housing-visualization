@@ -202,7 +202,7 @@ export default class extends React.Component {
       var chart = nv.models.multiBarHorizontalChart()
           .x(function(d) { return d.label })
           .y(function(d) { return d.value })
-          .margin({top: 30, right: 20, bottom: 50, left: 125})
+          .margin({top: 30, right: 20, bottom: 45, left: 125})
           .barColor( (d) => d.color )
           .showValues(true)           //Show bar value next to each bar.
           //.transitionDuration(350)

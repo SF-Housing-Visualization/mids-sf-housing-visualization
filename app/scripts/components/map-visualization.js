@@ -67,7 +67,13 @@ export default class extends React.Component {
 
   render() {
     let componentHeight = this.state.componentHeight;
-    let style = componentHeight ? { height: componentHeight } : { };
+    let style = {
+      paddingTop : 10,
+      paddingLeft: 35,
+      paddingRight: 20
+    };
+
+    if (componentHeight){ style.height = componentHeight }
 
     const position = [51.505, -0.09];
     const center = [37.7833, -122.4167];
